@@ -1,0 +1,126 @@
+# Engineering Leaders
+
+A Claude Code plugin that provides a virtual engineering leadership team — agents that refine requirements, set technical direction, and govern delivery. Instead of implementation workers, these agents provide coordination, oversight, and structured decision-making across the software development lifecycle.
+
+## About This Project
+
+This is a personal learning project. Building agents, wiring them together, and watching where they break is how I develop intuition for what works and what doesn't. The agents here are opinionated to a specific working style and aren't designed for broad adoption.
+
+If you're looking for well-maintained, general-purpose collections of Claude Code agents and skills, these are better starting points:
+
+- [wshobson/agents](https://github.com/wshobson/agents), a curated agent library
+- [affaan-m/everything-claude-code](https://github.com/AffaanM/everything-claude-code), a comprehensive Claude Code resource collection
+- [VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents), a community-maintained subagent catalog
+
+## What I'm Testing
+
+### A full leadership team, not individual specialists
+
+The previous iteration split agents across multiple plugins. This version consolidates them into a single team with clear roles: a product owner for roadmap context, a chief architect for structural decisions, a tech lead for tactical orchestration, a devops lead for infrastructure patterns, an engineering manager for systemic observation, a QA lead for test strategy, an agile coach for process health, and a UX strategist for experience coherence.
+
+Each agent's definition specifies who it consults and what it delegates, making the coordination chain explicit and inspectable.
+
+### Tech lead as tactical orchestrator
+
+The `tech-lead` agent acts as the team's implementation coordinator — deconstructing stories into plans, routing to domain specialists, and reviewing code for convention adherence. During postmortems and retrospectives, it identifies which specialists should contribute domain input. Outside active work, it codifies and surfaces gaps in project-wide patterns.
+
+### Product owner as a guardrail against drift
+
+One risk of delegating implementation to agents is losing sight of what actually matters. The `product-owner` agent maintains roadmap context, advises on sequencing, and pushes back when proposed work doesn't align with current priorities. The `/write-epic`, `/write-story`, `/write-bug`, and `/decompose-requirement` skills produce structured artifacts that land directly in GitHub Issues or Jira.
+
+### Engineering manager as meta-observer
+
+The `engineering-manager` agent scans for systemic issues — deferred tech debt in PR threads, convention drift, architectural decision outcomes, and code churn patterns. It produces structured proposals for human approval and never enacts changes autonomously.
+
+## Quick Start
+
+Add the marketplace to your Claude Code project, then install the plugin:
+
+```
+/plugin marketplace add cpliakas/claude-code-engineering-leaders
+/plugin install engineering-leaders
+```
+
+## Agents and Skills
+
+| Type  | Name                       | Description                                                                                |
+| ----- | -------------------------- | ------------------------------------------------------------------------------------------ |
+| Agent | `chief-architect`          | Strategic technical advisor for architecture decisions, trade-offs, and ADRs               |
+| Agent | `product-owner`            | Roadmap keeper that advises on sequencing, priorities, and phase transitions                |
+| Agent | `tech-lead`                | Tactical orchestrator for implementation plans, specialist routing, and convention ownership |
+| Agent | `engineering-manager`      | SDLC meta-observer for tech debt scans, convention health, and code churn analysis         |
+| Agent | `devops-lead`              | Infrastructure lead for CI/CD, deployment strategies, and incident response                |
+| Agent | `qa-lead`                  | QA strategy lead for test architecture, coverage gaps, and risk-based prioritization       |
+| Agent | `agile-coach`              | Peer coach for story quality review and retrospective facilitation                         |
+| Agent | `ux-strategist`            | Strategic UX advisor for experience coherence, persona guidance, and behavioral consistency |
+| Skill | `/write-epic`              | Write an epic specification with structured metadata compatible with GitHub Issues and Jira |
+| Skill | `/write-story`             | Write a user story with acceptance criteria and INVEST validation                          |
+| Skill | `/write-bug`               | Scaffold a RIMGEN-validated bug report with reproduction steps, severity, and priority     |
+| Skill | `/write-spike`             | Produce a structured findings document for a topic too uncertain to story-write directly   |
+| Skill | `/refine-story`            | Score a story draft against INVEST and agile coaching principles                           |
+| Skill | `/decompose-requirement`   | Decompose an epic into stories, or a story into subtasks, with structured metadata         |
+| Skill | `/facilitate-retrospective` | Facilitate a structured retrospective using the Derby-Larsen five-phase framework         |
+| Skill | `/conduct-postmortem`      | Conduct a blameless postmortem for an incident or failed/aborted release                   |
+| Skill | `/write-adr`               | Produce an Architecture Decision Record in MADR format                                     |
+| Skill | `/write-runbook`           | Generate a structured operational runbook for incident response or maintenance             |
+| Skill | `/plan-test-strategy`      | Produce a test strategy with highest-impact tests by type and layer                        |
+| Skill | `/analyze-code-churn`      | Analyze code churn and thrash patterns with hotspot detection and rework classification    |
+
+## Architecture
+
+### Agents vs Skills
+
+|                    | Agent                                      | Skill                           |
+| ------------------ | ------------------------------------------ | ------------------------------- |
+| **What**           | A specialist persona with domain expertise | A repeatable procedure / SOP    |
+| **Memory**         | Yes, learns across sessions                | No, runs the same way each time |
+| **Judgment**       | Yes, decides _how_ to approach problems    | No, follows a defined process   |
+| **Think of it as** | An IC you hired                            | A runbook in a wiki             |
+
+**Rule of thumb**: If it needs to _learn and decide_, it's an agent. If it needs to _execute a procedure_, it's a skill.
+
+### Agent Hierarchy
+
+Agents form a leadership team with clear delegation chains. The `tech-lead` acts as tactical orchestrator during implementation, routing to domain specialists as needed. Strategic agents like `chief-architect` and `product-owner` set direction, while operational agents like `devops-lead`, `qa-lead`, and `engineering-manager` govern their respective domains.
+
+### Memory
+
+All agents use `memory: project`. The agent definition is shared via the plugin, but each project maintains its own memory in `.claude/agent-memory/`. Generic learnings stay in the agent definition; project-specific learnings stay in project memory.
+
+## Repository Structure
+
+```
+claude-code-engineering-leaders/
+├── .claude-plugin/
+│   └── plugin.json
+├── README.md
+├── CLAUDE.md
+├── hooks/
+│   └── markdownlint-check.sh
+├── agents/
+│   ├── chief-architect.md
+│   ├── product-owner.md
+│   ├── tech-lead.md
+│   ├── engineering-manager.md
+│   ├── devops-lead.md
+│   ├── qa-lead.md
+│   ├── agile-coach.md
+│   └── ux-strategist.md
+└── skills/
+    ├── write-epic/SKILL.md
+    ├── write-story/SKILL.md
+    ├── write-bug/SKILL.md
+    ├── write-spike/SKILL.md
+    ├── refine-story/SKILL.md
+    ├── decompose-requirement/SKILL.md
+    ├── facilitate-retrospective/SKILL.md
+    ├── conduct-postmortem/SKILL.md
+    ├── write-adr/SKILL.md
+    ├── write-runbook/SKILL.md
+    ├── plan-test-strategy/SKILL.md
+    └── analyze-code-churn/SKILL.md
+```
+
+## License
+
+MIT
