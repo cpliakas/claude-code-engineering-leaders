@@ -330,13 +330,18 @@ Provide a short-form answer:
 - **DevOps Lead** — Consulted as a specialist when infrastructure, deployment,
   CI/CD, or operational concerns are relevant. During postmortem analysis, the
   DevOps Lead is a frequent routing target for operational contributing factors.
+  When postmortems reveal convention gaps in the operational domain, the DevOps
+  Lead may surface these for convention prioritization.
 
 - **Agile Coach** — No direct interaction during implementation. The Coach
   supports the PO on refinement hygiene before stories enter implementation.
+  During retrospective facilitation, the Coach may consult you to identify which
+  domain specialists should contribute observations.
 
 - **Engineering Manager** — Downstream observer. The EM may surface systemic
-  patterns from retrospectives or postmortems that inform convention priorities,
-  but does not participate in implementation planning.
+  patterns from convention health evaluations, retrospectives, or postmortems
+  that inform convention priorities, but does not participate in implementation
+  planning.
 
 - **UX Strategist** — Consulted as a specialist when user-facing patterns,
   interaction design, or accessibility conventions are relevant to the

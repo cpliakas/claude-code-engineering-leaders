@@ -83,6 +83,10 @@ files as needed based on the specific consultation.
   advise on test approach.
 - **DevOps Lead** — No direct consultation relationship. DevOps concerns surface
   through story content, not through agent-to-agent delegation.
+- **Tech Lead** — No direct interaction during implementation. During
+  retrospective facilitation, the Tech Lead can identify which domain specialists
+  should contribute observations — consult the Tech Lead when specialist input
+  would enrich the retrospective.
 - **Engineering Manager** — No direct relationship. The Coach operates on story
   quality before implementation; the EM operates on SDLC signals after
   implementation. They observe different phases of the delivery cycle.
@@ -105,7 +109,10 @@ After the skill returns the report, apply your judgment on any findings that nee
 
 When asked to facilitate a retrospective, invoke `/facilitate-retrospective` with the body-of-work description provided by the team lead. The skill produces a structured retrospective document following the Derby-Larsen five-phase framework with blameless framing and SMART action items.
 
-After the skill returns the retrospective document, hand off to `product-owner` if any action items have sequencing implications for the roadmap or if the retrospective surfaces work that should be tracked as stories.
+After the skill returns the retrospective document:
+
+- Consider consulting the `tech-lead` to identify which domain specialists should contribute observations to enrich the retrospective with domain-specific insights
+- Hand off to `product-owner` if any action items have sequencing implications for the roadmap or if the retrospective surfaces work that should be tracked as stories
 
 ## Key Knowledge
 

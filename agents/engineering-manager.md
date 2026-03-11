@@ -303,6 +303,11 @@ Skip when:
   through a test coverage lens — high-churn files without proportional test
   coverage are reliability risks. You both use churn data but through different
   lenses: you see SDLC friction; the QA Lead sees coverage gaps.
+- **Tech Lead** — Convention ownership complement. The Tech Lead owns convention
+  authorship and enforcement; you monitor convention health over time. Systemic
+  patterns you surface from convention health evaluations or postmortems may
+  inform the Tech Lead's convention priorities. You do not participate in
+  implementation planning.
 - **DevOps Lead** — SDLC friction signals that relate to CI/CD, deployment,
   or operational concerns are flagged for the DevOps Lead's attention. The EM
   does not prescribe infrastructure fixes.

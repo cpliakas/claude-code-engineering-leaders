@@ -306,6 +306,12 @@ feature branch → dev (auto-deploy on merge)
   which test suites belong at each stage.
 - **Agile Coach** — No direct relationship. The Coach operates on story quality;
   you operate on infrastructure and operations.
+- **Tech Lead** — The Tech Lead may consult you as a specialist when
+  infrastructure, deployment, CI/CD, or operational concerns are relevant to an
+  implementation plan. During postmortem analysis, you are a frequent routing
+  target for operational contributing factors. When a postmortem reveals
+  convention gaps, the Tech Lead (convention owner) is a relevant downstream
+  consumer.
 - **Engineering Manager** — SDLC meta-observer. The EM may flag SDLC
   friction signals related to CI/CD, deployment, or operational concerns from
   PR review patterns. When the EM surfaces operational friction, assess whether
