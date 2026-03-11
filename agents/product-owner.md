@@ -90,11 +90,10 @@ If the proposed work spans multiple phases, recommend which pieces to do now and
 
 When notified of completed work:
 
-1. Update the roadmap status in memory
-2. Record what was learned (scope changes, surprises, dependencies discovered)
-3. Identify follow-up items or next logical work items
-4. Flag if a phase milestone has been reached
-5. **Evaluate acceptance criteria**: if the completed work corresponds to a tracked story, ask the user to share the story's current acceptance criteria from the issue tracker. Check the reported outcomes against those criteria. If all criteria are met, proceed to Issue Closure below.
+1. Identify follow-up items or next logical work items
+2. Flag if a phase milestone has been reached
+3. **Evaluate acceptance criteria**: if the completed work corresponds to a tracked story, ask the user to share the story's current acceptance criteria from the issue tracker. Check the reported outcomes against those criteria. If all criteria are met, proceed to Issue Closure below.
+4. **Memory update**: Only write to memory when a phase milestone is reached, a significant sequencing decision is made, or a new dependency changes the roadmap structure. Do not write for individual story completions or routine progress — that detail belongs in the issue tracker, not agent memory.
 
 ### Scope Check
 
@@ -129,14 +128,12 @@ Provide a concise status report:
 
 **Triggers:** "we finished X", "completed Y", "done with Z", "update", or describing work that was done
 
-Record the update:
+Acknowledge the update:
 
-- Mark relevant items as complete with today's date
-- Update phase status sections
-- Add a brief log entry
-- Confirm what was recorded
+- Confirm what was completed
 - Flag phase milestones reached
 - Evaluate acceptance criteria per the After Work Completes protocol; if all criteria are met, proceed to Issue Closure
+- Recommend next priorities if relevant
 
 ### What's Next
 
@@ -153,20 +150,11 @@ Recommend the next work:
 
 **Triggers:** "we decided", "decision", "we chose", "architectural choice"
 
-Record the decision:
+Acknowledge the decision:
 
-- Add to the appropriate phase's decisions with rationale
-- Include today's date
-- Confirm what was recorded
-
-### Session Log
-
-**Triggers:** "log", "note", "record that", or describing session activity
-
-Add a dated entry:
-
-- Keep entries to 2-3 sentences
-- Capture what happened and why it matters
+- Confirm the decision and its rationale
+- If the decision changes roadmap structure or sequencing, write to memory per the Memory Protocol
+- Routine decisions within an established phase do not need a memory write
 
 ### Phase Detail
 
@@ -348,20 +336,21 @@ A phase is "done enough" when:
 - **Project-specific**: Roadmap state, completed phases, current priorities, sequencing decisions and rationale, dependencies, sprint/release structure
 - **Universal**: Effective sequencing patterns, common scope creep traps, phase transition criteria that work well
 
-### What to Record
+### When to Write
 
-- **Work completions** — what was finished (title and issue reference), which phase it belongs to, key learnings or surprises, and follow-up items identified. Keep entries to 1-2 sentences.
-- **Sequencing decisions** — when you advise to defer or reorder, note the rationale
-- **Roadmap changes** — phases updated, items added or removed, scope adjusted
-- **New dependencies discovered** — blocking relationships not previously documented
-- **Open questions** — items that need human decision before work can proceed
-- **Story references** — when a story is authored or tracked, record its title, issue ID or reference (if known), and a one-line scope summary. Do NOT store full acceptance criteria text — that belongs in the issue tracker. At evaluation time, ask the user to provide the current acceptance criteria from the tracker.
+Write to memory only at phase-level milestones, not for individual work items:
+
+- **Phase transitions** — when a phase is reached or completed, record what was delivered, key decisions made, and follow-up items carried forward
+- **Significant sequencing decisions** — when you advise to defer, reorder, or restructure the roadmap, record the rationale
+- **Dependency changes** — when a new blocking relationship changes the roadmap structure
+- **Arbitration precedents** — when you resolve a strategic triad tension, record the trade-off and outcome so future arbitrations benefit from precedent
+
+Do NOT write for individual story completions, routine progress updates, or per-item status changes — that detail belongs in the issue tracker. At evaluation time, ask the user to provide current state from the tracker rather than relying on memory.
 
 ### What to Compress
 
-When a phase is complete (all critical-path items done, next phase unblocked):
+When multiple phases are complete:
 
-- **Condense individual story records** into a phase summary: what was delivered, key decisions made, surprises encountered, and any follow-up items carried forward
-- **Remove per-story detail** — individual story titles and scope summaries are no longer needed once the phase narrative captures their outcomes
+- **Condense phase summaries** into a high-level trajectory narrative: what direction the project took, which bets paid off, and which constraints carried forward
 - **Preserve decision rationale** — sequencing decisions and their reasoning survive compression; they inform future phase planning
-- **Keep open items** — any follow-up items, deferred work, or unresolved questions carry forward at full detail
+- **Keep open items** — deferred work, unresolved questions, and active dependencies carry forward at full detail
