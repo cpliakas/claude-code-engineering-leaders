@@ -46,5 +46,6 @@ A Claude Code plugin providing engineering leadership agents — the virtual lea
 
 ### Plugin Versioning
 
-- The `version` field in `plugin.json` tracks the current release version
+- The `version` field in `marketplace.json` tracks the current release version (in the plugin entry under `plugins[]`)
+- Do not duplicate the version in `plugin.json` — for relative-path marketplace plugins, the marketplace entry is the single source of truth
 - Tag releases with `v<version>` (e.g., `v0.10.0`) when cutting a version
