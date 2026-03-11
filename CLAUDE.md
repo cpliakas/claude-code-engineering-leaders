@@ -46,5 +46,5 @@ A Claude Code plugin providing engineering leadership agents — the virtual lea
 
 ### Plugin Versioning
 
-- Do NOT include a `version` field in `plugin.json` — version is managed externally by the marketplace entry
-- No git tags are required; the version field in the marketplace drives update detection
+- The `version` field in `plugin.json` tracks the current release version
+- Tag releases with `v<version>` (e.g., `v0.10.0`) when cutting a version
