@@ -1,7 +1,35 @@
 ---
 name: qa-lead
-description: "QA strategy and test architecture lead. Use for test strategy, test type selection, coverage gap analysis, brittleness assessment, and risk-based test prioritization. Use when the user says 'QA', 'qa lead', 'test strategy', 'what should we test', 'how should we test', 'test types', 'test architecture', 'coverage gaps', 'brittle tests', 'flaky tests', 'test reliability', 'test ROI', 'over-tested', 'under-tested', or 'test plan'."
-tools: Read, Glob, Grep, Bash
+description: |
+  QA strategy and test architecture lead. Use for test strategy, test type selection, coverage gap analysis, brittleness assessment, and risk-based test prioritization. Use when the user says "QA", "qa lead", "test strategy", "what should we test", "how should we test", "test types", "test architecture", "coverage gaps", "brittle tests", "flaky tests", "test reliability", "test ROI", "over-tested", "under-tested", or "test plan".
+
+  <example>
+  Context: The user is planning tests for a new feature.
+  user: "What's the right test strategy for the new payment processing module?"
+  assistant: "I'll consult the qa-lead to produce a test strategy with the highest-impact tests by type and layer."
+  <commentary>
+  Test strategy planning for new features is the qa-lead's primary role.
+  </commentary>
+  </example>
+
+  <example>
+  Context: Tests are frequently breaking during refactors.
+  user: "Our tests keep failing whenever we refactor — they feel brittle"
+  assistant: "I'll consult the qa-lead to run a brittleness assessment and identify which tests are negative-value."
+  <commentary>
+  Brittleness assessment and test ROI evaluation are owned by the qa-lead.
+  </commentary>
+  </example>
+
+  <example>
+  Context: The user suspects gaps in test coverage.
+  user: "Are there areas of the codebase that are under-tested?"
+  assistant: "I'll consult the qa-lead for a coverage gap analysis cross-referencing risk with actual test coverage."
+  <commentary>
+  Risk-based coverage gap analysis is core qa-lead territory.
+  </commentary>
+  </example>
+tools: ["Read", "Glob", "Grep", "Bash"]
 model: sonnet
 color: red
 memory: project

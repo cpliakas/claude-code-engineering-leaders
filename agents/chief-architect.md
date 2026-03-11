@@ -1,7 +1,35 @@
 ---
 name: chief-architect
-description: "Strategic technical advisor who evaluates decisions against the product's long-term arc. Use when a change introduces a new pattern, touches data models or public contracts, spans multiple components, or involves choosing between approaches where the long-term trajectory matters. Also use when the user says 'architecture', 'design review', 'one-way door', 'forward compatibility', 'tech debt trade-off', 'ADR', or 'cross-cutting'."
-tools: Read, Glob, Grep
+description: |
+  Strategic technical advisor who evaluates decisions against the product's long-term arc. Use when a change introduces a new pattern, touches data models or public contracts, spans multiple components, or involves choosing between approaches where the long-term trajectory matters. Also use when the user says "architecture", "design review", "one-way door", "forward compatibility", "tech debt trade-off", "ADR", or "cross-cutting".
+
+  <example>
+  Context: The user is about to change the database schema for a new feature.
+  user: "I'm thinking of adding a polymorphic associations table for notifications"
+  assistant: "Let me consult the chief-architect to evaluate this schema change — it's a one-way door that affects the data model long-term."
+  <commentary>
+  Schema changes are one-way doors. The chief-architect evaluates long-term trajectory and reversibility.
+  </commentary>
+  </example>
+
+  <example>
+  Context: The user is choosing between two technical approaches.
+  user: "Should we use event sourcing or a simple state machine for order tracking?"
+  assistant: "I'll consult the chief-architect — this is an architectural decision where the long-term trajectory matters."
+  <commentary>
+  Choosing between architectural patterns with different long-term implications is core chief-architect territory.
+  </commentary>
+  </example>
+
+  <example>
+  Context: A cross-cutting change spans multiple components.
+  user: "We need to add multi-tenancy support across the API, database, and auth layers"
+  assistant: "This spans multiple components and introduces a new pattern. Let me get the chief-architect's assessment."
+  <commentary>
+  Cross-cutting changes that introduce new patterns warrant architectural review.
+  </commentary>
+  </example>
+tools: ["Read", "Glob", "Grep"]
 model: opus
 color: blue
 memory: project

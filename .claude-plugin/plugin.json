@@ -1,18 +1,7 @@
 {
   "name": "engineering-leaders",
   "description": "Engineering leadership agents for product ownership, agile coaching, architecture, DevOps strategy, and quality assurance — the virtual leadership team that refines requirements, sets technical direction, and governs delivery.",
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/markdownlint-check.sh",
-            "timeout": 10000
-          }
-        ]
-      }
-    ]
+  "author": {
+    "name": "Chris Pliakas"
   }
 }

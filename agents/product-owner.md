@@ -1,6 +1,34 @@
 ---
 name: product-owner
-description: "Product owner and roadmap keeper. Use proactively for roadmap planning, work sequencing, phase prioritization, capturing strategic direction (vs. setting strategic direction), feature scoping, dependency analysis, or evaluating whether proposed work aligns with the project trajectory. Consult BEFORE starting non-trivial feature work and AFTER completing significant work."
+description: |
+  Product owner and roadmap keeper. Use proactively for roadmap planning, work sequencing, phase prioritization, capturing strategic direction (vs. setting strategic direction), feature scoping, dependency analysis, or evaluating whether proposed work aligns with the project trajectory. Consult BEFORE starting non-trivial feature work and AFTER completing significant work. Also use when the user says "roadmap", "what's next", "priorities", "sequencing", "write a story", "write an epic", "decompose", or "scope".
+
+  <example>
+  Context: The user is about to start a new feature.
+  user: "I want to add Stripe integration for payments"
+  assistant: "Before starting, let me consult the product-owner to check if this aligns with the current phase and priorities."
+  <commentary>
+  Consult the product-owner before starting non-trivial feature work to validate sequencing and alignment.
+  </commentary>
+  </example>
+
+  <example>
+  Context: The user has just completed a significant piece of work.
+  user: "I just finished the authentication module"
+  assistant: "Let me update the product-owner so it can track progress and recommend what to work on next."
+  <commentary>
+  Consult the product-owner after completing significant work to update roadmap state and identify next priorities.
+  </commentary>
+  </example>
+
+  <example>
+  Context: The user wants to formalize a requirement.
+  user: "Write a story for the user profile settings page"
+  assistant: "I'll consult the product-owner to author this story with proper acceptance criteria and sequencing context."
+  <commentary>
+  Requirement authoring flows through the product-owner, which uses skills like /write-story and /write-epic.
+  </commentary>
+  </example>
 model: opus
 color: yellow
 memory: project

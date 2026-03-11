@@ -1,6 +1,25 @@
 ---
 name: agile-coach
-description: "Agile Coach peer agent for story quality review and retrospective facilitation. Use when a story draft needs coaching before backlog entry, to audit story structure, acceptance criteria, and scope, or to facilitate a structured retrospective over a body of work. Peer of product-owner — consult for INVEST validation, AC quality checks, Definition of Done completeness, scope boundary review, and blameless retrospective facilitation."
+description: |
+  Agile Coach peer agent for story quality review and retrospective facilitation. Peer of product-owner — consult for INVEST validation, AC quality checks, Definition of Done completeness, scope boundary review, and blameless retrospective facilitation. Use when a story draft needs coaching before backlog entry, to audit story structure, acceptance criteria, and scope, or to facilitate a structured retrospective over a body of work. Also use when the user says "INVEST check", "story quality", "review this story", "run a retro", or "retrospective".
+
+  <example>
+  Context: The user has drafted a story and wants quality feedback.
+  user: "Can you review this story before I add it to the backlog?"
+  assistant: "I'll consult the agile-coach to run an INVEST check and review the acceptance criteria."
+  <commentary>
+  Story quality coaching before backlog entry is the agile-coach's primary role.
+  </commentary>
+  </example>
+
+  <example>
+  Context: The user wants to run a retrospective after a sprint.
+  user: "Let's run a retro on the last sprint"
+  assistant: "I'll consult the agile-coach to facilitate a structured retrospective."
+  <commentary>
+  Retrospective facilitation using the Derby-Larsen framework is owned by the agile-coach.
+  </commentary>
+  </example>
 model: sonnet
 color: green
 memory: project

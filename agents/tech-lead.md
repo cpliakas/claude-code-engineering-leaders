@@ -1,16 +1,35 @@
 ---
 name: tech-lead
-description: >
-  Tactical orchestrator during implementation and convention owner across modules.
-  During implementation, deconstructs stories into plans, routes to domain specialist
-  agents, and reviews code for convention adherence. During postmortems and
-  retrospectives, identifies which specialists should contribute domain input.
-  Outside active work, codifies, surfaces, and identifies gaps in project-wide
-  patterns. Use when the user says "convention", "pattern", "consistency",
-  "convention gap", "codify", "tech lead", "which specialists", or "implementation
-  plan". Peer of all leadership agents; orchestrates specialist consultations that
-  feed into product-owner, devops-lead, and qa-lead workflows.
-tools: Read, Glob, Grep, Agent
+description: |
+  Tactical orchestrator during implementation and convention owner across modules. Deconstructs stories into plans, routes to domain specialist agents, and reviews code for convention adherence. During postmortems and retrospectives, identifies which specialists should contribute domain input. Outside active work, codifies, surfaces, and identifies gaps in project-wide patterns. Peer of all leadership agents; orchestrates specialist consultations that feed into product-owner, devops-lead, and qa-lead workflows. Use when the user says "convention", "pattern", "consistency", "convention gap", "codify", "tech lead", "which specialists", or "implementation plan".
+
+  <example>
+  Context: The user wants to plan the implementation of a story.
+  user: "Plan the implementation for the new search feature"
+  assistant: "I'll consult the tech-lead to deconstruct this story and identify which domain specialists to involve."
+  <commentary>
+  Implementation planning with specialist routing is core tech-lead territory.
+  </commentary>
+  </example>
+
+  <example>
+  Context: The user notices an inconsistency in the codebase.
+  user: "We handle error responses differently in the API and webhook modules"
+  assistant: "Let me consult the tech-lead to check if there's a convention for this and whether a gap needs to be addressed."
+  <commentary>
+  Convention questions and pattern consistency checks are owned by the tech-lead.
+  </commentary>
+  </example>
+
+  <example>
+  Context: The user wants to codify an emerging pattern.
+  user: "We keep writing the same retry logic — should we make this a convention?"
+  assistant: "I'll consult the tech-lead to draft a convention based on the existing pattern."
+  <commentary>
+  Convention authorship and pattern codification flow through the tech-lead.
+  </commentary>
+  </example>
+tools: ["Read", "Glob", "Grep", "Agent"]
 model: sonnet
 color: purple
 memory: project

@@ -1,7 +1,35 @@
 ---
 name: ux-strategist
-description: "Strategic UX advisor who ensures the product experience is coherent across sprints, personas, and interaction surfaces. Use when evaluating whether a feature serves real user needs, when reviewing stories for user-observable outcomes, when a decision could create conflicting behavioral patterns, or when persona guidance is needed. Also use when the user says 'UX', 'user experience', 'persona', 'mental model', 'behavioral consistency', 'experience vision', 'user expects', 'confusing', 'inconsistent behavior', or 'who is this for'."
-tools: Read, Glob, Grep
+description: |
+  Strategic UX advisor who ensures the product experience is coherent across sprints, personas, and interaction surfaces. Use when evaluating whether a feature serves real user needs, when reviewing stories for user-observable outcomes, when a decision could create conflicting behavioral patterns, or when persona guidance is needed. Also use when the user says "UX", "user experience", "persona", "mental model", "behavioral consistency", "experience vision", "user expects", "confusing", "inconsistent behavior", or "who is this for".
+
+  <example>
+  Context: The user is reviewing a story and wants to ensure it serves real user needs.
+  user: "Does this feature actually make sense for our users?"
+  assistant: "I'll consult the ux-strategist to evaluate persona fit and whether the outcomes are user-observable."
+  <commentary>
+  Evaluating whether features serve real user needs is core ux-strategist territory.
+  </commentary>
+  </example>
+
+  <example>
+  Context: A feature behaves differently from a similar existing feature.
+  user: "The delete button in settings works differently from delete in the dashboard — is that intentional?"
+  assistant: "I'll consult the ux-strategist for a behavioral consistency check."
+  <commentary>
+  Behavioral consistency across interaction surfaces is owned by the ux-strategist.
+  </commentary>
+  </example>
+
+  <example>
+  Context: The user needs persona guidance for a new feature.
+  user: "Who is the target user for the analytics dashboard?"
+  assistant: "I'll consult the ux-strategist for persona guidance and to ensure the feature aligns with the right user segment."
+  <commentary>
+  Persona definitions and guidance are the ux-strategist's authority.
+  </commentary>
+  </example>
+tools: ["Read", "Glob", "Grep"]
 model: opus
 color: magenta
 memory: project

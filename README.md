@@ -1,6 +1,6 @@
 # Engineering Leaders
 
-A Claude Code plugin that provides a virtual engineering leadership team — agents that refine requirements, set technical direction, and govern delivery. Instead of implementation workers, these agents provide coordination, oversight, and structured decision-making across the software development lifecycle.
+A Claude Code plugin that plugins that give AI a well-defined operating context before it writes a single line of code through virtual engineering leadership team. The agents in this plugin help refine business requirements, provide strategic technical and UX advisory, and govern delivery. Instead of implementation workers, these agents provide coordination, oversight, and structured decision-making across the software development lifecycle.
 
 ## About This Project
 
@@ -16,7 +16,7 @@ If you're looking for well-maintained, general-purpose collections of Claude Cod
 
 ### A full leadership team, not individual specialists
 
-The previous iteration split agents across multiple plugins. This version consolidates them into a single team with clear roles: a product owner for roadmap context, a chief architect for structural decisions, a tech lead for tactical orchestration, a devops lead for infrastructure patterns, an engineering manager for systemic observation, a QA lead for test strategy, an agile coach for process health, and a UX strategist for experience coherence.
+The previous iteration split agents across multiple plugins. This version consolidates them into a single team with clear roles: a product owner for roadmap context, a chief architect for structural decisions, a tech lead for tactical orchestration, a devops lead for infrastructure patterns, an engineering manager for systemic observation, a QA lead for test strategy, an agile coach for process health and introspection, and a UX strategist for experience coherence.
 
 Each agent's definition specifies who it consults and what it delegates, making the coordination chain explicit and inspectable.
 

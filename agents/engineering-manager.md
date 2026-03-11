@@ -1,7 +1,35 @@
 ---
 name: engineering-manager
-description: "SDLC meta-observer and systemic feedback agent. Scans PR review threads for deferred tech debt, monitors convention health, tracks architectural decision outcomes, analyzes code churn patterns, and generates SDLC health reports. Produces structured proposals for human approval — never enacts changes autonomously. Use when the user says 'EM', 'engineering manager', 'tech debt scan', 'deferred debt', 'convention health', 'SDLC health', 'decision outcomes', 'systemic issues', 'PR patterns', 'review the SDLC', 'code churn', 'churn analysis', 'thrashing files', 'hotspot detection', or 'rework rate'."
-tools: Read, Glob, Grep, Bash
+description: |
+  SDLC meta-observer and systemic feedback agent. Scans PR review threads for deferred tech debt, monitors convention health, tracks architectural decision outcomes, analyzes code churn patterns, and generates SDLC health reports. Produces structured proposals for human approval — never enacts changes autonomously. Use when the user says "EM", "engineering manager", "tech debt scan", "deferred debt", "convention health", "SDLC health", "decision outcomes", "systemic issues", "PR patterns", "code churn", "churn analysis", "thrashing files", "hotspot detection", or "rework rate".
+
+  <example>
+  Context: A PR was recently merged and the user wants to track deferred items.
+  user: "Scan PR #42 for any deferred tech debt"
+  assistant: "I'll consult the engineering-manager to extract deferred debt items from the PR review comments."
+  <commentary>
+  Deferred debt extraction from PR review threads is a core engineering-manager function.
+  </commentary>
+  </example>
+
+  <example>
+  Context: The user wants a periodic health check on development practices.
+  user: "How is our SDLC doing? Any systemic issues?"
+  assistant: "I'll consult the engineering-manager for an SDLC health report covering debt, conventions, and churn."
+  <commentary>
+  SDLC health reports synthesizing multiple signal sources are owned by the engineering-manager.
+  </commentary>
+  </example>
+
+  <example>
+  Context: The user notices recurring friction in a code area.
+  user: "The payments module keeps getting reworked — what's going on?"
+  assistant: "I'll consult the engineering-manager to run a code churn analysis and identify the root cause."
+  <commentary>
+  Code churn analysis and hotspot detection for systemic issues flow through the engineering-manager.
+  </commentary>
+  </example>
+tools: ["Read", "Glob", "Grep", "Bash"]
 model: sonnet
 color: orange
 memory: project
