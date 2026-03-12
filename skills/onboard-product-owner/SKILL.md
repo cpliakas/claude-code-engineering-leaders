@@ -185,6 +185,15 @@ See `.claude/agent-memory/engineering-leaders/PROJECT.md` for project
 overview, tech stack, team structure, and SDLC process.
 ```
 
+If `shared_context_exists = false`, append this section instead:
+
+```markdown
+## Shared Project Context
+
+Not yet configured. Run `/onboard` to set up shared project context (project
+overview, tech stack, team structure, SDLC process) that all agents can use.
+```
+
 Create the directory `.claude/agent-memory/engineering-leaders-product-owner/`
 if it does not exist, then write the file.
 

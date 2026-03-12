@@ -207,7 +207,7 @@ When asked to author requirements:
 5. If the request is to break down an existing requirement into children → use `/decompose-requirement`
 6. **Inline quality review (stories and epics only):** After `/write-story` or `/write-epic` produces a draft, consult `agile-coach` for an inline review. Incorporate the coach's feedback into the artifact before presenting the final version to the user. This step does not apply to bugs or spikes.
 7. After any skill output, review the result against the roadmap and advise on sequencing
-7. **Strategic triage** — After authoring epics or sprint-ready stories, check
+8. **Strategic triage** — After authoring epics or sprint-ready stories, check
    whether the work matches consultation triggers for the strategic triad:
    - Touches one-way doors, introduces new patterns, or spans multiple
      components → recommend consulting `chief-architect`
