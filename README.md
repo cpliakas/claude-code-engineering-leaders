@@ -42,29 +42,6 @@ Without leadership context, implementation agents optimize for technical complet
 └─────────────────────────────────────────────────────┘
 ```
 
-### Handoff patterns
-
-| Leadership Agent | Produces | Useful Input For |
-|---|---|---|
-| **product-owner** | Prioritized story with AC | Any implementation agent scoped to the story |
-| **chief-architect** | ADR selecting an approach | Domain specialist who implements the chosen pattern |
-| **tech-lead** | Implementation plan with steps | Developers executing each step |
-| **devops-lead** | Pipeline design, deployment strategy | `terraform-engineer`, `docker-expert`, `deployment-engineer` |
-| **qa-lead** | Test strategy by type and layer | `test-automator`, `qa-expert` |
-| **ux-strategist** | Persona guidance, behavioral spec | `ui-designer`, `frontend-developer` |
-| **agile-coach** | Refined story, retro action items | `product-owner` (backlog updates), implementation agents |
-| **engineering-manager** | Debt proposals, health reports | Human decision-maker, then implementation agents for approved work |
-
-### Example workflow
-
-1. **product-owner** sequences a feature and produces a story via `/write-story`
-2. **chief-architect** evaluates the approach and records an ADR via `/write-adr`
-3. **tech-lead** breaks the story into an implementation plan
-4. **qa-lead** produces a test strategy via `/plan-test-strategy`
-5. **devops-lead** designs the deployment approach
-6. Implementation agents (yours or from other plugins) execute the plan
-7. **engineering-manager** scans the resulting PRs for deferred debt
-
 ## Quick Start
 
 Add the marketplace to your Claude Code project, then install the plugin:
@@ -145,6 +122,31 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 ### Agent Hierarchy
 
 Agents form a leadership team with clear delegation chains. The `tech-lead` acts as tactical orchestrator during implementation, routing to domain specialists as needed. Strategic agents like `chief-architect` and `product-owner` set direction, while operational agents like `devops-lead`, `qa-lead`, and `engineering-manager` govern their respective domains.
+
+### Handoff Patterns
+
+Each leadership agent produces artifacts that feed directly into implementation:
+
+| Leadership Agent | Produces | Useful Input For |
+|---|---|---|
+| **product-owner** | Prioritized story with AC | Any implementation agent scoped to the story |
+| **chief-architect** | ADR selecting an approach | Domain specialist who implements the chosen pattern |
+| **tech-lead** | Implementation plan with steps | Developers executing each step |
+| **devops-lead** | Pipeline design, deployment strategy | `terraform-engineer`, `docker-expert`, `deployment-engineer` |
+| **qa-lead** | Test strategy by type and layer | `test-automator`, `qa-expert` |
+| **ux-strategist** | Persona guidance, behavioral spec | `ui-designer`, `frontend-developer` |
+| **agile-coach** | Refined story, retro action items | `product-owner` (backlog updates), implementation agents |
+| **engineering-manager** | Debt proposals, health reports | Human decision-maker, then implementation agents for approved work |
+
+### Example Workflow
+
+1. **product-owner** sequences a feature and produces a story via `/write-story`
+2. **chief-architect** evaluates the approach and records an ADR via `/write-adr`
+3. **tech-lead** breaks the story into an implementation plan and routes to domain specialists
+4. **qa-lead** produces a test strategy via `/plan-test-strategy`
+5. **devops-lead** designs the deployment approach
+6. Implementation agents (yours or from other plugins) execute the plan
+7. **engineering-manager** scans the resulting PRs for deferred debt
 
 ### Memory
 
