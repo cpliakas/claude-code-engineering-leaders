@@ -59,26 +59,6 @@ Engineering Leaders fills a different role. Those collections provide agents tha
 6. Implementation agents (yours or from other plugins) execute the plan
 7. **engineering-manager** scans the resulting PRs for deferred debt
 
-## What I'm Testing
-
-### A full leadership team, not individual specialists
-
-The previous iteration split agents across multiple plugins. This version consolidates them into a single team with clear roles: a product owner for roadmap context, a chief architect for structural decisions, a tech lead for tactical orchestration, a devops lead for infrastructure patterns, an engineering manager for systemic observation, a QA lead for test strategy, an agile coach for process health and introspection, and a UX strategist for experience coherence.
-
-Each agent's definition specifies who it consults and what it delegates, making the coordination chain explicit and inspectable.
-
-### Tech lead as tactical orchestrator
-
-The `tech-lead` agent acts as the team's implementation coordinator. It deconstructs stories into plans, routes to domain specialists, and reviews code for convention adherence. During postmortems and retrospectives, it identifies which specialists should contribute domain input. Outside active work, it codifies and surfaces gaps in project-wide patterns.
-
-### Product owner as a guardrail against drift
-
-One risk of delegating implementation to agents is losing sight of what actually matters. The `product-owner` agent maintains roadmap context, advises on sequencing, and pushes back when proposed work doesn't align with current priorities. The `/write-epic`, `/write-story`, `/write-bug`, and `/decompose-requirement` skills produce structured artifacts that land directly in GitHub Issues or Jira.
-
-### Engineering manager as meta-observer
-
-The `engineering-manager` agent scans for systemic issues: deferred tech debt in PR threads, convention drift, architectural decision outcomes, and code churn patterns. It produces structured proposals for human approval and never enacts changes autonomously.
-
 ## Quick Start
 
 Add the marketplace to your Claude Code project, then install the plugin:
