@@ -2,6 +2,7 @@
 name: onboard
 description: "Use when setting up the engineering-leaders plugin for the first time on a project, or when re-running onboarding to update shared project context. Gathers shared project context for all agents (one question at a time) and discovers specialist plugins for the Tech Lead routing table. Run this before per-agent onboarding skills like /onboard-product-owner."
 user-invokable: true
+argument-hint: ""
 allowed-tools: Read, Glob, Grep, Write, Bash
 context: fork
 ---
@@ -11,8 +12,8 @@ context: fork
 Gather shared project context for all engineering-leaders agents and discover
 specialist plugins for the Tech Lead routing table.
 
-This skill runs a guided interview — one question at a time — and writes the
-results to a shared memory file that every agent in this plugin reads.
+This skill runs a guided interview. It asks one question at a time and writes
+the results to a shared memory file that every agent in this plugin reads.
 
 ## Output Location
 
@@ -34,12 +35,41 @@ Specialist routing entries are written to:
 
 Read `.claude/agent-memory/engineering-leaders/PROJECT.md` if it exists.
 
-If it exists, show the user a summary of what is already recorded and ask:
+If it **does not exist**, proceed directly to Step 2. Track: `context_written = false`.
 
-> "Shared project context already exists. Would you like to (a) update specific
-> sections, (b) start fresh, or (c) skip to specialist discovery?"
+If it **exists**, show the user a brief summary of what is recorded (project
+name, tech stack, current phase) and ask:
 
-Respect their choice before proceeding.
+> "Shared project context already exists. Would you like to:
+>
+> (a) Update specific sections — I'll ask which sections to replace and re-run
+>     only those questions. All other sections are preserved unchanged.
+> (b) Start fresh — I'll run the full interview and replace the entire file
+>     when complete. If you abandon the interview before finishing, the original
+>     file is left unchanged.
+> (c) Skip to specialist discovery — skip the project context interview and go
+>     straight to updating the Tech Lead routing table."
+
+**If the user chooses (a):**
+
+Show the list of sections in the existing file (Project Overview, Tech Stack,
+Team, Key Constraints) and ask: "Which sections would you like to update?"
+Re-ask only the questions that correspond to the sections they name (Q1-Q2 for
+Project Overview, Q3 for Tech Stack, Q4-Q5 for Team, Q7 for Key Constraints),
+then merge the new answers into the existing file by replacing only those
+sections. Sections not selected are preserved verbatim from the original. Write
+the merged file and track: `context_written = true`.
+
+**If the user chooses (b):**
+
+Proceed to Step 2. Write the file only after the full interview completes in
+Step 3. If the user abandons the interview before Step 3, do not write
+anything and tell the user: "Interview not completed. The original file is
+unchanged." Track: `context_written = true` only if the file was actually written.
+
+**If the user chooses (c):**
+
+Skip Steps 2 and 3. Jump directly to Step 4. Track: `context_written = false`.
 
 ### Step 2: Project Overview Interview
 
@@ -117,8 +147,8 @@ If (a): "What's the sprint cadence? (1 week, 2 weeks, other)"
 
 ### Step 3: Write Shared Context
 
-After collecting answers, write the following file. Omit any section where the
-user skipped or had nothing to say.
+After collecting all answers, write the following file. Omit any section where
+the user skipped or had nothing to say.
 
 ```markdown
 # Project Context
@@ -149,9 +179,7 @@ user skipped or had nothing to say.
 ```
 
 Create the directory `.claude/agent-memory/engineering-leaders/` if it does
-not exist, then write the file.
-
-Confirm: "Shared project context saved."
+not exist, then write the file. Track: `context_written = true`.
 
 ### Step 4: Specialist Discovery
 
@@ -178,31 +206,54 @@ If agents are listed, for **each agent**, ask:
 > file paths (e.g., `src/api/**`), technology keywords (e.g., `terraform`), or
 > concern keywords (e.g., `authentication`). List as many as useful."
 
-After collecting signals for all agents, call `/add-specialist` for each one:
+After collecting signals for all agents, invoke `/add-specialist` for each one:
 
 ```
 /add-specialist [agent-name] [signal-1] [signal-2] ...
 ```
 
-Confirm each registration as it completes.
+**Note:** `/add-specialist` will verify that `agents/<agent-name>.md` exists in
+the current project. If the named agent comes from another plugin and is not in
+the local `agents/` directory, it will pause and ask for confirmation. Answer
+"yes" to register the specialist anyway.
+
+Track results for each invocation:
+
+- If `/add-specialist` completes successfully: mark the specialist as **registered**.
+- If it does not complete (validation rejected or user cancelled): mark the
+  specialist as **failed** and continue processing remaining specialists.
 
 ### Step 5: Summary and Next Steps
 
-Present a summary of what was written:
+Present a summary based on what actually happened in this run.
+
+**Shared context:**
+
+- If `context_written = true`: "Shared context written to:
+  `.claude/agent-memory/engineering-leaders/PROJECT.md`"
+- If `context_written = false`: "Shared context: unchanged (existing file
+  retained, or skipped this run)"
+
+**Specialists:**
+
+- If all registrations succeeded: "Specialists registered: [N]"
+- If some failed:
+
+  ```
+  Specialists registered: [N succeeded of N total requested]
+
+  Failed registrations — complete these manually with /add-specialist:
+    - [agent-name]: [reason — not found, cancelled, etc.]
+  ```
+
+- If none were requested: "Specialists: none registered. Add later with
+  `/add-specialist`."
+
+**Next steps:**
+
+The following per-agent onboarding skills are available in this plugin:
 
 ```
-Onboarding complete.
-
-Shared context written to:
-  .claude/agent-memory/engineering-leaders/PROJECT.md
-
-Specialists registered: [N] (or "none — add later with /add-specialist")
-
-Next steps:
-  /onboard-product-owner   — configure the Product Owner for your issue
-                             tracker, backlog norms, and current phase
+/onboard-product-owner   — configure the Product Owner for your issue
+                           tracker, backlog norms, and current phase
 ```
-
-If other per-agent onboarding skills are available in the plugin
-(check via Glob for `skills/onboard-*/SKILL.md`), list them all in the next
-steps block.

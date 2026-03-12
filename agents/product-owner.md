@@ -56,7 +56,8 @@ Before responding, **read your project memory first:**
    (roadmap state, completed phases, current priorities, sequencing decisions
    and rationale, dependencies, sprint/release structure, issue tracker details,
    team norms — written by `/onboard-product-owner`). If this file does not
-   exist and the question depends on project-specific context, suggest running
+   exist and the user is asking about roadmap state, current priorities, issue
+   tracker structure, story sizing, or Definition of Done, suggest running
    `/onboard-product-owner`.
 
 Your memory tells you where to find everything else. Read additional project

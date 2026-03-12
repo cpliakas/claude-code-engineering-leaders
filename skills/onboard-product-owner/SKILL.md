@@ -2,6 +2,7 @@
 name: onboard-product-owner
 description: "Use when configuring the Product Owner agent for a specific project. Gathers issue tracker details, backlog norms, and current roadmap state, then writes them to the Product Owner's project memory. Run /onboard first to establish shared project context. This is the reference implementation for per-agent onboarding skills."
 user-invokable: true
+argument-hint: ""
 allowed-tools: Read, Glob, Write
 context: fork
 ---
@@ -19,7 +20,8 @@ This skill layers on top of shared project context. Before starting, read:
 .claude/agent-memory/engineering-leaders/PROJECT.md
 ```
 
-If the file does not exist, note:
+Track whether this file exists as `shared_context_exists`. If it **does not
+exist**, note:
 
 > "Shared project context hasn't been set up yet. I can continue with
 > Product Owner-specific questions, but running /onboard first will give all
@@ -35,8 +37,31 @@ Product Owner project memory is written to:
 .claude/agent-memory/engineering-leaders-product-owner/MEMORY.md
 ```
 
-If this file already exists, show the user a summary of what is recorded and
-ask whether to update specific sections or start fresh.
+If this file **already exists**, show the user a brief summary of what is
+recorded (issue tracker platform, current phase, sizing convention) and ask:
+
+> "Product Owner memory already exists. Would you like to:
+>
+> (a) Update specific sections — I'll ask which sections to replace and re-run
+>     only those questions. All other sections are preserved unchanged.
+> (b) Start fresh — I'll run the full interview and replace the entire file
+>     when complete. If you abandon the interview before finishing, the original
+>     file is left unchanged."
+
+**If the user chooses (a):**
+
+Show the list of sections (Issue Tracker, Roadmap and Phases, Team Norms) and
+ask which to update. Re-ask only the questions for those sections (Q1-Q3 for
+Issue Tracker, Q4-Q6 for Roadmap and Phases, Q7-Q9 for Team Norms), then merge
+the new answers into the existing file by replacing only those sections.
+Sections not selected are preserved verbatim from the original.
+
+**If the user chooses (b):**
+
+Proceed through the full interview below. Write the file only after all
+questions are answered. If the user abandons before completing, do not write
+anything and tell the user: "Interview not completed. The original file is
+unchanged."
 
 ## Process
 
@@ -115,7 +140,7 @@ Skip this question if the user answered (f) above.
 
 ### Write Product Owner Memory
 
-After collecting answers, write the memory file. Use the structure below,
+After collecting all answers, write the memory file. Use the structure below,
 omitting sections where the user skipped or had nothing to say.
 
 ```markdown
@@ -141,7 +166,11 @@ omitting sections where the user skipped or had nothing to say.
 - **Story Sizing:** [from Q7]
 - **Definition of Done:** [from Q8]
 - **Other Norms:** [from Q9, if provided]
+```
 
+If `shared_context_exists = true`, append this section to the file:
+
+```markdown
 ## Shared Project Context
 
 See `.claude/agent-memory/engineering-leaders/PROJECT.md` for project
@@ -162,10 +191,11 @@ Memory written to:
   .claude/agent-memory/engineering-leaders-product-owner/MEMORY.md
 
 The Product Owner now knows:
-  - Issue tracker: [platform] at [url or "not specified"]
-  - Current focus: [phase/milestone]
-  - Sizing: [convention]
-  - DoD: [summary or "not specified"]
+  - Issue tracker: [platform from Q1] at [url from Q2, or "not specified"]
+  - Current focus: [phase/milestone from Q4]
+  - Top priorities: [first item from Q5, or "see memory"]
+  - Sizing: [convention from Q7]
+  - DoD: [one-line summary from Q8, or "not specified"]
 
 The Product Owner agent is ready. Invoke it by saying "consult the product
 owner" or asking about roadmap, sequencing, or story authoring.

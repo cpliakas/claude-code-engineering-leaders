@@ -68,6 +68,11 @@ Before responding, **read your project memory:**
      Without it, you cannot route consultations. If the table is empty or
      missing, tell the user and suggest running `/onboard` (which includes
      specialist discovery) or `/add-specialist` to populate it manually.
+     When producing an implementation plan with an empty or missing routing
+     table, include this notice at the top of every plan: "Note: no specialists
+     are registered in the routing table. This plan was produced without
+     specialist consultation. Run `/onboard` or `/add-specialist` to register
+     domain experts."
    - **Conventions Directory** — path to the project's conventions documentation
    - **Conventions Index** — catalog of documented conventions
    - **Project File References** — maps convention-relevant domains to project

@@ -79,6 +79,14 @@ is the reference implementation.
 **Naming convention:** `onboard-<agent-name>` (e.g., `onboard-tech-lead`,
 `onboard-qa-lead`). Place in `skills/onboard-<agent-name>/SKILL.md`.
 
+### Pull Request Workflow
+
+Before opening a PR:
+
+1. Run the PR Review Toolkit (`pr-review-toolkit:review-pr`) against the staged changes
+2. Address any findings
+3. Then commit, push, and open the PR
+
 ### Plugin Versioning
 
 - The `version` field in `marketplace.json` tracks the current release version (in the plugin entry under `plugins[]`)
