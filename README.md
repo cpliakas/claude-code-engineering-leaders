@@ -1,16 +1,63 @@
 # Engineering Leaders
 
-A Claude Code plugin that plugins that give AI a well-defined operating context before it writes a single line of code through virtual engineering leadership team. The agents in this plugin help refine business requirements, provide strategic technical and UX advisory, and govern delivery. Instead of implementation workers, these agents provide coordination, oversight, and structured decision-making across the software development lifecycle.
+A Claude Code plugin that provides the **leadership layer** for AI-assisted development. While most agent plugins focus on writing code, this one focuses on what happens *before and after* code gets written: refining requirements, structuring technical decisions, governing delivery, and surfacing systemic issues.
 
-## About This Project
+Humans decide what to build and why. These agents help refine that intent into artifacts that are ready for implementation.
 
-This is a personal learning project. Building agents, wiring them together, and watching where they break is how I develop intuition for what works and what doesn't. The agents here are opinionated to a specific working style and aren't designed for broad adoption.
+## How This Complements Other Plugins
 
-If you're looking for well-maintained, general-purpose collections of Claude Code agents and skills, these are better starting points:
+The Claude Code ecosystem has excellent implementation-focused agent collections:
 
-- [wshobson/agents](https://github.com/wshobson/agents), a curated agent library
-- [affaan-m/everything-claude-code](https://github.com/AffaanM/everything-claude-code), a comprehensive Claude Code resource collection
-- [VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents), a community-maintained subagent catalog
+- [wshobson/agents](https://github.com/wshobson/agents): curated agents for coding, testing, and infrastructure tasks
+- [VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents): 127+ specialized implementation agents across 10 categories
+- [affaan-m/everything-claude-code](https://github.com/AffaanM/everything-claude-code): comprehensive Claude Code resource collection
+
+Engineering Leaders fills a different role. Those collections provide agents that write code. This plugin provides advisory agents that help humans refine intent and prepare work before implementation begins.
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Leadership Layer (this plugin)                      │
+│  Refines human intent into implementation-ready      │
+│  artifacts                                           │
+│                                                      │
+│  product-owner · chief-architect · tech-lead         │
+│  qa-lead · devops-lead · agile-coach · EM · UX       │
+└────────────────────────┬────────────────────────────┘
+                         │ advisory output:
+                         │ stories, ADRs, test strategies,
+                         │ pipeline designs, runbooks
+                         ▼
+┌─────────────────────────────────────────────────────┐
+│  Implementation Layer (other plugins / agents)       │
+│  Executes the plan                                   │
+│                                                      │
+│  backend-developer · terraform-engineer              │
+│  test-automator · docker-expert · react-specialist   │
+└─────────────────────────────────────────────────────┘
+```
+
+### Handoff patterns
+
+| Leadership Agent | Produces | Useful Input For |
+|---|---|---|
+| **product-owner** | Prioritized story with AC | Any implementation agent scoped to the story |
+| **chief-architect** | ADR selecting an approach | Domain specialist who implements the chosen pattern |
+| **tech-lead** | Implementation plan with steps | Developers executing each step |
+| **devops-lead** | Pipeline design, deployment strategy | `terraform-engineer`, `docker-expert`, `deployment-engineer` |
+| **qa-lead** | Test strategy by type and layer | `test-automator`, `qa-expert` |
+| **ux-strategist** | Persona guidance, behavioral spec | `ui-designer`, `frontend-developer` |
+| **agile-coach** | Refined story, retro action items | `product-owner` (backlog updates), implementation agents |
+| **engineering-manager** | Debt proposals, health reports | Human decision-maker, then implementation agents for approved work |
+
+### Example workflow
+
+1. **product-owner** sequences a feature and produces a story via `/write-story`
+2. **chief-architect** evaluates the approach and records an ADR via `/write-adr`
+3. **tech-lead** breaks the story into an implementation plan
+4. **qa-lead** produces a test strategy via `/plan-test-strategy`
+5. **devops-lead** designs the deployment approach
+6. Implementation agents (yours or from other plugins) execute the plan
+7. **engineering-manager** scans the resulting PRs for deferred debt
 
 ## What I'm Testing
 
@@ -22,7 +69,7 @@ Each agent's definition specifies who it consults and what it delegates, making 
 
 ### Tech lead as tactical orchestrator
 
-The `tech-lead` agent acts as the team's implementation coordinator — deconstructing stories into plans, routing to domain specialists, and reviewing code for convention adherence. During postmortems and retrospectives, it identifies which specialists should contribute domain input. Outside active work, it codifies and surfaces gaps in project-wide patterns.
+The `tech-lead` agent acts as the team's implementation coordinator. It deconstructs stories into plans, routes to domain specialists, and reviews code for convention adherence. During postmortems and retrospectives, it identifies which specialists should contribute domain input. Outside active work, it codifies and surfaces gaps in project-wide patterns.
 
 ### Product owner as a guardrail against drift
 
@@ -30,7 +77,7 @@ One risk of delegating implementation to agents is losing sight of what actually
 
 ### Engineering manager as meta-observer
 
-The `engineering-manager` agent scans for systemic issues — deferred tech debt in PR threads, convention drift, architectural decision outcomes, and code churn patterns. It produces structured proposals for human approval and never enacts changes autonomously.
+The `engineering-manager` agent scans for systemic issues: deferred tech debt in PR threads, convention drift, architectural decision outcomes, and code churn patterns. It produces structured proposals for human approval and never enacts changes autonomously.
 
 ## Quick Start
 
@@ -49,7 +96,7 @@ Add the marketplace to your Claude Code project, then install the plugin:
 | Agent | `product-owner`            | Roadmap keeper that advises on sequencing, priorities, and phase transitions                |
 | Agent | `tech-lead`                | Tactical orchestrator for implementation plans, specialist routing, and convention ownership |
 | Agent | `engineering-manager`      | SDLC meta-observer for tech debt scans, convention health, and code churn analysis         |
-| Agent | `devops-lead`              | Infrastructure lead for CI/CD, deployment strategies, and incident response                |
+| Agent | `devops-lead`              | Infrastructure strategy lead for CI/CD design, deployment doctrine, and incident response  |
 | Agent | `qa-lead`                  | QA strategy lead for test architecture, coverage gaps, and risk-based prioritization       |
 | Agent | `agile-coach`              | Peer coach for story quality review and retrospective facilitation                         |
 | Agent | `ux-strategist`            | Strategic UX advisor for experience coherence, persona guidance, and behavioral consistency |
