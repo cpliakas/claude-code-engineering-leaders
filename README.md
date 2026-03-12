@@ -95,7 +95,7 @@ The `devops-lead` invokes `/conduct-postmortem` with the incident description, p
 
 ### Run a Retrospective with the Agile Coach
 
-**Scenario:** Your engineering team just wrapped a sprint that included authentication, profile settings, and a first pass at role-based access control. Some stories felt too big and there were scope surprises at the end.
+**Scenario:** Your digital team just wrapped a sprint that included authentication, profile settings, and a first pass at role-based access control. Some stories felt too big and there were scope surprises at the end.
 
 > `@agile-coach We just wrapped the auth sprint. We shipped login, profile settings, and basic RBAC, but a few stories ran long and we had some last-minute scope surprises. Can you run a retrospective so we can figure out what worked and where we need to improve?`
 
