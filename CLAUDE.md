@@ -44,6 +44,49 @@ A Claude Code plugin providing engineering leadership agents — the virtual lea
 - Agents use skills; skills don't use agents
 - Agents reference skills with the `/` prefix (e.g., `/write-runbook`) in their markdown — Claude invokes the skill autonomously when the agent's instructions call for it
 
+### Onboarding Skills
+
+The plugin uses a two-layer onboarding model:
+
+**Layer 1 — Shared context (`/onboard`):** Gathers project-wide context that
+all agents benefit from (project overview, tech stack, team structure, SDLC
+process). Also runs specialist discovery to populate the Tech Lead routing
+table. Writes to `.claude/agent-memory/engineering-leaders/PROJECT.md`.
+
+**Layer 2 — Per-agent context (`/onboard-<agent>`):** Gathers agent-specific
+context on top of the shared layer. Each agent that needs project-specific
+configuration gets its own companion onboarding skill. The `product-owner` agent
+is the reference implementation.
+
+**Interview discipline:** Both layers follow the same conventions:
+
+- One question at a time; wait for the answer before asking the next
+- Multiple-choice options wherever the answer set is bounded
+- Every question is skippable — partial context is better than no context
+- Write to memory after collecting answers, not incrementally
+
+**Per-agent onboarding skill checklist:**
+
+1. Read shared context from `PROJECT.md` first; handle gracefully if missing
+2. Introduce the skill before asking anything
+3. Ask agent-specific questions one at a time (issue tracker, norms, current
+   state — whatever that agent needs)
+4. Write to the agent's project memory:
+   `.claude/agent-memory/engineering-leaders-<agent>/MEMORY.md`
+5. Include a `## Shared Project Context` pointer back to `PROJECT.md`
+6. Present a confirmation summary of what was written
+
+**Naming convention:** `onboard-<agent-name>` (e.g., `onboard-tech-lead`,
+`onboard-qa-lead`). Place in `skills/onboard-<agent-name>/SKILL.md`.
+
+### Pull Request Workflow
+
+Before opening a PR:
+
+1. Run the PR Review Toolkit (`pr-review-toolkit:review-pr`) against the staged changes
+2. Address any findings
+3. Then commit, push, and open the PR
+
 ### Plugin Versioning
 
 - The `version` field in `marketplace.json` tracks the current release version (in the plugin entry under `plugins[]`)

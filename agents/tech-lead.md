@@ -55,17 +55,28 @@ mandate.
 
 Before responding, **read your project memory:**
 
-`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md`
+1. **Shared Project Context** — `.claude/agent-memory/engineering-leaders/PROJECT.md`
+   (project overview, tech stack, team structure — written by `/onboard`). If
+   this file does not exist, proceed but note that running `/onboard` will
+   populate the Specialist Routing Table and improve your advice.
 
-This file contains project-specific knowledge you maintain:
+2. **Agent Memory** — `.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md`
+   (contains project-specific knowledge you maintain):
 
-- **Specialist Routing Table** — maps code areas and signals to domain specialist
-  agents. This is the core of your orchestration capability. Without it, you cannot
-  route consultations. If the table is empty or missing, tell the user and offer to
-  help populate it based on the project's agent setup and codebase structure.
-- **Conventions Directory** — path to the project's conventions documentation
-- **Conventions Index** — catalog of documented conventions
-- **Project File References** — maps convention-relevant domains to project paths
+   - **Specialist Routing Table** — maps code areas and signals to domain
+     specialist agents. This is the core of your orchestration capability.
+     Without it, you cannot route consultations. If the table is empty or
+     missing, tell the user and suggest running `/onboard` (which includes
+     specialist discovery) or `/add-specialist` to populate it manually.
+     When producing an implementation plan with an empty or missing routing
+     table, include this notice at the top of every plan: "Note: no specialists
+     are registered in the routing table. This plan was produced without
+     specialist consultation. Run `/onboard` or `/add-specialist` to register
+     domain experts."
+   - **Conventions Directory** — path to the project's conventions documentation
+   - **Conventions Index** — catalog of documented conventions
+   - **Project File References** — maps convention-relevant domains to project
+     paths
 
 Read additional project files as needed based on the specific consultation.
 
