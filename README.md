@@ -6,13 +6,16 @@ Humans decide what to build and why. These agents help refine that intent into a
 
 ## How This Complements Other Plugins
 
-The Claude Code ecosystem has excellent implementation-focused agent collections:
+The Claude Code ecosystem has excellent implementation-focused agent collections and workflow plugins:
 
 - [wshobson/agents](https://github.com/wshobson/agents): curated agents for coding, testing, and infrastructure tasks
 - [VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents): 127+ specialized implementation agents across 10 categories
 - [affaan-m/everything-claude-code](https://github.com/AffaanM/everything-claude-code): comprehensive Claude Code resource collection
+- [obra/superpowers](https://github.com/obra/superpowers): structured development workflow with TDD discipline, brainstorming gates, and verification before completion
 
-Engineering Leaders fills a different role. Those collections provide agents that write code. This plugin provides advisory agents that help humans refine intent and prepare work before implementation begins.
+Engineering Leaders fills a different role. Those collections provide agents that write code and enforce execution discipline. This plugin provides advisory agents that ensure the right work gets built the right way before implementation begins.
+
+Without leadership context, implementation agents optimize for technical completeness rather than business fit. They may reach for distributed systems when a monolith would serve the project better, introduce patterns a small team cannot maintain, or apply architectural sophistication that outpaces what the project actually needs. These are the ivory tower failure modes: technically impressive, but misaligned with business constraints. Engineering Leaders counters this by ensuring stories are right-sized, architectural decisions are grounded in explicit trade-offs, and technical choices are made with awareness of the team's capacity and the project's current phase. The goal is not the most elegant solution: it is the right solution at the right time, delivered consistently.
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -68,6 +71,34 @@ Add the marketplace to your Claude Code project, then install the plugin:
 /plugin install engineering-leaders
 ```
 
+## Setting Up for Your Project
+
+After installation, run the onboarding skill to configure the plugin for your specific project:
+
+```
+/onboard
+```
+
+This runs a guided interview — one question at a time — that captures the context every agent needs to give you useful, project-specific advice rather than generic guidance. It covers:
+
+- **Project overview:** what you're building, your business domain, current phase
+- **Tech stack:** languages, frameworks, key infrastructure
+- **Team:** size, disciplines, SDLC process
+- **Key constraints:** compliance, performance targets, architectural boundaries
+- **Specialist agents:** any domain specialists from other plugins the Tech Lead should route to during implementation planning
+
+Onboarding writes to `.claude/agent-memory/engineering-leaders/PROJECT.md` — a shared context file that all eight agents read automatically.
+
+### Per-Agent Setup
+
+After running `/onboard`, configure individual agents with their own onboarding skills for deeper project-specific context:
+
+| Skill | Agent | What It Captures |
+|---|---|---|
+| `/onboard-product-owner` | `product-owner` | Issue tracker, current phase, backlog norms, team sizing and DoD conventions |
+
+Additional per-agent onboarding skills will be added as the pattern matures. You can always invoke agents without onboarding — they degrade gracefully and will prompt you to run the relevant skill when project-specific context would improve their advice.
+
 ## Agents and Skills
 
 | Type  | Name                       | Description                                                                                |
@@ -80,6 +111,8 @@ Add the marketplace to your Claude Code project, then install the plugin:
 | Agent | `qa-lead`                  | QA strategy lead for test architecture, coverage gaps, and risk-based prioritization       |
 | Agent | `agile-coach`              | Peer coach for story quality review and retrospective facilitation                         |
 | Agent | `ux-strategist`            | Strategic UX advisor for experience coherence, persona guidance, and behavioral consistency |
+| Skill | `/onboard`                 | Guided project setup: shared context interview for all agents + Tech Lead specialist discovery |
+| Skill | `/onboard-product-owner`   | Configure the Product Owner with issue tracker, backlog norms, and current roadmap state |
 | Skill | `/write-epic`              | Write an epic specification with structured metadata compatible with GitHub Issues and Jira |
 | Skill | `/write-story`             | Write a user story with acceptance criteria and INVEST validation                          |
 | Skill | `/write-bug`               | Scaffold a RIMGEN-validated bug report with reproduction steps, severity, and priority     |
@@ -134,6 +167,8 @@ claude-code-engineering-leaders/
 │   ├── agile-coach.md
 │   └── ux-strategist.md
 └── skills/
+    ├── onboard/SKILL.md
+    ├── onboard-product-owner/SKILL.md
     ├── write-epic/SKILL.md
     ├── write-story/SKILL.md
     ├── write-bug/SKILL.md
