@@ -27,7 +27,11 @@ exist**, note:
 > Product Owner-specific questions, but running /onboard first will give all
 > agents a better foundation. Would you like to continue anyway?"
 
-Respect the user's choice.
+- If the user says **yes**: track `shared_context_exists = false` and continue
+  to the Output Location section.
+- If the user says **no**: stop here. Do not proceed to the interview or write
+  any files. Tell the user: "No problem. Run /onboard first to set up shared
+  project context, then come back to /onboard-product-owner."
 
 ## Output Location
 
@@ -54,14 +58,18 @@ Show the list of sections (Issue Tracker, Roadmap and Phases, Team Norms) and
 ask which to update. Re-ask only the questions for those sections (Q1-Q3 for
 Issue Tracker, Q4-Q6 for Roadmap and Phases, Q7-Q9 for Team Norms), then merge
 the new answers into the existing file by replacing only those sections.
-Sections not selected are preserved verbatim from the original.
+Sections not selected are preserved verbatim from the original. Any content in
+the file that does not correspond to a template section (e.g., manually added
+sections) must also be preserved verbatim — do not discard unrecognized content.
 
 **If the user chooses (b):**
 
 Proceed through the full interview below. Write the file only after all
-questions are answered. If the user abandons before completing, do not write
-anything and tell the user: "Interview not completed. The original file is
-unchanged."
+questions are answered. The interview is considered abandoned if the user
+explicitly says to stop (e.g., "stop", "cancel", "never mind", "let's come
+back to this") or leaves the conversation without completing the Write section.
+If abandoned, do not write anything and tell the user: "Interview not
+completed. The original file is unchanged."
 
 ## Process
 

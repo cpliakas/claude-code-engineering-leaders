@@ -54,18 +54,24 @@ name, tech stack, current phase) and ask:
 
 Show the list of sections in the existing file (Project Overview, Tech Stack,
 Team, Key Constraints) and ask: "Which sections would you like to update?"
-Re-ask only the questions that correspond to the sections they name (Q1-Q2 for
-Project Overview, Q3 for Tech Stack, Q4-Q5 for Team, Q7 for Key Constraints),
-then merge the new answers into the existing file by replacing only those
-sections. Sections not selected are preserved verbatim from the original. Write
-the merged file and track: `context_written = true`.
+Re-ask only the questions that correspond to the sections they name (Q1, Q2,
+and Q6 for Project Overview; Q3 for Tech Stack; Q4 and Q5 for Team; Q7 for
+Key Constraints), then merge the new answers into the existing file by
+replacing only those sections. Sections not selected are preserved verbatim
+from the original. Any content in the file that does not correspond to a
+template section (e.g., manually added sections) must also be preserved
+verbatim — do not discard unrecognized content. Write the merged file and
+track: `context_written = true`.
 
 **If the user chooses (b):**
 
 Proceed to Step 2. Write the file only after the full interview completes in
-Step 3. If the user abandons the interview before Step 3, do not write
+Step 3. The interview is considered abandoned if the user explicitly says to
+stop (e.g., "stop", "cancel", "never mind", "let's come back to this") or
+leaves the conversation without completing Step 3. If abandoned, do not write
 anything and tell the user: "Interview not completed. The original file is
-unchanged." Track: `context_written = true` only if the file was actually written.
+unchanged." Track: `context_written = true` only if the file was actually
+written.
 
 **If the user chooses (c):**
 
@@ -237,10 +243,10 @@ Present a summary based on what actually happened in this run.
 **Specialists:**
 
 - If all registrations succeeded: "Specialists registered: [N]"
-- If some failed:
+- If some failed (including if all failed):
 
   ```
-  Specialists registered: [N succeeded of N total requested]
+  Specialists: [N succeeded of N total requested] registered
 
   Failed registrations — complete these manually with /add-specialist:
     - [agent-name]: [reason — not found, cancelled, etc.]
