@@ -26,13 +26,16 @@ Without leadership context, implementation agents optimize for technical complet
 │  product-owner · chief-architect · tech-lead         │
 │  qa-lead · devops-lead · agile-coach · EM · UX       │
 └────────────────────────┬────────────────────────────┘
-                         │ advisory output:
-                         │ stories, ADRs, test strategies,
-                         │ pipeline designs, runbooks
+                         │ tech-lead orchestrates:
+                         │ reads the implementation plan,
+                         │ consults the specialist routing
+                         │ table, and engages the right
+                         │ agents for each domain
                          ▼
 ┌─────────────────────────────────────────────────────┐
 │  Implementation Layer (other plugins / agents)       │
-│  Executes the plan                                   │
+│  Executes the plan — specialists engaged by          │
+│  tech-lead based on code area and signal matching    │
 │                                                      │
 │  backend-developer · terraform-engineer              │
 │  test-automator · docker-expert · react-specialist   │
