@@ -49,20 +49,28 @@ Establish the retrospective's scope and framing:
 
 ### 4. Gather Specialist Input
 
-Consult the `tech-lead` agent to identify which domain specialists should
-contribute observations about the retrospected body of work. Provide the Tech
-Lead with the work summary from Step 3.
+Gather specialist input using the Tech Lead's two-phase consultation protocol.
 
-The Tech Lead will:
+**Phase 1 — Get consultation requests:** Invoke the `tech-lead` agent with the
+work summary from Step 3. Ask it to identify which specialists should contribute
+observations about the retrospected body of work.
 
-1. Map the delivered work and themes to its Specialist Routing Table
-2. Spawn sub-agent consultations with relevant specialists
-3. Return domain-specific observations, convention adherence trends, and
-   emerging patterns
+The Tech Lead will return a structured set of **consultation requests**: one per
+matched specialist, each containing an agent name and a focused prompt.
 
-Incorporate the specialist observations into Step 5 alongside other data
-sources. If the Tech Lead's routing table is not yet configured for this
-project, skip this step and note that specialist input was not gathered.
+**Execute consultations:** For each consultation request the Tech Lead returned,
+spawn the specified specialist agent with the provided prompt. Run independent
+consultations in parallel.
+
+**Phase 2 — Synthesize:** Invoke the `tech-lead` agent again, passing the
+original work summary plus the verbatim specialist responses. The Tech Lead will
+synthesize the specialist input into domain-specific observations, convention
+adherence trends, and emerging patterns.
+
+Incorporate the synthesized specialist observations into Step 5 alongside other
+data sources. If the Tech Lead's routing table is not yet configured for this
+project, the Tech Lead will produce output directly without consultation
+requests: skip the execute and Phase 2 steps and use its output as-is.
 
 ### 5. Gather Data
 

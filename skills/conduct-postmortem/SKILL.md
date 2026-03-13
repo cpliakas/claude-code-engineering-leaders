@@ -68,20 +68,28 @@ Where `<slug>` is a short, hyphenated description of the incident (e.g.,
 
 ## Step 3 — Gather Specialist Input
 
-Consult the `tech-lead` agent to identify which domain specialists should
-contribute to the incident analysis. Provide the Tech Lead with the incident
-description and the affected systems identified in Step 1.
+Gather specialist input using the Tech Lead's two-phase consultation protocol.
 
-The Tech Lead will:
+**Phase 1 — Get consultation requests:** Invoke the `tech-lead` agent with the
+incident description and affected systems from Step 1. Ask it to identify which
+specialists should contribute to the incident analysis.
 
-1. Map affected systems to its Specialist Routing Table
-2. Spawn sub-agent consultations with relevant specialists
-3. Return domain-specific contributing factors, convention violations, and
-   systemic improvement recommendations
+The Tech Lead will return a structured set of **consultation requests**: one per
+matched specialist, each containing an agent name and a focused prompt.
 
-Incorporate the specialist input into the analysis in Step 4. If the Tech Lead's
-routing table is not yet configured for this project, skip this step and note
-that specialist input was not gathered.
+**Execute consultations:** For each consultation request the Tech Lead returned,
+spawn the specified specialist agent with the provided prompt. Run independent
+consultations in parallel.
+
+**Phase 2 — Synthesize:** Invoke the `tech-lead` agent again, passing the
+original incident context plus the verbatim specialist responses. The Tech Lead
+will synthesize the specialist input into domain-specific contributing factors,
+convention violations, and systemic improvement recommendations.
+
+Incorporate the synthesized specialist input into the analysis in Step 4. If the
+Tech Lead's routing table is not yet configured for this project, it will
+produce output directly without consultation requests: skip the execute and
+Phase 2 steps and use its output as-is.
 
 ## Step 4 — Analyze the Incident
 
