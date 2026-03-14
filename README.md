@@ -135,7 +135,7 @@ The `engineering-manager` invokes `/analyze-code-churn` scoped to the payments m
 
 **Action:**
 
-> `@agents/tech-lead Work with me to plan this issue.`
+> `@agents/tech-lead Plan the implementation for this refined story.`
 
 The **Tech Lead** agent decomposed the problem, identified which domains were involved, and routed consultations to two specialists in parallel:
 
