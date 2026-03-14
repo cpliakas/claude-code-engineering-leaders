@@ -87,6 +87,27 @@ The `product-owner` checks the enhancement against the current roadmap phase, ve
 
 ---
 
+### Plan Implementation for a Refined Story with the Tech Lead
+
+**Scenario:** You need to implement a refined story for hook-based state detection in a pipeline orchestrator. Instead of jumping straight to code, you ask the Tech Lead to plan the work.
+
+**Action:**
+
+> `@agents/tech-lead Plan the implementation for this refined story.`
+
+**In a real-world situation,** the **Tech Lead** agent decomposed the problem, identified which domains were involved, and routed consultations to two specialists in parallel:
+
+- **Claude Code Hooks Expert**, a custom subagent defined in the project's `.claude/agents/` directory, specializing in hook event semantics and lifecycle ordering
+- **Golang Pro** from the [Voltagent plugin](https://github.com/VoltAgent/awesome-claude-code-subagents), a language specialist for idiomatic Go implementation, concurrency safety, and test patterns
+
+The two specialists returned conflicting recommendations. The hooks expert argued that `PreToolUse` should cancel the idle timer *and* transition state, because long-running tools (30+ second builds) can cause spurious "idle" transitions on the dashboard. The Go specialist argued for timer cancellation only, keeping state transitions in `PostToolUse` to avoid duplicate events in the log.
+
+The Tech Lead resolved the disagreement by siding with the hooks expert on the core question (the safety argument was stronger) while incorporating the Go specialist's concern by adding a guard: only emit a state-change event if the stage actually changed. Both specialists were right about different aspects of the problem.
+
+**Impact:** Without this orchestration layer, the AI would have picked one approach and missed the other's constraint, producing code with either **a timing bug that causes spurious state transitions** or **an event log polluted with duplicate entries**. The Tech Lead caught both issues before a single line of code was written.
+
+---
+
 ### Run a Post-Mortem with the DevOps Lead
 
 **Scenario:** The v2.4.0 release caused a spike in 500 errors on the checkout flow and had to be rolled back within 20 minutes.
@@ -126,27 +147,6 @@ The `agile-coach` invokes `/facilitate-retrospective` with the sprint summary, p
 The `engineering-manager` invokes `/analyze-code-churn` scoped to the payments module, classifies the changes by type (feature additions, defect fixes, rework cycles), and identifies hotspot files by severity. If it finds thrashing or temporal coupling signals, it produces structured tech debt proposals with supporting evidence and routes them to `product-owner` for priority review. When the churn reveals a convention or ownership gap, it flags the `tech-lead`, who then engages the appropriate domain specialist to file targeted tech debt stories.
 
 **Impact:** A gut feeling about a hotspot becomes an evidence-based tech debt proposal routed to the right agents for prioritization and action.
-
----
-
-### Plan Implementation for a Refined Story with the Tech Lead
-
-**Scenario:** You need to implement a refined story for hook-based state detection in a pipeline orchestrator. Instead of jumping straight to code, you ask the Tech Lead to plan the work.
-
-**Action:**
-
-> `@agents/tech-lead Plan the implementation for this refined story.`
-
-**In a real-world situation,** the **Tech Lead** agent decomposed the problem, identified which domains were involved, and routed consultations to two specialists in parallel:
-
-- **Claude Code Hooks Expert**, a custom subagent defined in the project's `.claude/agents/` directory, specializing in hook event semantics and lifecycle ordering
-- **Golang Pro** from the [Voltagent plugin](https://github.com/VoltAgent/awesome-claude-code-subagents), a language specialist for idiomatic Go implementation, concurrency safety, and test patterns
-
-The two specialists returned conflicting recommendations. The hooks expert argued that `PreToolUse` should cancel the idle timer *and* transition state, because long-running tools (30+ second builds) can cause spurious "idle" transitions on the dashboard. The Go specialist argued for timer cancellation only, keeping state transitions in `PostToolUse` to avoid duplicate events in the log.
-
-The Tech Lead resolved the disagreement by siding with the hooks expert on the core question (the safety argument was stronger) while incorporating the Go specialist's concern by adding a guard: only emit a state-change event if the stage actually changed. Both specialists were right about different aspects of the problem.
-
-**Impact:** Without this orchestration layer, the AI would have picked one approach and missed the other's constraint, producing code with either **a timing bug that causes spurious state transitions** or **an event log polluted with duplicate entries**. The Tech Lead caught both issues before a single line of code was written.
 
 ---
 
