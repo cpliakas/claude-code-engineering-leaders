@@ -113,6 +113,25 @@ The `engineering-manager` invokes `/analyze-code-churn` scoped to the payments m
 
 ---
 
+### Resolve a Specialist Disagreement with the Tech Lead
+
+**Scenario:** You need to implement a refined story for hook-based state detection in a pipeline orchestrator. Instead of jumping straight to code, you ask the Tech Lead to plan the work.
+
+> `@tech-lead Work with me to plan this issue.`
+
+The **Tech Lead** agent decomposed the problem, identified which domains were involved, and routed consultations to two specialists in parallel:
+
+- **Claude Code Hooks Expert**, a custom subagent defined in the project's `.claude/agents/` directory, specializing in hook event semantics and lifecycle ordering
+- **Golang Pro** from the [Voltagent plugin](https://github.com/VoltAgent/awesome-claude-code-subagents), a language specialist for idiomatic Go implementation, concurrency safety, and test patterns
+
+The two specialists returned conflicting recommendations. The hooks expert argued that `PreToolUse` should cancel the idle timer *and* transition state, because long-running tools (30+ second builds) can cause spurious "idle" transitions on the dashboard. The Go specialist argued for timer cancellation only, keeping state transitions in `PostToolUse` to avoid duplicate events in the log.
+
+The Tech Lead resolved the disagreement by siding with the hooks expert on the core question (the safety argument was stronger) while incorporating the Go specialist's concern by adding a guard: only emit a state-change event if the stage actually changed. Both specialists were right about different aspects of the problem.
+
+Without this orchestration layer, the AI would have picked one approach and missed the other's constraint, producing code with either **a timing bug that causes spurious state transitions** or **an event log polluted with duplicate entries**. The Tech Lead caught both issues before a single line of code was written.
+
+---
+
 ### Per-Agent Setup
 
 After running `/onboard`, configure individual agents with their own onboarding skills for deeper project-specific context:
