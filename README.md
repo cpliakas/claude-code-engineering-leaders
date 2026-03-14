@@ -77,9 +77,13 @@ These examples show real prompts for common engineering leadership workflows. Ea
 
 **Scenario:** You have an idea for adding CSV export to the audit log UI and want to validate scope and priority before writing the story.
 
+**Action:**
+
 > `@agents/product-owner Can you help me refine an enhancement? We want to add CSV export to the audit log page so compliance teams can pull reports without needing database access. Does this fit the current phase, and can you write a story for it?`
 
 The `product-owner` checks the enhancement against the current roadmap phase, verifies that the audit log data layer is in place as a prerequisite, and either proceeds or recommends deferral with rationale. When ready, it authors a user story via `/write-story`, triggers an inline INVEST review from `agile-coach`, and presents a polished story with sequencing advice. If the export format decision touches a one-way door (schema or API contract), it recommends looping in `chief-architect` before the story enters the sprint.
+
+**Impact:** A vague feature idea becomes a prioritized, INVEST-validated story with sequencing advice and architectural guardrails before any code is written.
 
 ---
 
@@ -87,9 +91,13 @@ The `product-owner` checks the enhancement against the current roadmap phase, ve
 
 **Scenario:** The v2.4.0 release caused a spike in 500 errors on the checkout flow and had to be rolled back within 20 minutes.
 
+**Action:**
+
 > `@agents/devops-lead The v2.4.0 release we pushed on Tuesday caused 500 errors on the checkout flow and we had to roll back. Can you run a blameless post-mortem?`
 
 The `devops-lead` invokes `/conduct-postmortem` with the incident description, producing a structured document covering what happened, the contributing factors, the response timeline, and concrete action items. It applies rollback-first doctrine to evaluate whether the team's response sequence was correct, flags any monitoring or runbook gaps the incident exposed, and proposes follow-up operational improvements. If the postmortem reveals a convention or pattern gap, it flags the `tech-lead` for follow-up.
+
+**Impact:** A release failure becomes a structured postmortem with concrete action items, monitoring gap analysis, and cross-agent follow-ups instead of an ad-hoc Slack thread.
 
 ---
 
@@ -97,9 +105,13 @@ The `devops-lead` invokes `/conduct-postmortem` with the incident description, p
 
 **Scenario:** Your digital team just wrapped a sprint that included authentication, profile settings, and a first pass at role-based access control. Some stories felt too big and there were scope surprises at the end.
 
+**Action:**
+
 > `@agents/agile-coach We just wrapped the auth sprint. We shipped login, profile settings, and basic RBAC, but a few stories ran long and we had some last-minute scope surprises. Can you run a retrospective so we can figure out what worked and where we need to improve?`
 
 The `agile-coach` invokes `/facilitate-retrospective` with the sprint summary, producing a Derby-Larsen five-phase retrospective document with blameless framing. It surfaces what went well, what needs improvement (story sizing, scope boundary discipline), and generates SMART action items with clear owners. Action items that belong in the backlog are handed off to `product-owner` for sequencing, so nothing falls through the cracks.
+
+**Impact:** Sprint friction turns into SMART action items with owners, and backlog-worthy improvements are routed directly to the Product Owner so nothing falls through the cracks.
 
 ---
 
@@ -107,15 +119,21 @@ The `agile-coach` invokes `/facilitate-retrospective` with the sprint summary, p
 
 **Scenario:** The payments module has been touched in nearly every PR this month and you want to know whether it is a signal worth acting on.
 
+**Action:**
+
 > `@agents/engineering-manager The payments module keeps showing up in every PR. Can you run a code churn analysis and tell me if we have a hotspot problem?`
 
 The `engineering-manager` invokes `/analyze-code-churn` scoped to the payments module, classifies the changes by type (feature additions, defect fixes, rework cycles), and identifies hotspot files by severity. If it finds thrashing or temporal coupling signals, it produces structured tech debt proposals with supporting evidence and routes them to `product-owner` for priority review. When the churn reveals a convention or ownership gap, it flags the `tech-lead`, who then engages the appropriate domain specialist to file targeted tech debt stories.
+
+**Impact:** A gut feeling about a hotspot becomes an evidence-based tech debt proposal routed to the right agents for prioritization and action.
 
 ---
 
 ### Plan Implementation for a Refined Story with the Tech Lead
 
 **Scenario:** You need to implement a refined story for hook-based state detection in a pipeline orchestrator. Instead of jumping straight to code, you ask the Tech Lead to plan the work.
+
+**Action:**
 
 > `@agents/tech-lead Work with me to plan this issue.`
 
@@ -128,7 +146,7 @@ The two specialists returned conflicting recommendations. The hooks expert argue
 
 The Tech Lead resolved the disagreement by siding with the hooks expert on the core question (the safety argument was stronger) while incorporating the Go specialist's concern by adding a guard: only emit a state-change event if the stage actually changed. Both specialists were right about different aspects of the problem.
 
-Without this orchestration layer, the AI would have picked one approach and missed the other's constraint, producing code with either **a timing bug that causes spurious state transitions** or **an event log polluted with duplicate entries**. The Tech Lead caught both issues before a single line of code was written.
+**Impact:** Without this orchestration layer, the AI would have picked one approach and missed the other's constraint, producing code with either **a timing bug that causes spurious state transitions** or **an event log polluted with duplicate entries**. The Tech Lead caught both issues before a single line of code was written.
 
 ---
 
