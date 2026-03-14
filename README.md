@@ -137,7 +137,7 @@ The `engineering-manager` invokes `/analyze-code-churn` scoped to the payments m
 
 > `@agents/tech-lead Plan the implementation for this refined story.`
 
-The **Tech Lead** agent decomposed the problem, identified which domains were involved, and routed consultations to two specialists in parallel:
+**In a real-world situation,** the **Tech Lead** agent decomposed the problem, identified which domains were involved, and routed consultations to two specialists in parallel:
 
 - **Claude Code Hooks Expert**, a custom subagent defined in the project's `.claude/agents/` directory, specializing in hook event semantics and lifecycle ordering
 - **Golang Pro** from the [Voltagent plugin](https://github.com/VoltAgent/awesome-claude-code-subagents), a language specialist for idiomatic Go implementation, concurrency safety, and test patterns
