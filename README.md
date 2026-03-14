@@ -15,59 +15,7 @@ The Claude Code ecosystem has excellent implementation-focused agent collections
 
 Engineering Leaders fills a different role. Those collections provide agents that write code and enforce execution discipline. This plugin provides advisory agents that ensure the right work gets built the right way before implementation begins.
 
-Without leadership context, implementation agents optimize for technical completeness rather than business fit. They may reach for distributed systems when a monolith would serve the project better, introduce patterns a small team cannot maintain, or apply architectural sophistication that outpaces what the project actually needs. These are the ivory tower failure modes: technically impressive, but misaligned with business constraints. Engineering Leaders counters this by ensuring stories are right-sized, architectural decisions are grounded in explicit trade-offs, and technical choices are made with awareness of the team's capacity and the project's current phase. The goal is not the most elegant solution: it is the right solution at the right time, delivered consistently.
-
-```
-┌─────────────────────────────────────────────────────┐
-│  Leadership Layer (this plugin)                      │
-│  Refines human intent into implementation-ready      │
-│  artifacts                                           │
-│                                                      │
-│  product-owner · chief-architect · tech-lead         │
-│  qa-lead · devops-lead · agile-coach · EM · UX       │
-└────────────────────────┬────────────────────────────┘
-                         │ tech-lead orchestrates:
-                         │ reads the implementation plan,
-                         │ consults the specialist routing
-                         │ table, and engages the right
-                         │ agents for each domain
-                         ▼
-┌─────────────────────────────────────────────────────┐
-│  Implementation Layer (other plugins / agents)       │
-│  Executes the plan — specialists engaged by          │
-│  tech-lead based on code area and signal matching    │
-│                                                      │
-│  backend-developer · terraform-engineer              │
-│  test-automator · docker-expert · react-specialist   │
-└─────────────────────────────────────────────────────┘
-```
-
-## Quick Start
-
-Add the marketplace to your Claude Code project, then install the plugin:
-
-```
-/plugin marketplace add cpliakas/claude-code-engineering-leaders
-/plugin install engineering-leaders
-```
-
-## Setting Up for Your Project
-
-After installation, run the onboarding skill to configure the plugin for your specific project:
-
-```
-/onboard
-```
-
-This runs a guided interview — one question at a time — that captures the context every agent needs to give you useful, project-specific advice rather than generic guidance. It covers:
-
-- **Project overview:** what you're building, your business domain, current phase
-- **Tech stack:** languages, frameworks, key infrastructure
-- **Team:** size, disciplines, SDLC process
-- **Key constraints:** compliance, performance targets, architectural boundaries
-- **Specialist agents:** any domain specialists from other plugins the Tech Lead should route to during implementation planning
-
-Onboarding writes to `.claude/agent-memory/engineering-leaders/PROJECT.md` — a shared context file that all eight agents read automatically.
+Without leadership context, implementation agents optimize for technical completeness rather than business fit, and they can miss cross-cutting concerns that only surface when multiple specialists weigh in. Engineering Leaders counters both problems: it right-sizes stories, grounds architectural decisions in explicit trade-offs, and orchestrates specialist input so that implementation plans account for timing bugs, concurrency hazards, and convention gaps before code is written. The goal is the right solution at the right time, delivered at high quality.
 
 ## Working Examples
 
@@ -150,6 +98,33 @@ The `engineering-manager` invokes `/analyze-code-churn` scoped to the payments m
 
 ---
 
+## Quick Start
+
+Add the marketplace to your Claude Code project, then install the plugin:
+
+```
+/plugin marketplace add cpliakas/claude-code-engineering-leaders
+/plugin install engineering-leaders
+```
+
+## Setting Up for Your Project
+
+After installation, run the onboarding skill to configure the plugin for your specific project:
+
+```
+/onboard
+```
+
+This runs a guided interview — one question at a time — that captures the context every agent needs to give you useful, project-specific advice rather than generic guidance. It covers:
+
+- **Project overview:** what you're building, your business domain, current phase
+- **Tech stack:** languages, frameworks, key infrastructure
+- **Team:** size, disciplines, SDLC process
+- **Key constraints:** compliance, performance targets, architectural boundaries
+- **Specialist agents:** any domain specialists from other plugins the Tech Lead should route to during implementation planning
+
+Onboarding writes to `.claude/agent-memory/engineering-leaders/PROJECT.md` — a shared context file that all eight agents read automatically.
+
 ### Per-Agent Setup
 
 After running `/onboard`, configure individual agents with their own onboarding skills for deeper project-specific context:
@@ -203,6 +178,45 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 ### Agent Hierarchy
 
 Agents form a digital leadership team with clear delegation chains. The `tech-lead` acts as tactical orchestrator during implementation, routing to domain specialists as needed. Strategic agents like `chief-architect` and `product-owner` set direction, while operational agents like `devops-lead`, `qa-lead`, and `engineering-manager` govern their respective domains.
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    Leadership Layer                      │
+│                    (this plugin)                         │
+│                                                          │
+│  ┌───────────────┐  ┌───────────────┐  ┌──────────────┐  │
+│  │  Strategy     │  │  Operations   │  │  Process     │  │
+│  │               │  │               │  │              │  │
+│  │  product-     │  │  devops-lead  │  │  agile-coach │  │
+│  │  owner        │  │  qa-lead      │  │              │  │
+│  │  chief-       │  │  engineering- │  │              │  │
+│  │  architect    │  │  manager      │  │              │  │
+│  │  ux-          │  │               │  │              │  │
+│  │  strategist   │  │               │  │              │  │
+│  └───────┬───────┘  └───────┬───────┘  └──────┬───────┘  │
+│          │                  │                 │          │
+│          └──────────┬───────┘─────────────────┘          │
+│                     │                                    │
+│              ┌──────┴───────┐                            │
+│              │  tech-lead   │  Tactical orchestrator     │
+│              │              │  Routes to specialists,    │
+│              │              │  synthesizes input,        │
+│              │              │  owns conventions          │
+│              └──────┬───────┘                            │
+└─────────────────────┼────────────────────────────────────┘
+                      │
+                      ▼
+┌──────────────────────────────────────────────────────────┐
+│                 Implementation Layer                     │
+│                 (other plugins / agents)                 │
+│                                                          │
+│  Specialists engaged by tech-lead based on               │
+│  code area and signal matching                           │
+│                                                          │
+│  backend-dev · terraform-engineer · test-automator       │
+│  docker-expert · react-specialist · golang-pro · ...     │
+└──────────────────────────────────────────────────────────┘
+```
 
 ### Handoff Patterns
 
