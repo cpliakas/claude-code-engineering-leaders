@@ -1,6 +1,6 @@
 # Engineering Leaders
 
-A Claude Code plugin that provides the **leadership layer** for AI-assisted development. While most agent plugins focus on writing code, this one focuses on what happens *before and after* code gets written: refining requirements, structuring technical decisions, governing delivery, and surfacing systemic issues.
+A Claude Code plugin that provides the **leadership layer** for AI-assisted development. While most agent plugins focus on writing code, this one focuses on what happens *before and after* code gets written: [refining requirements](#refine-a-feature-with-the-product-owner), [structuring technical decisions](#plan-implementation-for-a-refined-story-with-the-tech-lead), [governing delivery](#run-a-post-mortem-with-the-devops-lead), and [surfacing systemic issues](#scan-code-churn-then-route-tech-debt-through-the-tech-lead).
 
 Humans decide what to build and why. These agents help refine that intent into artifacts that are ready for implementation.
 
@@ -77,7 +77,7 @@ These examples show real prompts for common engineering leadership workflows. Ea
 
 **Scenario:** You have an idea for adding CSV export to the audit log UI and want to validate scope and priority before writing the story.
 
-> `@product-owner Can you help me refine an enhancement? We want to add CSV export to the audit log page so compliance teams can pull reports without needing database access. Does this fit the current phase, and can you write a story for it?`
+> `@agents/product-owner Can you help me refine an enhancement? We want to add CSV export to the audit log page so compliance teams can pull reports without needing database access. Does this fit the current phase, and can you write a story for it?`
 
 The `product-owner` checks the enhancement against the current roadmap phase, verifies that the audit log data layer is in place as a prerequisite, and either proceeds or recommends deferral with rationale. When ready, it authors a user story via `/write-story`, triggers an inline INVEST review from `agile-coach`, and presents a polished story with sequencing advice. If the export format decision touches a one-way door (schema or API contract), it recommends looping in `chief-architect` before the story enters the sprint.
 
@@ -87,7 +87,7 @@ The `product-owner` checks the enhancement against the current roadmap phase, ve
 
 **Scenario:** The v2.4.0 release caused a spike in 500 errors on the checkout flow and had to be rolled back within 20 minutes.
 
-> `@devops-lead The v2.4.0 release we pushed on Tuesday caused 500 errors on the checkout flow and we had to roll back. Can you run a blameless post-mortem?`
+> `@agents/devops-lead The v2.4.0 release we pushed on Tuesday caused 500 errors on the checkout flow and we had to roll back. Can you run a blameless post-mortem?`
 
 The `devops-lead` invokes `/conduct-postmortem` with the incident description, producing a structured document covering what happened, the contributing factors, the response timeline, and concrete action items. It applies rollback-first doctrine to evaluate whether the team's response sequence was correct, flags any monitoring or runbook gaps the incident exposed, and proposes follow-up operational improvements. If the postmortem reveals a convention or pattern gap, it flags the `tech-lead` for follow-up.
 
@@ -97,7 +97,7 @@ The `devops-lead` invokes `/conduct-postmortem` with the incident description, p
 
 **Scenario:** Your digital team just wrapped a sprint that included authentication, profile settings, and a first pass at role-based access control. Some stories felt too big and there were scope surprises at the end.
 
-> `@agile-coach We just wrapped the auth sprint. We shipped login, profile settings, and basic RBAC, but a few stories ran long and we had some last-minute scope surprises. Can you run a retrospective so we can figure out what worked and where we need to improve?`
+> `@agents/agile-coach We just wrapped the auth sprint. We shipped login, profile settings, and basic RBAC, but a few stories ran long and we had some last-minute scope surprises. Can you run a retrospective so we can figure out what worked and where we need to improve?`
 
 The `agile-coach` invokes `/facilitate-retrospective` with the sprint summary, producing a Derby-Larsen five-phase retrospective document with blameless framing. It surfaces what went well, what needs improvement (story sizing, scope boundary discipline), and generates SMART action items with clear owners. Action items that belong in the backlog are handed off to `product-owner` for sequencing, so nothing falls through the cracks.
 
@@ -107,17 +107,17 @@ The `agile-coach` invokes `/facilitate-retrospective` with the sprint summary, p
 
 **Scenario:** The payments module has been touched in nearly every PR this month and you want to know whether it is a signal worth acting on.
 
-> `@engineering-manager The payments module keeps showing up in every PR. Can you run a code churn analysis and tell me if we have a hotspot problem?`
+> `@agents/engineering-manager The payments module keeps showing up in every PR. Can you run a code churn analysis and tell me if we have a hotspot problem?`
 
 The `engineering-manager` invokes `/analyze-code-churn` scoped to the payments module, classifies the changes by type (feature additions, defect fixes, rework cycles), and identifies hotspot files by severity. If it finds thrashing or temporal coupling signals, it produces structured tech debt proposals with supporting evidence and routes them to `product-owner` for priority review. When the churn reveals a convention or ownership gap, it flags the `tech-lead`, who then engages the appropriate domain specialist to file targeted tech debt stories.
 
 ---
 
-### Resolve a Specialist Disagreement with the Tech Lead
+### Plan Implementation for a Refined Story with the Tech Lead
 
 **Scenario:** You need to implement a refined story for hook-based state detection in a pipeline orchestrator. Instead of jumping straight to code, you ask the Tech Lead to plan the work.
 
-> `@tech-lead Work with me to plan this issue.`
+> `@agents/tech-lead Work with me to plan this issue.`
 
 The **Tech Lead** agent decomposed the problem, identified which domains were involved, and routed consultations to two specialists in parallel:
 
