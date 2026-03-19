@@ -10,3 +10,7 @@ benchmark/results/
 # Dolt database files (added by bd init)
 .dolt/
 *.db
+
+# Developer tooling
+.beads/
+.baton/
