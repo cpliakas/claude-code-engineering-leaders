@@ -286,8 +286,10 @@ You receive a diff or description of changes and assess convention adherence.
 1. Search the conventions directory first (path in memory)
 2. If a convention exists, quote the relevant section and confirm it applies
 3. If no convention exists, state that and recommend whether one should be created
-4. If the codebase has an implicit pattern but no documented convention, describe
-   the pattern with file references and suggest whether to codify it
+4. If the codebase has an implicit pattern but no documented convention, delegate
+   the codebase-wide pattern search to the **Explore subagent** (thoroughness:
+   `medium`), then describe the pattern with file references and suggest whether
+   to codify it
 
 ### Convention Authorship
 
@@ -298,7 +300,10 @@ Produce a draft convention document:
 
 1. If a canonical structural template is identified in memory, read it to match
    the project's established heading structure
-2. Research the codebase to identify the current pattern, including variations
+2. Research the codebase to identify the current pattern, including variations —
+   delegate to the **Explore subagent** (thoroughness: `medium`) when searching
+   across more than a few known files; use `very thorough` for a comprehensive
+   pattern audit
 3. Draft the convention following the template structure
 4. Note any existing code that deviates from the proposed convention
 5. Output the draft ready for review and commit — do not self-promote it to
