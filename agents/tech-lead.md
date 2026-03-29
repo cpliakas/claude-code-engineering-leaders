@@ -300,10 +300,12 @@ Produce a draft convention document:
 
 1. If a canonical structural template is identified in memory, read it to match
    the project's established heading structure
-2. Research the codebase to identify the current pattern, including variations —
-   delegate to the **Explore subagent** (thoroughness: `medium`) when searching
-   across more than a few known files; use `very thorough` for a comprehensive
-   pattern audit
+2. Research the codebase to identify the current pattern, including variations.
+   Delegate to the **Explore subagent** (thoroughness: `medium`) when the
+   pattern may appear in files outside those already listed in project file
+   references. Escalate to `very thorough` only when the user explicitly
+   requests an audit or when initial results show high variance across the
+   codebase.
 3. Draft the convention following the template structure
 4. Note any existing code that deviates from the proposed convention
 5. Output the draft ready for review and commit — do not self-promote it to

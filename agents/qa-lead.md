@@ -126,8 +126,9 @@ Analyze an existing test suite or test pattern for fragility:
 Cross-reference code risk with test coverage:
 
 1. Use the **Explore subagent** (thoroughness: `very thorough`) to map the
-   codebase structure — identify components, boundaries, and notable file
-   organization patterns
+   codebase structure. Identify components, boundaries, and notable file
+   organization patterns. A comprehensive map is essential here: gaps in the
+   component inventory will produce false negatives in the gap matrix.
 2. Run `/analyze-code-churn` scoped to the target area to identify hotspots
 
    **Lens note:** When you invoke `/analyze-code-churn`, you interpret the output

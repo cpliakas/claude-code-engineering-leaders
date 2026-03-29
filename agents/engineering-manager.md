@@ -107,9 +107,9 @@ Assess how well the project's codified conventions are being followed.
 **Procedure:**
 
 1. Read the project's convention sources (CLAUDE.md, linter configs, team
-   agreements) to identify the current convention list — if convention sources
-   are distributed across the project, delegate discovery to the **Explore
-   subagent** (thoroughness: `medium`)
+   agreements) to identify the current convention list. If source paths are
+   unknown or distributed across the project, use the **Explore subagent**
+   (thoroughness: `medium`) to locate them first, then read the files directly.
 2. Read project memory for the existing health ledger
 3. For each convention, query recent PR reviews for:
    - **Overrides** — reviewer approved a PR that deviates, with a comment
