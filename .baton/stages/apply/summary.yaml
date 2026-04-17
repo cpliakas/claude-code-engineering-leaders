@@ -1,0 +1,37 @@
+result: pass
+reason: Implemented the /plan-implementation skill with all 20 applicable tasks complete, two PR review findings addressed, and changes committed to the feature branch.
+decisions:
+  - question: Should the Tip callout pointing to /plan-implementation be inside or outside the Phase 1 output code fence in tech-lead.md?
+    answer: Outside the code fence, as standalone prose immediately after the closing fence.
+    evidence: PR review found the Tip was accidentally placed inside the markdown code fence, which would cause it to appear verbatim in every Phase 1 response the Tech Lead emits. Moved it outside so it is reader-facing documentation, not template content.
+  - question: Should step headings in SKILL.md use em dashes (Step 1 — Name) or colons (Step 1: Name)?
+    answer: Colons, per the global feedback rule prohibiting em dashes as grammatical ties.
+    evidence: PR review identified 11 em dashes in SKILL.md step headings and bullet items violating the user's stated preference. All replaced with colons or restructured sentences.
+  - question: Should the SKILL.md description use a YAML folded scalar or a quoted inline string?
+    answer: Quoted inline string, to match the convention used by every other skill in the fleet.
+    evidence: PR review non-blocking observation; changed during the rewrite that fixed em dashes.
+  - question: Should the tasks 5.2-5.4 (live validation runs) be marked complete?
+    answer: No. These are live execution steps requiring real specialist agents registered in a routing table, which are not available in this authoring environment.
+    evidence: Tasks 5.2-5.4 require running the skill against a project with a populated routing table and observing real specialist responses; they are marked incomplete per honest task tracking.
+files_read:
+  - agents/tech-lead.md
+  - openspec/changes/plan-implementation-skill/design.md
+  - openspec/changes/plan-implementation-skill/tasks.md
+  - README.md
+  - skills/conduct-postmortem/SKILL.md
+  - skills/facilitate-retrospective/SKILL.md
+  - .claude-plugin/marketplace.json
+files_changed:
+  - agents/tech-lead.md
+  - skills/plan-implementation/SKILL.md
+  - skills/plan-implementation/test-fixtures/README.md
+  - skills/plan-implementation/test-fixtures/story-no-specialists.md
+  - skills/plan-implementation/test-fixtures/story-parse-failure.md
+  - skills/plan-implementation/test-fixtures/story-slug-missing.md
+  - skills/plan-implementation/test-fixtures/story-specialist-empty.md
+  - skills/plan-implementation/test-fixtures/story-all-specialists-missing.md
+  - skills/plan-implementation/test-fixtures/story-happy-path.md
+  - README.md
+  - .claude-plugin/marketplace.json
+  - openspec/changes/plan-implementation-skill/tasks.md
+browser_tested: false

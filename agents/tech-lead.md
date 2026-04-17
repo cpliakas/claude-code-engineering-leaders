@@ -148,6 +148,29 @@ Spawn the consultation requests above as sub-agents in parallel, then invoke me
 again with the specialist responses to produce the final synthesis.
 ```
 
+> **Tip:** Instead of manually executing both phases, use the
+> `/plan-implementation` skill. It drives Phase 1, spawns specialists in
+> parallel, and invokes Phase 2 synthesis automatically without manual
+> orchestration.
+
+#### Parseable Phase 1 Output Contract
+
+The `/plan-implementation` skill parses Phase 1 output programmatically. The
+following anchors are the **stable parsing contract**. Do not change their
+exact shape without updating the skill:
+
+- `## Consultation Requests` heading: marks the start of the specialist list
+- `### [Specialist Agent Name]`: a level-3 heading for each specialist
+- `**Agent:** \`[agent-name]\``: agent slug, backtick-quoted, on its own line
+- `**Prompt:**`: on its own line, immediately followed by a blockquote (lines
+  prefixed with `> `) containing the full prompt for that specialist
+- `## Next Step` heading: signals end of consultation requests; used as a
+  stop anchor during parsing
+
+When Phase 1 returns zero consultation requests (section absent, empty, or
+notes "No routing table matches for this issue"), the skill treats Phase 1
+output as the final plan and skips Phase 2.
+
 If no specialists match the routing table, skip Phase 2 and produce the final
 output directly (using the synthesis format below) with the Specialist
 Consultations section noting "No routing table matches for this issue."

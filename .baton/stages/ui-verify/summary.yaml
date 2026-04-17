@@ -1,0 +1,12 @@
+result: skipped
+reason: No browser-observable behavior found in specs; the change is a pure CLI skill with no HTML, HTMX, JavaScript, CSS, or WebSocket components.
+decisions:
+  - question: Does the plan-implementation-skill change require UI verification?
+    answer: No — it is a CLI skill that orchestrates agents via the Skill tool with no rendered output.
+    evidence: The single spec file (openspec/changes/plan-implementation-skill/specs/plan-implementation-skill.md) describes agent invocation, markdown parsing, and sub-agent fan-out with no mention of HTML templates, HTMX, JavaScript, CSS, or WebSocket events.
+files_read:
+  - openspec/changes/plan-implementation-skill/specs/plan-implementation-skill.md
+files_changed:
+  - openspec/changes/plan-implementation-skill/ui-verify.md
+  - .baton/stages/ui-verify/summary.yaml
+browser_tested: false

@@ -161,6 +161,7 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Skill | `/write-runbook`           | Generate a structured operational runbook for incident response or maintenance             |
 | Skill | `/plan-test-strategy`      | Produce a test strategy with highest-impact tests by type and layer                        |
 | Skill | `/analyze-code-churn`      | Analyze code churn and thrash patterns with hotspot detection and rework classification    |
+| Skill | `/plan-implementation`     | Drive the Tech Lead's two-phase consultation end-to-end: routing, specialist fan-out, and synthesis |
 
 ## Architecture
 
@@ -280,7 +281,10 @@ claude-code-engineering-leaders/
     ├── write-adr/SKILL.md
     ├── write-runbook/SKILL.md
     ├── plan-test-strategy/SKILL.md
-    └── analyze-code-churn/SKILL.md
+    ├── analyze-code-churn/SKILL.md
+    └── plan-implementation/
+        ├── SKILL.md
+        └── test-fixtures/
 ```
 
 ## License
