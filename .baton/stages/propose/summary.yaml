@@ -1,28 +1,32 @@
 result: pass
-reason: Generated OpenSpec change artifacts for the plan-implementation skill that operationalizes the Tech Lead's two-phase consultation protocol.
+reason: Proposed unify-specialist-routing change adopting Option 2 (eliminate trigger-phrase duplication) with a narrow project-local overrides table and a new audit skill.
 decisions:
-  - question: What slug should the change use?
-    answer: plan-implementation-skill
-    evidence: The issue proposes a skill named /plan-implementation; tech-lead.md:85-97 identifies "implementation planning" as the triggering response mode.
-  - question: Does the spec require a Verification Checklist (UI)?
-    answer: No
-    evidence: The skill's output is markdown returned in the conversation; it does not touch HTML templates, HTMX, JavaScript, CSS, or WebSocket events. Per task guidance, pure backend/procedural specs skip the checklist.
-  - question: Does the change require modifying the Tech Lead agent?
-    answer: Only if a Phase 1 output audit finds drift; a small "Parseable Phase 1 Output Contract" subsection is in scope but not guaranteed.
-    evidence: tech-lead.md:114-149 already emits the anchors the skill needs; proposal.md and design.md document the contract dependency and scope the audit as task 1.1 in tasks.md.
-  - question: How does the skill handle missing or empty specialist responses?
-    answer: Record a "No response received" notice in the Phase 2 input and still run synthesis so the Tech Lead can flag the gap.
-    evidence: design.md failure-modes table and specs/plan-implementation-skill.md invariants.
+  - question: Which of the three approaches in the issue should be adopted?
+    answer: Option 2 (eliminate trigger-phrase duplication and match against agent descriptions) with a thin supplementary overrides table preserved for project-local code-area signals.
+    evidence: Issue #6 scope permits one of three options. Option 2 removes duplication at the root; Option 1 keeps a derived artifact that invites hand-edits; Option 3 only surfaces drift. Per agents/tech-lead.md and skills/add-specialist/SKILL.md, the current routing table conflates trigger vocabulary (already in agent descriptions) with project-local code-area signals (genuinely project-specific), so eliminating the first and keeping the second as a narrow overrides table is the cleanest unification.
+  - question: Should the change modify agent description frontmatter schema to add routing metadata?
+    answer: No.
+    evidence: Issue #6 explicitly places this out of scope.
+  - question: How should the Phase 1 output format change?
+    answer: It should not change.
+    evidence: /plan-implementation parses Phase 1 output against the contract documented at agents/tech-lead.md:156-168. Preserving that contract keeps the skill working without changes.
+  - question: Does any spec require a UI verification checklist?
+    answer: No.
+    evidence: The spec covers Tech Lead routing behavior, memory-file structure, and skill I/O. No HTML, HTMX, JavaScript, CSS, or WebSocket output is produced.
 files_read:
+  - openspec/changes/archive/2026-04-17-plan-implementation-skill/proposal.md
+  - openspec/changes/archive/2026-04-17-plan-implementation-skill/design.md
+  - openspec/changes/archive/2026-04-17-plan-implementation-skill/tasks.md
+  - openspec/changes/archive/2026-04-17-plan-implementation-skill/specs/plan-implementation-skill.md
   - agents/tech-lead.md
-  - skills/plan-test-strategy/SKILL.md
+  - agents/qa-lead.md
+  - skills/add-specialist/SKILL.md
+  - skills/onboard/SKILL.md
   - CLAUDE.md
   - .baton/config.yaml
 files_changed:
-  - openspec/changes/plan-implementation-skill/proposal.md
-  - openspec/changes/plan-implementation-skill/design.md
-  - openspec/changes/plan-implementation-skill/tasks.md
-  - openspec/changes/plan-implementation-skill/specs/plan-implementation-skill.md
-  - .baton/openspec/propose-complete
-  - .baton/stages/propose/summary.yaml
+  - openspec/changes/unify-specialist-routing/proposal.md
+  - openspec/changes/unify-specialist-routing/design.md
+  - openspec/changes/unify-specialist-routing/tasks.md
+  - openspec/changes/unify-specialist-routing/specs/tech-lead-routing.md
 browser_tested: false
