@@ -1,37 +1,41 @@
 result: pass
-reason: Implemented the /plan-implementation skill with all 20 applicable tasks complete, two PR review findings addressed, and changes committed to the feature branch.
+reason: Implemented all 38 tasks from the unify-specialist-routing proposal, replacing the Specialist Routing Table with two narrower sections and creating the audit-routing-table skill.
 decisions:
-  - question: Should the Tip callout pointing to /plan-implementation be inside or outside the Phase 1 output code fence in tech-lead.md?
-    answer: Outside the code fence, as standalone prose immediately after the closing fence.
-    evidence: PR review found the Tip was accidentally placed inside the markdown code fence, which would cause it to appear verbatim in every Phase 1 response the Tech Lead emits. Moved it outside so it is reader-facing documentation, not template content.
-  - question: Should step headings in SKILL.md use em dashes (Step 1 — Name) or colons (Step 1: Name)?
-    answer: Colons, per the global feedback rule prohibiting em dashes as grammatical ties.
-    evidence: PR review identified 11 em dashes in SKILL.md step headings and bullet items violating the user's stated preference. All replaced with colons or restructured sentences.
-  - question: Should the SKILL.md description use a YAML folded scalar or a quoted inline string?
-    answer: Quoted inline string, to match the convention used by every other skill in the fleet.
-    evidence: PR review non-blocking observation; changed during the rewrite that fixed em dashes.
-  - question: Should the tasks 5.2-5.4 (live validation runs) be marked complete?
-    answer: No. These are live execution steps requiring real specialist agents registered in a routing table, which are not available in this authoring environment.
-    evidence: Tasks 5.2-5.4 require running the skill against a project with a populated routing table and observing real specialist responses; they are marked incomplete per honest task tracking.
+  - question: Should the existing MEMORY.md interaction-designer keyword rows be kept as overrides?
+    answer: No — they are all generic trigger vocabulary, not project-local code-area signals, so the overrides table is left empty and the agent is registered as a specialist only.
+    evidence: Design doc states "Signals should be project-local (file globs, repo-specific module names, internal terminology)"; all existing rows were generic phrases like "component state", "interaction flow".
+  - question: Should /plan-implementation also be updated to match the new Tech Lead contract?
+    answer: Yes — the PR review (task 9.1) identified that the skill still referenced the old "No routing table matches" literal, which would cause a regression on the no-specialists path.
+    evidence: PR review critical finding #1; task 7.5 requires plan-implementation regression test; Phase 1 contract string changed in tech-lead.md.
+  - question: Should audit-routing-table include Grep in allowed-tools?
+    answer: Yes — the task spec (5.1) specified Read, Glob, Grep; the initial SKILL.md omitted Grep; the PR review flagged the mismatch.
+    evidence: PR review important finding #2; tasks.md 5.1 explicitly lists Grep.
 files_read:
   - agents/tech-lead.md
-  - openspec/changes/plan-implementation-skill/design.md
-  - openspec/changes/plan-implementation-skill/tasks.md
-  - README.md
+  - skills/add-specialist/SKILL.md
+  - skills/onboard/SKILL.md
+  - skills/plan-implementation/SKILL.md
   - skills/conduct-postmortem/SKILL.md
   - skills/facilitate-retrospective/SKILL.md
+  - openspec/changes/unify-specialist-routing/design.md
+  - openspec/changes/unify-specialist-routing/tasks.md
+  - openspec/changes/unify-specialist-routing/specs/tech-lead-routing.md
+  - .claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md
   - .claude-plugin/marketplace.json
+  - README.md
+  - AGENTS.md
+  - tests/scenarios.md
 files_changed:
   - agents/tech-lead.md
+  - skills/add-specialist/SKILL.md
+  - skills/onboard/SKILL.md
   - skills/plan-implementation/SKILL.md
-  - skills/plan-implementation/test-fixtures/README.md
-  - skills/plan-implementation/test-fixtures/story-no-specialists.md
-  - skills/plan-implementation/test-fixtures/story-parse-failure.md
-  - skills/plan-implementation/test-fixtures/story-slug-missing.md
-  - skills/plan-implementation/test-fixtures/story-specialist-empty.md
-  - skills/plan-implementation/test-fixtures/story-all-specialists-missing.md
-  - skills/plan-implementation/test-fixtures/story-happy-path.md
-  - README.md
+  - skills/conduct-postmortem/SKILL.md
+  - skills/facilitate-retrospective/SKILL.md
+  - skills/audit-routing-table/SKILL.md
+  - skills/audit-routing-table/MIGRATION.md
+  - openspec/changes/unify-specialist-routing/tasks.md
   - .claude-plugin/marketplace.json
-  - openspec/changes/plan-implementation-skill/tasks.md
+  - README.md
+  - tests/scenarios.md
 browser_tested: false

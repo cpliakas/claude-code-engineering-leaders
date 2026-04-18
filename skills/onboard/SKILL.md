@@ -1,6 +1,6 @@
 ---
 name: onboard
-description: "Use when setting up the engineering-leaders plugin for the first time on a project, or when re-running onboarding to update shared project context. Gathers shared project context for all agents (one question at a time) and discovers specialist plugins for the Tech Lead routing table. Run this before per-agent onboarding skills like /onboard-product-owner."
+description: "Use when setting up the engineering-leaders plugin for the first time on a project, or when re-running onboarding to update shared project context. Gathers shared project context for all agents (one question at a time) and discovers specialist plugins for the Tech Lead to consult. Run this before per-agent onboarding skills like /onboard-product-owner."
 user-invokable: true
 argument-hint: ""
 allowed-tools: Read, Glob, Grep, Write, Bash
@@ -10,7 +10,7 @@ context: fork
 # Onboard
 
 Gather shared project context for all engineering-leaders agents and discover
-specialist plugins for the Tech Lead routing table.
+specialist plugins for the Tech Lead to consult.
 
 This skill runs a guided interview. It asks one question at a time and writes
 the results to a shared memory file that every agent in this plugin reads.
@@ -48,20 +48,25 @@ name, tech stack, current phase) and ask:
 >     when complete. If you abandon the interview before finishing, the original
 >     file is left unchanged.
 > (c) Skip to specialist discovery — skip the project context interview and go
->     straight to updating the Tech Lead routing table."
+>     straight to updating the Tech Lead specialist registry."
 
 **If the user chooses (a):**
 
 Show the list of sections in the existing file (Project Overview, Tech Stack,
-Team, Key Constraints) and ask: "Which sections would you like to update?"
-Re-ask only the questions that correspond to the sections they name (Q1, Q2,
-and Q6 for Project Overview; Q3 for Tech Stack; Q4 and Q5 for Team; Q7 for
-Key Constraints), then merge the new answers into the existing file by
-replacing only those sections. Sections not selected are preserved verbatim
-from the original. Any content in the file that does not correspond to a
-template section (e.g., manually added sections) must also be preserved
-verbatim — do not discard unrecognized content. Write the merged file and
-track: `context_written = true`.
+Team, Key Constraints, Specialists) and ask: "Which sections would you like to
+update?" Re-ask only the questions that correspond to the sections they name
+(Q1, Q2, and Q6 for Project Overview; Q3 for Tech Stack; Q4 and Q5 for Team;
+Q7 for Key Constraints; Step 4 for Specialists), then merge the new answers
+into the existing file by replacing only those sections. Sections not selected
+are preserved verbatim from the original. Any content in the file that does not
+correspond to a template section (e.g., manually added sections) must also be
+preserved verbatim — do not discard unrecognized content.
+
+For the Specialists section, run Step 4 (Specialist Discovery) and update the
+`## Registered Specialists` and `## Project Code Area Overrides` sections in
+`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md` accordingly.
+
+Write the merged file and track: `context_written = true`.
 
 **If the user chooses (b):**
 
@@ -191,9 +196,10 @@ not exist, then write the file. Track: `context_written = true`.
 
 Transition with:
 
-> "Now let's set up the Tech Lead's routing table. This tells the Tech Lead
-> which specialist agents to consult during implementation planning, incident
-> analysis, and retrospectives."
+> "Now let's register any specialist agents the Tech Lead should know about.
+> Specialists are consulted during implementation planning, incident analysis,
+> and retrospectives. The Tech Lead will match issues to specialists based on
+> each agent's own description — you only need to name the agents."
 
 **Q8 — Installed specialist agents**
 
@@ -206,16 +212,18 @@ Transition with:
 If none or skip: note that specialists can be added later with `/add-specialist`
 and move to Step 5.
 
-If agents are listed, for **each agent**, ask:
-
-> "What code areas or topics should route work to `[agent-name]`? You can use
-> file paths (e.g., `src/api/**`), technology keywords (e.g., `terraform`), or
-> concern keywords (e.g., `authentication`). List as many as useful."
-
-After collecting signals for all agents, invoke `/add-specialist` for each one:
+If agents are listed, invoke `/add-specialist` for each one with the agent name
+only:
 
 ```
-/add-specialist [agent-name] [signal-1] [signal-2] ...
+/add-specialist [agent-name]
+```
+
+Trigger keywords and file globs are not collected here. Users who want
+project-local code-area overrides can add them after onboarding with:
+
+```
+/add-specialist [agent-name] "src/example/**"
 ```
 
 **Note:** `/add-specialist` will verify that `agents/<agent-name>.md` exists in
@@ -262,4 +270,17 @@ The following per-agent onboarding skills are available in this plugin:
 ```
 /onboard-product-owner   — configure the Product Owner for your issue
                            tracker, backlog norms, and current phase
+```
+
+To add project-local code-area overrides for a registered specialist, or to
+register additional specialists later:
+
+```
+/add-specialist <agent-name> ["src/example/**"]
+```
+
+To verify routing health after onboarding or after adding specialists:
+
+```
+/audit-routing-table
 ```

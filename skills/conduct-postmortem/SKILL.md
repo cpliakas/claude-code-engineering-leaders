@@ -87,9 +87,9 @@ will synthesize the specialist input into domain-specific contributing factors,
 convention violations, and systemic improvement recommendations.
 
 Incorporate the synthesized specialist input into the analysis in Step 4. If the
-Tech Lead's routing table is not yet configured for this project, it will
-produce output directly without consultation requests: skip the execute and
-Phase 2 steps and use its output as-is.
+Tech Lead has no registered specialists for this project, it will produce output
+directly without consultation requests: skip the execute and Phase 2 steps and
+use its output as-is.
 
 ## Step 4 — Analyze the Incident
 

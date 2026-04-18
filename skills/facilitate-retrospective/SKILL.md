@@ -68,9 +68,9 @@ synthesize the specialist input into domain-specific observations, convention
 adherence trends, and emerging patterns.
 
 Incorporate the synthesized specialist observations into Step 5 alongside other
-data sources. If the Tech Lead's routing table is not yet configured for this
-project, the Tech Lead will produce output directly without consultation
-requests: skip the execute and Phase 2 steps and use its output as-is.
+data sources. If the Tech Lead has no registered specialists for this project,
+the Tech Lead will produce output directly without consultation requests: skip
+the execute and Phase 2 steps and use its output as-is.
 
 ### 5. Gather Data
 

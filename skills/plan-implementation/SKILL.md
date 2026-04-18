@@ -74,8 +74,9 @@ Invoke the `tech-lead` agent with the following prompt:
 
 ```
 Plan the implementation for this story. Use Phase 1 of your two-phase
-consultation protocol: assess engagement depth, match the routing table, and
-emit structured consultation requests for each matched specialist.
+consultation protocol: assess engagement depth, match registered specialists
+via description and overrides, and emit structured consultation requests for
+each matched specialist.
 
 Story:
 
@@ -97,19 +98,20 @@ agent is registered and retry /plan-implementation.
 Stop here. Do not attempt Phase 2.
 
 **No-specialists-matched path:** Check whether the response signals that no
-specialists matched the routing table. This can appear as:
+registered specialists matched. This can appear as:
 
-- The text "No routing table matches for this issue" anywhere in the response, OR
+- The text "No registered specialists matched this issue" anywhere in the
+  response, OR
 - A `## Consultation Requests` section that is present but contains zero
   level-3 specialist subsections.
 
 If either condition is met, treat the Tech Lead's output as the final plan:
 
 ```
-[NOTICE] No specialists matched the routing table for this story. The Tech
-Lead produced a direct plan without specialist consultation. This may be
-expected for stories with no domain specialist concerns. Run /onboard or
-/add-specialist if specialist coverage is unexpectedly missing.
+[NOTICE] No registered specialists matched this story. The Tech Lead produced
+a direct plan without specialist consultation. This may be expected for stories
+with no domain specialist concerns. Run /onboard or /add-specialist if
+specialist coverage is unexpectedly missing.
 
 ---
 

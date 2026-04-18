@@ -1,19 +1,20 @@
 result: pass
-reason: Delta spec synced as a new capability to openspec/specs/plan-implementation-skill/spec.md and the change was successfully archived as 2026-04-17-plan-implementation-skill.
+reason: Delta spec for tech-lead-routing synced to main specs and the unify-specialist-routing change successfully archived to openspec/changes/archive/2026-04-18-unify-specialist-routing/.
 decisions:
-  - question: Was the delta spec a new capability or a modification to an existing spec?
-    answer: New capability — no existing openspec/specs/plan-implementation-skill/spec.md existed.
-    evidence: ls openspec/specs/ returned not found; the delta was copied directly as the canonical spec.
-  - question: How to handle the file-vs-directory mismatch in the delta specs structure?
-    answer: Treated plan-implementation-skill.md as the spec content and copied it to openspec/specs/plan-implementation-skill/spec.md.
-    evidence: The delta directory contained a single file plan-implementation-skill.md rather than a subdirectory with spec.md; the instructions were adapted accordingly.
+  - question: How to handle the flat .md delta spec vs expected subdirectory structure?
+    answer: Treated tech-lead-routing.md as a new capability spec, created openspec/specs/tech-lead-routing/spec.md from it.
+    evidence: No openspec/specs/tech-lead-routing/spec.md existed; existing specs use the <name>/spec.md pattern (e.g. plan-implementation-skill/spec.md).
+  - question: Archive with incomplete tasks (3 of 38)?
+    answer: Proceeded with --yes flag as instructed; warnings were non-blocking.
+    evidence: openspec archive output showed "Warning: 3 incomplete task(s) found. Continuing due to --yes flag."
 files_read:
-  - openspec/changes/plan-implementation-skill/specs/plan-implementation-skill.md
-files_changed:
+  - openspec/changes/unify-specialist-routing/specs/tech-lead-routing.md
   - openspec/specs/plan-implementation-skill/spec.md
-  - openspec/changes/archive/2026-04-17-plan-implementation-skill/design.md
-  - openspec/changes/archive/2026-04-17-plan-implementation-skill/proposal.md
-  - openspec/changes/archive/2026-04-17-plan-implementation-skill/specs/plan-implementation-skill.md
-  - openspec/changes/archive/2026-04-17-plan-implementation-skill/tasks.md
-  - openspec/changes/archive/2026-04-17-plan-implementation-skill/ui-verify.md
+files_changed:
+  - openspec/specs/tech-lead-routing/spec.md
+  - openspec/changes/archive/2026-04-18-unify-specialist-routing/design.md
+  - openspec/changes/archive/2026-04-18-unify-specialist-routing/proposal.md
+  - openspec/changes/archive/2026-04-18-unify-specialist-routing/specs/tech-lead-routing.md
+  - openspec/changes/archive/2026-04-18-unify-specialist-routing/tasks.md
+  - openspec/changes/archive/2026-04-18-unify-specialist-routing/ui-verify.md
 browser_tested: false

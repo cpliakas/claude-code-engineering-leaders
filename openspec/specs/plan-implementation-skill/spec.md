@@ -35,8 +35,8 @@ If `$ARGUMENTS` is empty, the skill **must** prompt for one of the accepted inpu
 ### Environmental Dependencies
 
 - Tech Lead agent is available in the plugin
-- Tech Lead's project memory (including the Specialist Routing Table) is readable
-- All specialist agents referenced by the routing table are available under the slugs the Tech Lead emits
+- Tech Lead's project memory (including `## Registered Specialists` and `## Project Code Area Overrides`) is readable
+- All specialist agents referenced by the registered specialists list are available under the slugs the Tech Lead emits
 
 ## Outputs
 
@@ -73,7 +73,7 @@ On the parse-failure path, the skill returns the raw Phase 1 output with a prepe
 ### No-Match Path
 
 8. Prepend this notice to the Phase 1 output and return it as the final plan:
-   > No specialists matched the Tech Lead's routing table. Phase 2 synthesis was skipped. The Phase 1 output below is the final plan.
+   > No registered specialists matched this issue. Phase 2 synthesis was skipped. The Phase 1 output below is the final plan.
 
 ### Parse-Failure Path
 

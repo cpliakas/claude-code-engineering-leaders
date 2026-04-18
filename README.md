@@ -121,7 +121,7 @@ This runs a guided interview — one question at a time — that captures the co
 - **Tech stack:** languages, frameworks, key infrastructure
 - **Team:** size, disciplines, SDLC process
 - **Key constraints:** compliance, performance targets, architectural boundaries
-- **Specialist agents:** any domain specialists from other plugins the Tech Lead should route to during implementation planning
+- **Specialist agents:** any domain specialists from other plugins the Tech Lead should route to during implementation planning (one-step registration with `/add-specialist`)
 
 Onboarding writes to `.claude/agent-memory/engineering-leaders/PROJECT.md` — a shared context file that all eight agents read automatically.
 
@@ -162,6 +162,8 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Skill | `/plan-test-strategy`      | Produce a test strategy with highest-impact tests by type and layer                        |
 | Skill | `/analyze-code-churn`      | Analyze code churn and thrash patterns with hotspot detection and rework classification    |
 | Skill | `/plan-implementation`     | Drive the Tech Lead's two-phase consultation end-to-end: routing, specialist fan-out, and synthesis |
+| Skill | `/add-specialist`          | Register a specialist agent for Tech Lead routing (one step, no trigger-phrase copying)    |
+| Skill | `/audit-routing-table`     | Audit Tech Lead routing health: orphan overrides, broken pointers, redundant rows, thin descriptions |
 
 ## Architecture
 
@@ -282,6 +284,10 @@ claude-code-engineering-leaders/
     ├── write-runbook/SKILL.md
     ├── plan-test-strategy/SKILL.md
     ├── analyze-code-churn/SKILL.md
+    ├── add-specialist/SKILL.md
+    ├── audit-routing-table/
+    │   ├── SKILL.md
+    │   └── MIGRATION.md
     └── plan-implementation/
         ├── SKILL.md
         └── test-fixtures/

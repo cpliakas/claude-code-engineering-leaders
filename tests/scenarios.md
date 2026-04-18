@@ -391,3 +391,151 @@ user-observable rewrites grounded in the persona's language?"
 - [ ] Rewrites ACs in user-observable terms (e.g., "When I click Export, I receive a CSV file I can open in Excel")
 - [ ] Adds persona context that the Coach couldn't provide
 - [ ] Demonstrates the complementary relationship — Coach flags the structure problem, UX Strategist provides the domain-grounded fix
+
+---
+
+## Part 3: Specialist Routing Scenarios
+
+### SR-1: Register-only path
+
+**Setup:** Ensure `.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md`
+exists (or will be created). No `my-backend-specialist` entry present.
+
+**Action:** Run `/add-specialist my-backend-specialist`
+
+**Expected Behaviors:**
+
+- [ ] Attempts to locate `agents/my-backend-specialist.md` and warns if absent
+- [ ] Creates or updates the memory file with a `## Registered Specialists`
+  section
+- [ ] Adds `- \`my-backend-specialist\`` to `## Registered Specialists`
+- [ ] Does NOT add any row to `## Project Code Area Overrides`
+- [ ] Output confirms registration and mentions `/audit-routing-table` as a
+  follow-up step
+
+### SR-2: Register with code-area override
+
+**Setup:** `my-payments-specialist` not yet registered.
+
+**Action:** Run `/add-specialist my-payments-specialist "src/payments/**"`
+
+**Expected Behaviors:**
+
+- [ ] Registers `my-payments-specialist` in `## Registered Specialists`
+- [ ] Appends a row `| \`src/payments/**\` | my-payments-specialist |` to
+  `## Project Code Area Overrides`
+- [ ] Output shows both the registration and the override row
+- [ ] Output mentions `/audit-routing-table`
+
+### SR-3: Override redundancy warning
+
+**Setup:** Register `qa-lead` (whose description body contains the phrase
+"test strategy").
+
+**Action:** Run `/add-specialist qa-lead "test strategy"`
+
+**Expected Behaviors:**
+
+- [ ] Detects that "test strategy" appears in `qa-lead`'s description
+- [ ] Warns the user that the override is redundant
+- [ ] Asks whether to proceed before writing the row
+- [ ] If user says no, skips the override but still registers the agent
+- [ ] Output explains what was written vs. skipped
+
+### SR-4: Tech Lead routing via description match
+
+**Setup:** Register `my-backend-specialist` whose description contains
+"REST API" and "endpoint design".
+
+**Action:** Invoke `@agents/tech-lead Plan the implementation for: Add a new
+REST API endpoint for user profile retrieval.`
+
+**Expected Behaviors:**
+
+- [ ] Phase 1 output includes a `## Consultation Requests` section
+- [ ] `my-backend-specialist` appears under `## Consultation Requests`
+- [ ] Output does NOT reference a "Specialist Routing Table"; matching is
+  described in terms of description matching
+- [ ] Phase 1 format is parseable: `## Consultation Requests`, `### <Name>`,
+  `**Agent:** \`my-backend-specialist\``, `**Prompt:**`, `## Next Step`
+
+### SR-5: Broken pointer warning
+
+**Setup:** Add `ghost-specialist` to `## Registered Specialists` with a path
+that does not exist: `- \`ghost-specialist\` — \`agents/ghost-specialist.md\``
+
+**Action:** Invoke `@agents/tech-lead Plan the implementation for any issue.`
+
+**Expected Behaviors:**
+
+- [ ] Phase 1 output includes a routing warning about `ghost-specialist` in
+  `## Preliminary Constraints`
+- [ ] Other registered specialists (if any) still route correctly
+- [ ] No consultation request is emitted for `ghost-specialist`
+- [ ] The warning is explicit, not silent
+
+### SR-6: Audit routing table — clean project
+
+**Setup:** Project has one registered specialist with a readable agent file.
+No override rows. No redundant signals.
+
+**Action:** Run `/audit-routing-table`
+
+**Expected Behaviors:**
+
+- [ ] All four checks report PASS
+- [ ] Summary table shows PASS for all checks
+- [ ] No files are modified
+- [ ] Report is human-readable
+
+### SR-7: Audit routing table — all four findings
+
+**Setup:** Manually craft a MEMORY.md with:
+- An orphan override row (target agent not in Registered Specialists)
+- A registered specialist whose agent file does not exist
+- A redundant override row (signal text appears in the agent's description)
+- A registered specialist with a description under 60 words
+
+**Action:** Run `/audit-routing-table`
+
+**Expected Behaviors:**
+
+- [ ] Check 1 flags the orphan override with the agent name and recommended action
+- [ ] Check 2 flags the broken pointer with the missing path
+- [ ] Check 3 flags the redundant override, identifying which description
+  contains the signal
+- [ ] Check 4 flags the thin description with the actual word count
+- [ ] Summary table shows N finding(s) for each failing check
+- [ ] No files are modified
+- [ ] Report ends with a reminder that no auto-fix occurred
+
+### SR-8: plan-implementation regression
+
+**Setup:** Register at least one specialist whose description matches a known
+issue topic. Ensure the MEMORY.md uses the new `## Registered Specialists`
+format (no `## Specialist Routing Table` section).
+
+**Action:** Run `/plan-implementation` on the issue.
+
+**Expected Behaviors:**
+
+- [ ] Phase 1 produces `## Consultation Requests` with the matched specialist
+- [ ] Phase 1 output is parseable: `**Agent:** \`<name>\`` and `**Prompt:**`
+  anchors are present
+- [ ] Phase 2 synthesis runs after specialist responses are fed back
+- [ ] Final plan is produced in the synthesis format
+
+### SR-9: Onboard — simplified Q8
+
+**Setup:** Fresh project (or use a test project with no existing memory).
+
+**Action:** Run `/onboard` through to Step 4 and provide one specialist name
+when prompted.
+
+**Expected Behaviors:**
+
+- [ ] Q8 does NOT ask for code areas or trigger keywords — only agent names
+- [ ] `/add-specialist <name>` is invoked with the agent name only (no signals)
+- [ ] Step 5 summary mentions `/audit-routing-table` as a follow-up hygiene step
+- [ ] MEMORY.md after onboarding uses `## Registered Specialists` format, not
+  `## Specialist Routing Table`
