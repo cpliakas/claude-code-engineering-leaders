@@ -98,6 +98,48 @@ The `engineering-manager` invokes `/analyze-code-churn` scoped to the payments m
 
 ---
 
+### Run a Pre-Implementation Refinement Review
+
+**Scenario:** You've drafted a story for a new feature and want strategic
+sign-off from the Product Owner, Chief Architect, and UX Strategist before
+handing it to the Tech Lead for implementation planning.
+
+**Action:**
+
+> `/refinement-review As a compliance officer, I want to export the audit log as
+> a CSV file so that I can provide records to auditors without needing database
+> access. Acceptance criteria: ...`
+
+`/refinement-review` invokes all three strategic peers in parallel. The Product
+Owner evaluates scope fit and roadmap alignment. The Chief Architect flags any
+one-way doors or cross-cutting implications. The UX Strategist checks persona
+fit and whether the acceptance criteria describe user-observable outcomes. The
+three responses are preserved verbatim in a consolidated report with an overall
+readiness verdict: `ready`, `needs-revision`, or `blocked`. When peers
+raises a concern or returns a non-ready verdict, the report surfaces those
+concerns in an `## Objections` section, attributed to the named peer.
+
+**Impact:** One command surfaces all three strategic perspectives before
+implementation begins, preventing the "forgot to ask UX" failure mode and
+catching one-way-door concerns while the story is still cheap to revise.
+
+#### When to use `/refinement-review` vs. related skills
+
+| Skill | Purpose | When to use |
+|---|---|---|
+| `/write-story` | Author a story from scratch | Before `/refinement-review`: draft the story first |
+| `/refine-story` | Score the story's structure (INVEST, AC quality) | Complements `/refinement-review`; checks the story's own text for structural quality |
+| `/refinement-review` | Strategic sign-off: is this the right thing to build? | After authoring; before `/plan-implementation` |
+| `/plan-implementation` | Deconstruct the story into an implementation plan | After `/refinement-review` returns `ready` |
+
+**Note:** Trivial stories that follow well-established patterns and carry no
+architectural or persona-fit risk may legitimately skip `/refinement-review`.
+Running three peer agents in parallel is more expensive than a single
+consultation. Reserve the ceremony for stories where the investment is
+justified by the complexity or risk.
+
+---
+
 ## Quick Start
 
 Add the marketplace to your Claude Code project, then install the plugin:
@@ -153,6 +195,7 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Skill | `/write-story`             | Write a user story with acceptance criteria and INVEST validation                          |
 | Skill | `/write-bug`               | Scaffold a RIMGEN-validated bug report with reproduction steps, severity, and priority     |
 | Skill | `/write-spike`             | Produce a structured findings document for a topic too uncertain to story-write directly   |
+| Skill | `/refinement-review`       | Convene the PO, Architect, and UX Strategist in parallel on a story draft; produces a readiness verdict before implementation |
 | Skill | `/refine-story`            | Score a story draft against INVEST and agile coaching principles                           |
 | Skill | `/decompose-requirement`   | Decompose an epic into stories, or a story into subtasks, with structured metadata         |
 | Skill | `/facilitate-retrospective` | Facilitate a structured retrospective using the Derby-Larsen five-phase framework         |
@@ -277,6 +320,7 @@ claude-code-engineering-leaders/
     ├── write-bug/SKILL.md
     ├── write-spike/SKILL.md
     ├── refine-story/SKILL.md
+    ├── refinement-review/SKILL.md
     ├── decompose-requirement/SKILL.md
     ├── facilitate-retrospective/SKILL.md
     ├── conduct-postmortem/SKILL.md

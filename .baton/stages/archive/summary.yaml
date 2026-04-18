@@ -1,20 +1,21 @@
 result: pass
-reason: Delta spec for tech-lead-routing synced to main specs and the unify-specialist-routing change successfully archived to openspec/changes/archive/2026-04-18-unify-specialist-routing/.
+reason: Delta spec for refinement-review-skill synced to main specs and refinement-cell-skill change archived as 2026-04-18-refinement-cell-skill.
 decisions:
-  - question: How to handle the flat .md delta spec vs expected subdirectory structure?
-    answer: Treated tech-lead-routing.md as a new capability spec, created openspec/specs/tech-lead-routing/spec.md from it.
-    evidence: No openspec/specs/tech-lead-routing/spec.md existed; existing specs use the <name>/spec.md pattern (e.g. plan-implementation-skill/spec.md).
-  - question: Archive with incomplete tasks (3 of 38)?
-    answer: Proceeded with --yes flag as instructed; warnings were non-blocking.
-    evidence: openspec archive output showed "Warning: 3 incomplete task(s) found. Continuing due to --yes flag."
+  - question: How to handle new capability spec format for archive?
+    answer: Remove the pre-created main spec file so the archive command could create it fresh from the delta, avoiding duplicate-requirement errors.
+    evidence: Archive failed with "ADDED failed - already exists" when main spec existed; succeeded after removing it and letting archive create it.
+  - question: Should delta spec be converted to full format before archive?
+    answer: No; the archive command handles conversion from delta format to canonical spec format itself.
+    evidence: Archive produced a clean spec with Purpose and Requirements sections after creating the file from scratch.
 files_read:
-  - openspec/changes/unify-specialist-routing/specs/tech-lead-routing.md
+  - openspec/changes/refinement-cell-skill/specs/refinement-review-skill/spec.md
   - openspec/specs/plan-implementation-skill/spec.md
 files_changed:
-  - openspec/specs/tech-lead-routing/spec.md
-  - openspec/changes/archive/2026-04-18-unify-specialist-routing/design.md
-  - openspec/changes/archive/2026-04-18-unify-specialist-routing/proposal.md
-  - openspec/changes/archive/2026-04-18-unify-specialist-routing/specs/tech-lead-routing.md
-  - openspec/changes/archive/2026-04-18-unify-specialist-routing/tasks.md
-  - openspec/changes/archive/2026-04-18-unify-specialist-routing/ui-verify.md
+  - openspec/specs/refinement-review-skill/spec.md
+  - openspec/changes/archive/2026-04-18-refinement-cell-skill/.openspec.yaml
+  - openspec/changes/archive/2026-04-18-refinement-cell-skill/design.md
+  - openspec/changes/archive/2026-04-18-refinement-cell-skill/proposal.md
+  - openspec/changes/archive/2026-04-18-refinement-cell-skill/specs/refinement-review-skill/spec.md
+  - openspec/changes/archive/2026-04-18-refinement-cell-skill/tasks.md
+  - openspec/changes/archive/2026-04-18-refinement-cell-skill/ui-verify.md
 browser_tested: false
