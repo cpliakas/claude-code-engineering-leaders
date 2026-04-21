@@ -252,3 +252,126 @@ Stop here. Do not proceed to Step 7.
 
 Return the Phase 2 synthesis to the user as the final output. No additional
 summarization or wrapping is needed.
+
+## Step 8: Capture Routing Outcomes
+
+After returning the Phase 2 synthesis to the user, append one row per
+specialist to the `## Routing Outcomes` section of the Tech Lead's memory file.
+This step runs only on the Phase 2 success path. It does not run on the
+no-match path (no specialists consulted) or the parse-failure path (Phase 1
+output lacked required anchors) because there is nothing to grade.
+
+### 8.1 Parse Routing Values from Phase 2 Output
+
+For each specialist section (level-3 heading under `## Specialist
+Consultations` in the Phase 2 response), extract:
+
+- The **specialist slug** from the level-3 heading or from a nearby
+  `**Agent:**` line if one is present.
+- The **routing value** from the `**Routing Value:**` line. The value must be
+  exactly one of `high`, `medium`, `low`, `none` (case-insensitive match is
+  acceptable; normalize to lowercase for storage).
+- The **routing note** from the optional `**Routing Note:**` line that
+  immediately follows `**Routing Value:**`. If the line is absent, store an
+  empty string.
+
+**Parse failure handling (non-fatal):** If the `**Routing Value:**` line is
+absent for a specialist, or the value is not in the fixed vocabulary, skip
+that specialist and surface a one-line notice in the skill's output:
+
+```
+[ROUTING OUTCOME] Skipped outcome capture for `<specialist>`: could not parse
+**Routing Value:** line.
+```
+
+Continue with the remaining specialists. The Phase 2 synthesis is already
+returned to the user; this notice appears after it or alongside it. A missing
+or invalid line does not block the plan.
+
+### 8.2 Derive the Story Slug
+
+Derive the story slug from the story input resolved in Step 1, using this
+order of precedence:
+
+1. The `slug` field from YAML front matter in the story (if the story body
+   begins with `---`-delimited front matter).
+2. The filename without extension (if the story was loaded from a file path).
+3. The first level-1 or level-2 heading in the story body, slugified
+   (lowercased, spaces and non-alphanumeric characters replaced with `-`,
+   leading/trailing `-` stripped).
+4. `unknown-slug` as a fallback if no candidate is resolvable.
+
+Note: when the story is passed as an inline body without front matter or a
+leading heading, the fallback `unknown-slug` is the common result. Users who
+want meaningful slugs should ensure the story body opens with a heading (e.g.,
+`# Add Retry Logic`) or a front-matter `slug` field.
+
+### 8.3 Append Rows to the Memory File
+
+Read the Tech Lead's memory file at
+`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md`.
+
+**If the `## Routing Outcomes` section is absent:** Create it by appending the
+following block at the end of the file (after the last existing top-level `##`
+section):
+
+```markdown
+## Routing Outcomes
+
+| Date | Story Slug | Specialist | Value | Note |
+|------|------------|------------|-------|------|
+```
+
+**Then append one row per successfully parsed specialist**, using today's date
+in `YYYY-MM-DD` format, the derived story slug, the specialist slug, the
+routing value, and the routing note (empty string when absent):
+
+```markdown
+| 2026-04-21 | my-story-slug | qa-lead | medium | Added flake-resistance notes |
+```
+
+**If the `## Routing Outcomes` section already exists:** Append new rows after
+the last existing data row. Do not duplicate the section heading, column
+header row, or separator row.
+
+**Write failure handling (non-fatal):** If the memory file cannot be read or
+written (does not exist, is read-only, or any other I/O failure), surface a
+notice and stop the append step:
+
+```
+[ROUTING OUTCOME] Could not write to memory file: <path>. Routing outcomes for
+this plan were not recorded.
+```
+
+The Phase 2 synthesis has already been returned to the user unchanged. The
+notice informs the user that outcome data was lost for this plan, but the plan
+itself is complete.
+
+### 8.4 Append Step Paths Summary
+
+| Path | Append step runs? | Reason |
+|------|------------------|--------|
+| Phase 2 success, all values parse | Yes: all rows appended | Normal path |
+| Phase 2 success, some values missing | Yes: parseable rows appended; notice emitted for skipped specialists | Partial parse |
+| Phase 2 success, no values parse | No rows appended; notices emitted for all specialists | Full parse failure |
+| No-match path (no specialists matched) | No | Nothing was graded |
+| Phase 1 parse-failure path | No | Phase 2 did not run |
+| Phase 2 failure path | No | Phase 2 did not run |
+
+## Phase 2 Contract Dependency
+
+Also see the Parseable Phase 2 Output Contract in `agents/tech-lead.md` (the
+"Parseable Phase 2 Output Contract" subsection under Implementation Planning).
+Step 8 depends on the `**Routing Value:**` and `**Routing Note:**` anchors
+defined there. If the Tech Lead's Phase 2 output format changes, Step 8's
+parsing logic must be updated to match.
+
+## Feedback Loop: Routing Quality
+
+The outcome rows appended by Step 8 accumulate in
+`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md` and are read
+by `/audit-routing-quality`. After running `/plan-implementation` on several
+stories, use `/audit-routing-quality` to review the recorded history. The
+audit skill identifies specialists that are consistently over-routed (high
+`low` or `none` rate) and recommends specific narrowing actions so future
+plans pay for fewer unproductive specialist consultations.

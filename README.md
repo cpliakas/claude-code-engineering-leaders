@@ -424,17 +424,39 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Skill | `/plan-implementation`     | Drive the Tech Lead's two-phase consultation end-to-end: routing, specialist fan-out, and synthesis |
 | Skill | `/add-specialist`          | Register a specialist agent for Tech Lead routing (one step, no trigger-phrase copying)    |
 | Skill | `/audit-routing-table`     | Audit Tech Lead routing health: orphan overrides, broken pointers, redundant rows, thin descriptions |
+| Skill | `/audit-routing-quality`   | Audit Tech Lead routing quality from outcome history: recommends narrowing actions for over-routed specialists |
 | Skill | `/audit-agent-memory`      | Audit a single agent's project memory for state leakage, dead links, and size; advisory and read-only |
 | Skill | `/re-onboard`              | Audit onboarded agent memory for drift against live project signals; confirms updates before writing  |
 
 ### Audit Skills
 
-Three skills cover memory hygiene and drift: two are read-only audits, one applies confirmed updates.
+Four skills cover memory hygiene, drift detection, and routing quality: three are read-only audits, one applies confirmed updates.
 
 **`/audit-routing-table`** inspects the Tech Lead's specialist routing model
 for orphan overrides, broken file pointers, redundant override rows, and thin
 agent descriptions. Run it after onboarding, after adding specialists, or when
 the Tech Lead appears to be missing consultation requests.
+
+**`/audit-routing-quality`** reads the Tech Lead's `## Routing Outcomes`
+history and recommends narrowing actions for over-routed specialists:
+specialists the Tech Lead consulted repeatedly but that added little or no
+value. It aggregates per-specialist outcome counts, computes a narrowing-signal
+score (`low` + `none` percentage), and suggests specific narrowing actions:
+tighten description vocabulary, remove redundant Code Area Overrides, or
+consider deregistering. When the outcome table exceeds 200 rows, it offers a
+user-confirmed roll-up that condenses older rows into summary rows while
+preserving the most-recent 50.
+
+This skill is advisory only: it never edits the routing table. All
+recommendations are applied manually. Run it after accumulating outcome
+history from several `/plan-implementation` runs.
+
+The two routing audit skills are complementary:
+
+| Skill | Input | Finds |
+|-------|-------|-------|
+| `/audit-routing-table` | Routing memory structure and agent files | Structural problems: orphan overrides, broken pointers, thin descriptions |
+| `/audit-routing-quality` | `## Routing Outcomes` history | Coverage drift: over-routed specialists with consistently low value |
 
 **`/audit-agent-memory <agent-name>`** inspects a single agent's project
 memory directory (`.claude/agent-memory/engineering-leaders-<agent-name>/`)
@@ -459,10 +481,12 @@ skill is a diff pass, not a replacement for a full `/onboard-<agent>` re-run.
 Use `/onboard-<agent>` when you want to refresh content that has no local
 signal source (team norms, persona preferences, stakeholder relationships).
 
-`/re-onboard` is the only audit skill that writes to memory. `/audit-routing-table`
-and `/audit-agent-memory` are both read-only and advisory: they do not delete,
-move, or rewrite any file. All three audits are complementary and can be run
-independently.
+`/re-onboard` is the only audit skill that writes to memory by default.
+`/audit-routing-table` and `/audit-agent-memory` are read-only and advisory:
+they do not delete, move, or rewrite any file. `/audit-routing-quality` is
+advisory for all recommendations, but writes to `## Routing Outcomes` only
+when the user explicitly confirms a roll-up. All four audits are complementary
+and can be run independently.
 
 ## Architecture
 
@@ -588,6 +612,8 @@ claude-code-engineering-leaders/
     ├── audit-routing-table/
     │   ├── SKILL.md
     │   └── MIGRATION.md
+    ├── audit-routing-quality/
+    │   └── SKILL.md
     ├── audit-agent-memory/
     │   └── SKILL.md
     └── plan-implementation/

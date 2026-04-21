@@ -110,6 +110,19 @@ On the parse-failure path, the skill returns the raw Phase 1 output with a prepe
 15. Re-invoke the Tech Lead with this prompt. Request Phase 2 synthesis explicitly (for example, "Synthesize the final plan from the specialist responses above").
 16. Return the Tech Lead's Phase 2 output to the user as the final result.
 
+### Phase 3 — Outcome Capture
+
+This step runs only on the success path (Phase 2 completed and produced parseable specialist subsections). It does not run on the no-match or parse-failure paths.
+
+17. For each `### <Specialist Name>` subsection in the Phase 2 output, extract:
+    - The `**Routing Value:**` line value (must be one of `high`, `medium`, `low`, `none`).
+    - The `**Routing Note:**` line value (optional single-sentence note on the line immediately after `**Routing Value:**`).
+18. Derive the story slug using this order: front-matter `slug` field, then filename without extension (if `$ARGUMENTS` was a path), then the first heading of the story slugified, then `unknown-slug` as a fallback.
+19. Append one row per specialist to the `## Routing Outcomes` section of the Tech Lead's project memory file (`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md`). Each row contains `Date`, `Story Slug`, `Specialist`, `Value`, and `Note` as defined in `openspec/specs/routing-outcome-capture/spec.md`.
+20. If the `## Routing Outcomes` section does not exist in the memory file, create it with the documented column header and separator rows before appending.
+21. If a specialist's `**Routing Value:**` line is missing or its value is not in the fixed vocabulary, emit a one-line notice naming the affected specialist, skip that specialist's row, and continue appending for parseable specialists.
+22. If the memory file cannot be written, emit a one-line notice identifying the write failure. The Phase 2 synthesis returned to the user is unaffected.
+
 ## Invariants
 
 - The skill must not paraphrase, summarize, or truncate specialist responses before Phase 2.
@@ -117,6 +130,9 @@ On the parse-failure path, the skill returns the raw Phase 1 output with a prepe
 - The skill must not run Phase 2 on the no-match or parse-failure paths.
 - The skill must always run Phase 2 when at least one specialist was matched, even if all specialist responses are empty.
 - The skill must never silently drop a specialist miss; every miss appears in the Phase 2 input so the Tech Lead can flag the gap.
+- Outcome capture must not modify the Phase 2 synthesis content returned to the caller.
+- Outcome capture failures (parse errors, write errors) are surfaced as notices; they must never prevent the Phase 2 synthesis from reaching the user.
+- The skill must not append any rows on the no-match or parse-failure paths.
 
 ## Non-Requirements
 
@@ -132,3 +148,124 @@ On the parse-failure path, the skill returns the raw Phase 1 output with a prepe
 - [ ] When a specialist sub-agent errors or returns empty, the Phase 2 input contains a "No response received" notice for that specialist, and Phase 2 still runs.
 - [ ] When the Tech Lead's Phase 1 output lacks `## Consultation Requests` or `## Next Step`, the skill returns the parse-failure path output rather than proceeding blindly.
 - [ ] Running the skill twice on the same story with the same Tech Lead memory produces outputs with the same specialist set and the same top-level section ordering.
+- [ ] After a successful Phase 2 synthesis with three specialists, the Tech Lead's memory file contains three new rows in `## Routing Outcomes`, one per specialist, each with `Date`, `Story Slug`, `Specialist`, `Value`, and `Note`.
+- [ ] When the memory file has no `## Routing Outcomes` section, the first successful run creates the section header, separator row, and appended rows.
+- [ ] When Phase 2 output is missing a `**Routing Value:**` line for one specialist, the skill appends rows for the other specialists, emits a notice for the missing one, and returns the full Phase 2 synthesis unchanged.
+- [ ] When the memory file cannot be written during outcome capture, the skill emits a write-failure notice and still returns the Phase 2 synthesis to the user.
+- [ ] The skill appends no rows to `## Routing Outcomes` on the no-match path or the parse-failure path.
+## Requirements
+### Requirement: Post-Phase-2 outcome capture
+
+The `/plan-implementation` skill SHALL append one row per
+specialist to the `## Routing Outcomes` section of the Tech Lead's
+memory file after Phase 2 synthesis completes successfully. The
+append step runs only on the success path: when Phase 2 produced
+output that the skill could parse into specialist subsections. The
+skill MUST NOT append rows on the no-match path (no specialists
+consulted) or the parse-failure path (Phase 1 output could not be
+parsed against the expected contract).
+
+Each row MUST contain values for `Date`, `Story Slug`,
+`Specialist`, `Value`, and `Note` as defined in the
+`routing-outcome-capture` capability. The story slug MUST be
+derived using the documented order: front-matter `slug` field,
+then filename without extension, then the first heading
+slugified, then `unknown-slug` as a fallback.
+
+The append step MUST NOT modify the Phase 2 synthesis content
+returned to the caller; the synthesis is returned to the user as
+before, with the append occurring as a side effect.
+
+#### Scenario: Success path appends one row per specialist
+
+- **WHEN** `/plan-implementation` completes Phase 2 synthesis with
+  three specialists, each carrying a `**Routing Value:**` line
+- **THEN** the skill appends three rows to the
+  `## Routing Outcomes` section in the Tech Lead's memory file,
+  one per specialist, each row containing the five documented
+  columns
+
+#### Scenario: No-match path appends nothing
+
+- **WHEN** `/plan-implementation` takes the no-match path because
+  Phase 1 produced no consultation requests
+- **THEN** the skill does not append any row to
+  `## Routing Outcomes`, because there is nothing to grade
+
+#### Scenario: Parse-failure path appends nothing
+
+- **WHEN** `/plan-implementation` takes the parse-failure path
+  because Phase 1 output lacked the required anchors
+- **THEN** the skill does not append any row to
+  `## Routing Outcomes`, because Phase 2 did not run
+
+### Requirement: Parse failures in the append step are non-fatal
+
+The skill SHALL treat failures inside the outcome-append step as
+non-fatal. If the Tech Lead's Phase 2 output lacks a
+`**Routing Value:**` line for one or more specialists, or the
+value is not in the fixed vocabulary, the skill MUST:
+
+- Emit a one-line notice in its output identifying the affected
+  specialists.
+- Append rows for specialists whose values parsed successfully.
+- Skip appending for specialists whose values failed to parse.
+- Return the full Phase 2 synthesis to the caller unchanged.
+
+A failure to write to the memory file (for example, because the
+file is read-only) MUST NOT prevent the skill from returning the
+Phase 2 synthesis. The write failure is surfaced as a notice, and
+the plan still reaches the user.
+
+#### Scenario: Partial parse failure surfaces a notice
+
+- **WHEN** Phase 2 output contains `**Routing Value:**` lines for
+  two of three specialists, with the third specialist's line
+  missing
+- **THEN** the skill appends two rows (for the parseable
+  specialists), surfaces a notice naming the third specialist as
+  unparseable, and returns the full Phase 2 synthesis to the
+  caller
+
+#### Scenario: Write failure does not discard the plan
+
+- **WHEN** the Tech Lead's memory file cannot be written during
+  the append step
+- **THEN** the skill surfaces a notice identifying the write
+  failure and still returns the Phase 2 synthesis to the caller
+
+### Requirement: Append step creates the section when missing
+
+The skill SHALL create the `## Routing Outcomes` section on first
+append when the section does not exist in the memory file. The
+created section MUST consist of:
+
+- A `## Routing Outcomes` heading.
+- The documented column header row
+  `| Date | Story Slug | Specialist | Value | Note |`.
+- The markdown-table separator row.
+- One row per specialist with parsed values.
+
+The skill MUST NOT reorder existing sections in the memory file
+when creating the outcomes section; the new section is appended
+at the end of the file or after the last existing
+top-level-`##` section, whichever is consistent with the file's
+current structure.
+
+#### Scenario: First append creates header and separator
+
+- **WHEN** the memory file exists and contains
+  `## Registered Specialists` and `## Project Code Area Overrides`
+  but no `## Routing Outcomes` section
+- **THEN** the skill appends the `## Routing Outcomes` heading,
+  the column header row, and the separator row, followed by one
+  row per graded specialist
+
+#### Scenario: Subsequent append does not duplicate the header
+
+- **WHEN** the memory file already contains a
+  `## Routing Outcomes` section with previous rows
+- **THEN** the skill appends new rows after the existing rows, and
+  does not duplicate the section header, column header row, or
+  separator row
+

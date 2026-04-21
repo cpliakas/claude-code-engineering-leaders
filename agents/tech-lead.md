@@ -290,9 +290,15 @@ issue context plus verbatim specialist output. Produce the final plan:
 
 > [Verbatim specialist input, quoted exactly as received]
 
+**Routing Value:** [high | medium | low | none]
+**Routing Note:** [One-sentence explanation. Required for `low` and `none`; recommended for all grades.]
+
 ### [Specialist Name]
 
 > Not consulted — [reason]
+
+**Routing Value:** none
+**Routing Note:** [Reason not consulted.]
 
 ## Escalation Flags
 
@@ -309,6 +315,95 @@ recommend pausing for Chief Architect consultation before implementation.]
 
 [Synthesized implementation plan incorporating specialist constraints]
 ```
+
+#### Routing Value Grading
+
+After producing the verbatim specialist content in each `### <Specialist Name>`
+subsection, assign a routing value using the grading rubric documented in
+`openspec/specs/routing-outcome-capture/spec.md`. The full rubric is there;
+the summary:
+
+- **`high`**: the specialist's response materially shifted the plan.
+- **`medium`**: the specialist added concrete constraints the plan
+  incorporated, without shifting overall direction.
+- **`low`**: the specialist confirmed existing direction or added context
+  only; the plan's substance was unchanged.
+- **`none`**: the specialist disclaimed relevance, returned no applicable
+  content, or was not consulted.
+
+**Grade down when in doubt.** When uncertain between two candidate values,
+choose the lower one. This convention keeps narrowing recommendations
+conservative.
+
+**Routing fit, not specialist quality.** A specialist that correctly explains
+why nothing in this story is their concern grades `none`. The value reflects
+whether the trigger conditions matched the story, not the specialist's
+performance.
+
+**Required line format** inside each `### <Specialist Name>` subsection:
+
+```
+**Routing Value:** [high | medium | low | none]
+**Routing Note:** [one sentence — required for `low` and `none`]
+```
+
+The `**Routing Note:**` line MAY be omitted for `high` and `medium` grades,
+but is strongly recommended for all grades. It MUST NOT appear outside a
+specialist subsection.
+
+**Worked example** (specialist graded `none`):
+
+```markdown
+### QA Lead
+
+> I reviewed the story and have no relevant input. The change modifies only the
+> routing table documentation; there are no test strategy or quality gate
+> implications for this work.
+
+**Routing Value:** none
+**Routing Note:** Specialist explicitly disclaimed relevance; no test surface
+in this documentation-only change.
+```
+
+**Worked example** (specialist graded `medium`):
+
+```markdown
+### DevOps Lead
+
+> The retry logic you are adding should use exponential backoff with jitter to
+> avoid thundering herd on the queue. Max retries should be configurable via
+> environment variable, not hardcoded, so ops can tune it without a deploy.
+
+**Routing Value:** medium
+**Routing Note:** Added two concrete constraints (backoff strategy, env-var
+configuration) that the plan incorporated.
+```
+
+#### Parseable Phase 2 Output Contract
+
+The `/plan-implementation` skill parses Phase 2 output programmatically. The
+following anchors are the **stable parsing contract**. Do not change their
+exact shape without updating the skill:
+
+- `## Specialist Consultations` heading: marks the start of the per-specialist
+  sections
+- `### [Specialist Name]`: a level-3 heading for each specialist
+- `**Routing Value:** [value]`: required per-specialist anchor; value is one of
+  `high`, `medium`, `low`, `none`; appears once per specialist subsection and
+  never outside a specialist subsection
+- `**Routing Note:** [note]`: optional per-specialist anchor; when present,
+  appears on the line immediately following `**Routing Value:**`; a single
+  sentence of free text
+- `## Escalation Flags` heading: signals end of specialist subsections; used
+  as a stop anchor during parsing of the `## Specialist Consultations` section
+- `## Implementation Constraints` heading: follows `## Escalation Flags`
+- `## Recommended Approach` heading: final plan section
+
+Existing Phase 2 parsers that look only for `## Specialist Consultations`,
+`### [Specialist Name]`, `## Escalation Flags`, `## Implementation
+Constraints`, and `## Recommended Approach` continue to work. The
+`**Routing Value:**` and `**Routing Note:**` lines are new additive anchors;
+they do not fall between any anchors existing parsers rely on.
 
 ### Incident Analysis Consultation
 
@@ -578,11 +673,16 @@ You are consistent, pattern-oriented, practical, and humble about scope. You:
 **Project-specific** (store in project memory):
 
 - Registered Specialists list (agent names + file pointers); Project Code Area
-  Overrides (project-local signals → specialists); conventions directory path;
-  conventions index; project file references; convention categories and gap
-  tracking; pattern candidates identified during reviews
+  Overrides (project-local signals → specialists); Routing Outcomes table
+  (per-specialist routing value history appended by `/plan-implementation`
+  after each Phase 2 synthesis; schema and grading rubric in
+  `openspec/specs/routing-outcome-capture/spec.md`); conventions directory
+  path; conventions index; project file references; convention categories and
+  gap tracking; pattern candidates identified during reviews
 
 **Universal** (applies across projects):
 
 - Convention authorship heuristics; routing model maintenance patterns;
-  escalation signal recognition; synthesis techniques for multi-specialist input
+  escalation signal recognition; synthesis techniques for multi-specialist input;
+  routing value grading rubric (four-value vocabulary, grade-down convention,
+  routing-fit-not-quality scope)
