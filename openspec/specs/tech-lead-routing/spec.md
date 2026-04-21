@@ -25,13 +25,29 @@ list contains no trigger metadata.
 Entry format:
 
 ```markdown
-- `<agent-name>` — `<path-to-agent-file>`
+- `<agent-name>` — `<path-or-slug>` — `target-type: <type>`
 ```
+
+The third token (`target-type: <type>`) is **optional**. When omitted, the
+entry is treated as `subagent` at routing time and the legacy two-token format
+is preserved so existing memory files round-trip unchanged.
 
 - `<agent-name>` is the kebab-case name that matches the agent's `name`
   frontmatter field.
-- `<path-to-agent-file>` is optional. When omitted, the Tech Lead uses
-  `agents/<agent-name>.md`.
+- `<path-or-slug>` carries a type-specific value:
+  - `subagent`: path to the agent file (`agents/<agent-name>.md` when omitted).
+  - `skill`: the skill slug (e.g., `write-runbook`).
+  - `doc`: the file path to read (e.g., `docs/security-review.md`).
+  - `human`: the contact identifier (a name, role, or email address).
+  - `external-agent`: the namespaced agent slug (e.g., `plugin-x:agent-y`).
+- `<type>` is one of five fixed strings: `subagent`, `skill`, `doc`, `human`,
+  `external-agent`. Any other value is treated as `subagent` with a routing
+  warning. Entries without the third token default to `subagent`.
+
+`subagent` entries (explicit or defaulted) MUST be written in the legacy
+two-token format (`- \`<name>\` — \`<path>\``) so that existing memory files
+round-trip cleanly. Non-`subagent` entries MUST include the `target-type`
+suffix.
 
 Invariants:
 
@@ -94,21 +110,26 @@ zero consultation requests.
 
 ### Step 2 — Load Agent Descriptions
 
-For each entry in `## Registered Specialists`, read the referenced agent file:
+For each entry in `## Registered Specialists`, read the target type from the
+entry (defaulting to `subagent` when the third token is absent).
 
-- If the file is readable, extract the `description` field from the
-  frontmatter block. Concatenate any multi-line description (the plugin's
-  convention uses pipe-quoted YAML scalars for long descriptions, which
-  preserves newlines).
-- If the file is not readable (missing, unreadable, or malformed frontmatter),
-  skip the specialist and record a routing warning. The warning is surfaced in
-  the Phase 1 output under the `## Preliminary Constraints` section as a line:
-  `Routing warning: could not read agent file for \`<agent-name>\` at
-  \`<path>\`.`
+- For `subagent` and `external-agent` entries: read the referenced agent or
+  plugin file to extract the `description` field from its frontmatter block.
+  Concatenate multi-line descriptions (the plugin's convention uses
+  pipe-quoted YAML scalars).
+- For `skill`, `doc`, and `human` entries: skip the agent-file read. The
+  path-or-slug token carries the target value directly; no description
+  extraction is needed.
+
+If an agent file for a `subagent` or `external-agent` entry is not readable
+(missing, unreadable, or malformed frontmatter), skip the specialist and
+record a routing warning. The warning is surfaced under
+`## Preliminary Constraints` as:
+`Routing warning: could not read agent file for \`<agent-name>\` at \`<path>\`.`
 
 ### Step 3 — Build Match Candidate Set
 
-A specialist is a match candidate if either condition holds:
+A specialist is a match candidate if any condition holds:
 
 - **Description match.** A case-insensitive substring of any trigger phrase,
   example-context phrase, or jurisdiction keyword extracted from the agent's
@@ -118,20 +139,35 @@ A specialist is a match candidate if either condition holds:
   Overrides` whose target is this specialist. Glob matching uses standard
   shell glob semantics; plain-keyword overrides use case-insensitive
   substring match.
+- **Non-subagent type.** `skill`, `doc`, and `human` entries carry no agent
+  description to match against; they are unconditionally included in the
+  match candidate set regardless of issue text.
 
-A specialist matched by both mechanisms appears once in the match candidate
-set.
+A specialist matched by more than one mechanism appears once in the match
+candidate set.
 
 ### Step 4 — Emit Phase 1 Output
 
-Produce Phase 1 output in the exact format documented at
-`agents/tech-lead.md:183-222`. The output is unchanged by this spec:
+Produce Phase 1 output in the format documented at `agents/tech-lead.md`. The
+output gains one additive line per consultation request:
 
 - `## Engagement Depth`
 - `## Engagement Tier`
 - `## Consultation Requests` with one `### <Specialist Name>` subsection per
-  match candidate, each containing `**Agent:**` and `**Prompt:**` anchors
-- `## Preliminary Constraints`: includes any routing warnings from Step 2
+  match candidate. Each subsection MUST contain, in order:
+  1. `**Target Type:** <type>`, immediately after the heading; one of the
+     five fixed strings (`subagent`, `skill`, `doc`, `human`,
+     `external-agent`).
+  2. The per-type dispatch anchor:
+     - `subagent`: `**Agent:** \`<local-kebab-slug>\``
+     - `external-agent`: `**Agent:** \`<plugin:agent>\``
+     - `skill`: `**Skill:** <skill-slug>`
+     - `doc`: `` **Doc:** `<file-path>` ``
+     - `human`: `**Contact:** <name-or-role>`
+  3. `**Prompt:**` blockquote (unchanged; preserved across all types).
+- `## Preliminary Constraints`: includes routing warnings from Step 2 and any
+  unknown-type warnings for entries whose declared type is not in the five-
+  string vocabulary.
 - `## Next Step`
 
 ### Step 5 — Gap Handling
@@ -150,14 +186,23 @@ The Tech Lead never invents a consultation request for an unregistered agent.
 
 - Trigger vocabulary lives in agent descriptions. The routing memory file
   does not contain trigger vocabulary.
-- Every override row targets a registered specialist. Orphan rows are audit
-  findings, not routing inputs; the Tech Lead skips them at runtime.
-- The Phase 1 output format is unchanged by this spec. Existing parsers
-  (notably `/plan-implementation`) continue to work.
+- Every override row targets a registered specialist regardless of the
+  specialist's target type. Orphan rows are audit findings, not routing
+  inputs; the Tech Lead skips them at runtime.
+- The existing Phase 1 parsing anchors (`**Agent:**`, `**Prompt:**`,
+  `## Consultation Requests`, `## Next Step`) are preserved unchanged. The
+  new `**Target Type:**` line and per-type anchors (`**Skill:**`, `**Doc:**`,
+  `**Contact:**`) are additive. Existing parsers (notably
+  `/plan-implementation`) continue to work; parsers MAY ignore anchors they
+  do not recognize.
 - Specialist descriptions are read at routing time, not cached across
   invocations. The Tech Lead always sees the current description content.
-- Specialists with unreadable agent files produce a visible warning in Phase 1
-  output; they are never silently dropped.
+- Specialists with unreadable agent files (for `subagent` and
+  `external-agent` entries) produce a visible warning in Phase 1 output;
+  they are never silently dropped.
+- `subagent` entries (explicit or defaulted) are written in the legacy
+  two-token format; the `target-type` suffix is never written for `subagent`
+  entries so existing memory files round-trip unchanged.
 
 ## Non-Requirements
 
@@ -191,6 +236,24 @@ The Tech Lead never invents a consultation request for an unregistered agent.
 - [ ] `/audit-routing-table` reports orphan overrides, broken pointers,
       redundant overrides, and thin descriptions with recommended actions
       for each finding.
+- [ ] Registering a `skill` target via `/add-specialist <name> skill
+      <slug>` causes the Tech Lead's Phase 1 output to emit
+      `**Target Type:** skill` and `**Skill:** <slug>` on a matching issue.
+- [ ] Registering a `doc` target via `/add-specialist <name> doc <path>`
+      causes the Tech Lead's Phase 1 output to emit `**Target Type:** doc`
+      and `` **Doc:** `<path>` `` on a matching issue.
+- [ ] Registering a `human` target causes the Tech Lead's Phase 1 output to
+      emit `**Target Type:** human` and `**Contact:** <name-or-role>`.
+- [ ] Registering an `external-agent` target with a namespaced slug causes
+      the Phase 1 output to emit `**Target Type:** external-agent` and
+      `**Agent:** <plugin:agent>`.
+- [ ] A legacy entry (no target-type suffix) is treated as `subagent` at
+      routing time and the Phase 1 output emits `**Target Type:** subagent`.
+- [ ] `/plan-implementation` is not modified by this change. Consultation
+      requests whose target type is `skill`, `doc`, or `human` do not carry
+      `**Agent:**`; the current parser surfaces them to the user rather
+      than dispatching via the Agent tool.
+- [ ] `skills/refinement-review/SKILL.md` is not modified by this change.
 ## Requirements
 ### Requirement: Routing Outcomes section in Tech Lead memory
 

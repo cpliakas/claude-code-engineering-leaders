@@ -153,12 +153,25 @@ the absence of an explicit tier.
    notice described in Your Knowledge Sources above.
 
    **Step B — Load agent descriptions.** For each registered specialist, read
-   the agent file at the path specified (or `agents/<agent-name>.md` if no
-   path is given). If a file cannot be read, record a routing warning:
-   "Routing warning: could not read agent file for `<agent-name>` at `<path>`."
-   Surface this warning under `## Preliminary Constraints`. Never silently
-   drop a specialist — the warning must appear even when no consultation
-   request is emitted for that agent.
+   the target type from the entry (the `target-type: <type>` suffix when
+   present; default to `subagent` when absent). Then:
+
+   - For `subagent` and `external-agent` entries: read the agent file at the
+     path or namespaced slug specified (or `agents/<agent-name>.md` if no
+     path is given). If a file cannot be read, record a routing warning:
+     "Routing warning: could not read agent file for `<agent-name>` at
+     `<path>`." Surface this warning under `## Preliminary Constraints`.
+     Never silently drop a specialist — the warning must appear even when no
+     consultation request is emitted.
+   - For `skill`, `doc`, and `human` entries: skip the agent-file read. The
+     path-or-slug token carries the target value directly. These entries are
+     always included in the match candidate set without a description-based
+     filter; their relevance is assumed because the user registered them
+     explicitly.
+   - For an entry whose declared target type is not one of the five supported
+     values (`subagent`, `skill`, `doc`, `human`, `external-agent`): emit a
+     routing warning naming the entry and the invalid type, and treat the
+     entry as `subagent` for the purposes of routing output.
 
    **Step C — Build match candidate set.** A specialist is a match candidate
    if either holds:
@@ -193,22 +206,45 @@ the absence of an explicit tier.
 
 ## Consultation Requests
 
-The following registered specialists matched this issue. Spawn each as a
-sub-agent in parallel, then feed their responses back to me for synthesis.
+The following registered specialists matched this issue. Handle each according
+to its target type, then feed dispatchable responses back to me for synthesis.
 
 ### [Specialist Agent Name]
 
+**Target Type:** subagent
 **Agent:** `[agent-name]`
 **Prompt:**
 > [Focused prompt describing the issue context and what input you need from this
 > specialist. Be specific: reference the relevant code areas, the story scope,
 > and the questions this specialist should answer.]
 
-### [Specialist Agent Name]
+### [Skill Target Name]
 
-**Agent:** `[agent-name]`
+**Target Type:** skill
+**Skill:** [skill-slug]
 **Prompt:**
-> [Focused prompt for this specialist.]
+> [Focused prompt describing what the skill should produce for this issue.]
+
+### [Doc Target Name]
+
+**Target Type:** doc
+**Doc:** `[path/to/doc.md]`
+**Prompt:**
+> [What to look for when reading this document before proceeding.]
+
+### [Human Target Name]
+
+**Target Type:** human
+**Contact:** [name, role, or email]
+**Prompt:**
+> [The question to ask this person or the judgment they need to provide.]
+
+### [External Agent Name]
+
+**Target Type:** external-agent
+**Agent:** `[plugin-name:agent-name]`
+**Prompt:**
+> [Focused prompt for this external specialist.]
 
 ## Preliminary Constraints
 
@@ -217,14 +253,22 @@ sub-agent in parallel, then feed their responses back to me for synthesis.
 
 ## Next Step
 
-Spawn the consultation requests above as sub-agents in parallel, then invoke me
-again with the specialist responses to produce the final synthesis.
+For `subagent` and `external-agent` targets: spawn as sub-agents in parallel,
+then invoke me again with the specialist responses to produce the final
+synthesis. For `skill` targets: invoke the named skill with the emitted prompt,
+then feed its output back to me for Phase 2 synthesis. For `doc` targets: read
+the referenced file before starting. For `human` targets: pause and escalate
+to the named contact.
+
+See the [Routing Target Types](../README.md#routing-target-types) section of
+the top-level README for the full per-type handling patterns.
 ```
 
 > **Tip:** Instead of manually executing both phases, use the
-> `/plan-implementation` skill. It drives Phase 1, spawns specialists in
-> parallel, and invokes Phase 2 synthesis automatically without manual
-> orchestration.
+> `/plan-implementation` skill. It drives Phase 1, spawns `subagent` and
+> `external-agent` specialists in parallel, and invokes Phase 2 synthesis
+> automatically. `skill`, `doc`, and `human` targets are surfaced to the user
+> for manual handling; full target-type dispatch is a planned follow-up.
 
 #### Parseable Phase 1 Output Contract
 
@@ -234,7 +278,8 @@ exact shape without updating the skill:
 
 - `## Consultation Requests` heading: marks the start of the specialist list
 - `### [Specialist Agent Name]`: a level-3 heading for each specialist
-- `**Agent:** \`[agent-name]\``: agent slug, backtick-quoted, on its own line
+- `**Agent:** \`[agent-name]\``: agent slug, backtick-quoted, on its own line;
+  emitted for `subagent` and `external-agent` targets only
 - `**Prompt:**`: on its own line, immediately followed by a blockquote (lines
   prefixed with `> `) containing the full prompt for that specialist
 - `## Next Step` heading: signals end of consultation requests; used as a
@@ -247,6 +292,24 @@ exact shape without updating the skill:
   this heading for backward compatibility; it does not fall between
   `## Consultation Requests` and `## Next Step` and does not affect
   existing specialist-extraction logic.
+
+The following are **additive anchors**. Existing parsers MAY ignore them.
+Parsers that match only `**Agent:**` and `**Prompt:**` continue to work:
+`skill`, `doc`, and `human` requests carry no `**Agent:**` line and are
+therefore naturally surfaced to the user as non-spawnable by existing parsers.
+
+- `**Target Type:** [type]`: immediately after each `### <Name>` heading;
+  one of `subagent`, `skill`, `doc`, `human`, `external-agent`. Parsers
+  MAY branch on this value to determine dispatch behavior. Full target-type
+  dispatch in `/plan-implementation` is a deliberate follow-up change.
+- `**Skill:** [slug]`: emitted for `skill` targets; carries the skill slug.
+- `` **Doc:** `[path]` ``: emitted for `doc` targets; carries the file path.
+- `**Contact:** [name-or-role]`: emitted for `human` targets; carries the
+  contact identifier.
+
+For the full caller-side dispatch patterns per target type, see the
+[Routing Target Types](../README.md#routing-target-types) section of the
+top-level README.
 
 When Phase 1 returns zero consultation requests (section absent, empty, or
 notes "No registered specialists matched this issue"), the skill treats Phase 1

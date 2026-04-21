@@ -307,6 +307,120 @@ protocol in action.
 
 ---
 
+## Routing Target Types
+
+The Tech Lead's routing table supports five target types. Every registered
+specialist entry MAY declare a target type; entries without a declared type
+default to `subagent` and existing projects require no migration.
+
+| Target Type | What it is | How to register |
+|---|---|---|
+| `subagent` | A local Claude Code sub-agent (default) | `/add-specialist my-agent` |
+| `skill` | A skill invocation that produces the answer | `/add-specialist my-skill skill write-runbook` |
+| `doc` | A document the user should read before proceeding | `/add-specialist my-doc doc docs/security/review.md` |
+| `human` | A named person or role whose judgment is required | `/add-specialist my-gate human "Alice Chen (CISO)"` |
+| `external-agent` | A sub-agent in another installed plugin | `/add-specialist my-ext external-agent plugin-x:agent-y` |
+
+When the Tech Lead matches a registered specialist during Phase 1, it emits a
+`**Target Type:**` line on the consultation request immediately after the
+`### <Name>` heading. The caller reads this line to determine how to handle
+the request.
+
+### Caller-Side Dispatch Patterns
+
+**`subagent`**
+
+Spawn via the Agent tool using the slug on the `**Agent:**` line:
+
+```
+**Target Type:** subagent
+**Agent:** `golang-pro`
+**Prompt:**
+> [prompt text]
+```
+
+Feed the specialist's response back to the Tech Lead for Phase 2 synthesis.
+This is the current behavior and the default for all existing registered
+entries. See the
+[Plan Implementation example](#plan-implementation-for-a-refined-story-with-the-tech-lead)
+for a real-world illustration.
+
+**`skill`**
+
+Invoke the named skill with the emitted prompt as input. Feed the skill's
+output into Phase 2 like any specialist response:
+
+```
+**Target Type:** skill
+**Skill:** write-runbook
+**Prompt:**
+> [what the skill should produce for this issue]
+```
+
+Example scenario: an operational question routes to `/write-runbook` to
+produce a structured runbook draft. The draft feeds Phase 2 as the
+"specialist response."
+
+**`doc`**
+
+Cite the file path in the plan's dependencies. The plan notes "Read
+`<path>` before starting." No Phase 2 feedback loop:
+
+```
+**Target Type:** doc
+**Doc:** `docs/architecture/auth-decisions.md`
+**Prompt:**
+> [what to look for when reading this document]
+```
+
+Example scenario: a security-adjacent change routes to an ADR file that
+documents the approved authentication pattern. The user reads the ADR; no
+agent is spawned.
+
+**`human`**
+
+Pause the plan with an explicit escalation notice naming the contact and
+quoting the prompt as the question being asked. The user owns the handoff:
+
+```
+**Target Type:** human
+**Contact:** Alice Chen (CISO)
+**Prompt:**
+> [the question that requires Alice's judgment]
+```
+
+Example scenario: a change touching PII storage routes to the named security
+reviewer. The plan notes the escalation; automation stops here and the user
+handles the handoff out of band.
+
+**`external-agent`**
+
+Spawn via the Agent tool using the namespaced slug on the `**Agent:**` line,
+exactly as you would a local subagent. Feed the response back to Phase 2:
+
+```
+**Target Type:** external-agent
+**Agent:** `plugin-x:compliance-agent`
+**Prompt:**
+> [prompt for the external specialist]
+```
+
+Example scenario: a compliance check routes to a specialist agent defined in a
+separate compliance plugin installed in the project.
+
+### Back-Compat Guarantee
+
+Entries without a declared target type default to `subagent`. Existing
+`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md` files require
+no migration. The Tech Lead emits `**Target Type:** subagent` on any
+consultation request whose registered entry has no type suffix.
+
+To register a non-`subagent` specialist, use `/add-specialist` with the
+`--target-type` flag or the positional target-type token. See
+[`/add-specialist`](#agents-and-skills) in the Agents and Skills table.
+
+---
+
 ## Quick Start
 
 Add the marketplace to your Claude Code project, then install the plugin:
