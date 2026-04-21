@@ -374,6 +374,30 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Skill | `/plan-implementation`     | Drive the Tech Lead's two-phase consultation end-to-end: routing, specialist fan-out, and synthesis |
 | Skill | `/add-specialist`          | Register a specialist agent for Tech Lead routing (one step, no trigger-phrase copying)    |
 | Skill | `/audit-routing-table`     | Audit Tech Lead routing health: orphan overrides, broken pointers, redundant rows, thin descriptions |
+| Skill | `/audit-agent-memory`      | Audit a single agent's project memory for state leakage, dead links, and size; advisory and read-only |
+
+### Audit Skills
+
+Two skills provide memory hygiene coverage at different levels:
+
+**`/audit-routing-table`** inspects the Tech Lead's specialist routing model
+for orphan overrides, broken file pointers, redundant override rows, and thin
+agent descriptions. Run it after onboarding, after adding specialists, or when
+the Tech Lead appears to be missing consultation requests.
+
+**`/audit-agent-memory <agent-name>`** inspects a single agent's project
+memory directory (`.claude/agent-memory/engineering-leaders-<agent-name>/`)
+for four hygiene categories: state-like content (dated phase trackers,
+enumerated file lists, work-item tables that belong in an issue tracker),
+dead-link files (files that exist in the directory but are no longer
+referenced from `MEMORY.md`), and size signals (individual files or the full
+directory exceeding documented token thresholds). Run it as periodic hygiene,
+before re-onboarding an agent, or when an agent feels slower or noisier than
+expected.
+
+Both skills are read-only and advisory: they do not delete, move, or rewrite
+any file. Each finding carries a recommended action the user confirms or
+dismisses. The two audits are complementary and can be run independently.
 
 ## Architecture
 
@@ -499,6 +523,8 @@ claude-code-engineering-leaders/
     ├── audit-routing-table/
     │   ├── SKILL.md
     │   └── MIGRATION.md
+    ├── audit-agent-memory/
+    │   └── SKILL.md
     └── plan-implementation/
         ├── SKILL.md
         └── test-fixtures/
