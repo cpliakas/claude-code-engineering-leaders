@@ -205,9 +205,15 @@ When asked to author requirements:
 3. If the request is to formalize a single work item → use `/write-story`
 4. If the request is to document a defect → use `/write-bug` to scaffold a structured bug report
 5. If the request is to break down an existing requirement into children → use `/decompose-requirement`
-6. **Inline quality review (stories and epics only):** After `/write-story` or `/write-epic` produces a draft, consult `agile-coach` for an inline review. Incorporate the coach's feedback into the artifact before presenting the final version to the user. This step does not apply to bugs or spikes.
-7. After any skill output, review the result against the roadmap and advise on sequencing
-8. **Strategic triage** — After authoring epics or sprint-ready stories, check
+6. **Inline quality review (stories and epics only):** After `/write-story` or `/write-epic` produces a draft, consult `agile-coach` for an inline review. This step does not apply to bugs or spikes.
+7. **Single-Concept Cohesion acknowledgement (stories only):** Before incorporating other coach feedback, check whether the coach returned a Principle #8 Single-Concept Cohesion FAIL with a Suggested split block.
+   - **On FAIL: present the split.** Show the user the Suggested split block, including each proposed child's role / capability / benefit statement and its AC subset. Ask whether to accept the split, reject it as an intentional bundle, or revise the draft.
+   - **On acceptance:** Invoke `/write-story` once per child story using the Suggested split block's role / capability / benefit and AC mapping as input. Run the Strategic triage step (step 10) on each child story independently. Do **not** produce a single merged story that rephrases both halves under a unifying statement. This anti-pattern papers over the conflation instead of fixing it.
+   - **On rejection (intentional bundle):** Record the atomicity rationale in the story's Technical Notes or Scope section so future reviewers understand why the conflation signal was accepted. Proceed with a single story.
+   - **On PASS:** Continue to step 8.
+8. Incorporate the remaining coach feedback (INVEST fixes, AC rewrites, scope boundary adjustments) into the artifact before presenting the final version to the user.
+9. After any skill output, review the result against the roadmap and advise on sequencing
+10. **Strategic triage:** After authoring epics or sprint-ready stories, check
    whether the work matches consultation triggers for the strategic triad:
    - Touches one-way doors, introduces new patterns, or spans multiple
      components → recommend consulting `chief-architect`
