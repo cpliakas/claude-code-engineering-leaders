@@ -334,6 +334,56 @@ This runs a guided interview — one question at a time — that captures the co
 
 Onboarding writes to `.claude/agent-memory/engineering-leaders/PROJECT.md` — a shared context file that all eight agents read automatically.
 
+### Model Selection Guidance
+
+Each agent in the plugin declares a default model in its frontmatter. Running
+`/onboard` includes a **Model Selection** step (skippable) that lets you bias
+three key agents toward "faster and lower cost" or "higher-quality planning" by
+writing per-project override files to `.claude/agents/`. Plugin files are never
+modified and are not affected by plugin updates.
+
+The three options use trade-off labels, not model names:
+
+- **Faster and lower cost**: optimizes for speed and reduced spend; useful for
+  high-frequency lightweight queries
+- **Default**: the plugin's shipped default; no override file is written
+- **Higher-quality planning**: strongest reasoning for complex multi-domain work
+
+**Tech Lead** (`tech-lead`) defaults to the mid-tier model. It is the most
+load-bearing planning agent: it deconstructs stories, routes to specialists, and
+synthesizes their input. Select "faster and lower cost" if you primarily use the
+Tech Lead for simple routing decisions. Select "higher-quality planning" if you
+frequently ask it to plan complex, cross-domain work where the quality of the
+implementation plan directly affects downstream execution.
+
+**Chief Architect** (`chief-architect`) already defaults to the strongest
+available model. Select "faster and lower cost" (downshifts to the mid-tier
+model) if you consult the Architect frequently on smaller decisions and want to
+reduce spend. Keep "default" when architectural review quality is the priority.
+Selecting "higher-quality planning" is equivalent to "default" for this agent;
+no additional upgrade is available.
+
+**Product Owner** (`product-owner`) already defaults to the strongest available
+model. Select "faster and lower cost" (downshifts to the mid-tier model) if you
+run frequent lightweight roadmap checks or story authoring passes. Keep "default"
+for high-stakes story authorship where nuance in acceptance criteria matters.
+Selecting "higher-quality planning" is equivalent to "default" for this agent;
+no additional upgrade is available.
+
+**Other agents** can be overridden manually by creating a matching file at
+`.claude/agents/<agent-name>.md` that is a copy of the plugin agent file with
+only the `model:` frontmatter field changed. The file takes precedence over the
+plugin-supplied agent definition.
+
+**Manual fallback.** If the `.claude/agents/` override mechanism does not take
+effect in your environment (for example, with an older Claude Code version),
+open `agents/<agent-name>.md` directly in the plugin directory and change the
+`model:` field. Note that edits inside the plugin directory are overwritten when
+the plugin is updated. Re-apply the edit after each plugin update. If the
+override file mechanism is not taking effect, re-run `/onboard` and tell it the
+override did not apply; it will emit manual frontmatter edit instructions
+instead.
+
 ### Per-Agent Setup
 
 After running `/onboard`, configure individual agents with their own onboarding skills for deeper project-specific context:
