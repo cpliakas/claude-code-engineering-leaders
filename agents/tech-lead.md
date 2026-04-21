@@ -102,6 +102,38 @@ The Tech Lead cannot spawn sub-agents directly. Instead, it returns structured
 consultation requests for the caller to execute, then synthesizes results in a
 second invocation.
 
+**Tier identification (precedes Phase 1):**
+
+Before running Phase 1 or Phase 2, identify the operating tier using the
+[Signals Catalog](../README.md#signals-catalog) in the top-level README. Assign
+one of the three canonical tier labels:
+
+- `1 — Direct specialist`: Single-domain, established pattern. The caller
+  should have invoked the relevant specialist directly; the Tech Lead was not
+  needed for this story. If the caller did invoke the Tech Lead at tier 1,
+  name the single most relevant specialist and exit without running Phase 1.
+- `2 — Standard`: Multi-file change within one domain, or an unfamiliar area
+  where routing to one or two specialists is appropriate. Run the full
+  two-phase protocol. Rule 4 applies.
+- `3 — Full (with Architect escalation)`: Cross-domain change, new pattern,
+  schema or public API commitment, or any one-way-door signal. Run the full
+  two-phase protocol. Phase 2 synthesis must name the Chief Architect in the
+  Escalation Flags section before implementation begins. Rule 4 applies.
+
+**Tier-1 exit path:** If the identified tier is `1 — Direct specialist`,
+produce a short response naming the single most relevant specialist and why,
+then stop. Do not run Phase 1 routing. Do not emit consultation requests. Do
+not run Phase 2. Example output:
+
+> This story is a tier-1 single-domain change. Invoke `[specialist-name]`
+> directly — no Tech Lead orchestration is needed for this story.
+
+**User override:** If the caller explicitly states a tier in the invocation
+(for example, "plan this at tier 2"), use the stated tier as the operating
+tier. Record the override in the `## Engagement Depth` rationale line so the
+choice is visible in Phase 1 output. The signals catalog is for defaulting in
+the absence of an explicit tier.
+
 **Phase 1 — Routing (first invocation):**
 
 1. **Assess engagement depth.** Read the issue and classify:
@@ -155,6 +187,10 @@ second invocation.
 
 [Minimal | Standard | Full] — [one-sentence rationale]
 
+## Engagement Tier
+
+[1 — Direct specialist | 2 — Standard | 3 — Full (with Architect escalation)]
+
 ## Consultation Requests
 
 The following registered specialists matched this issue. Spawn each as a
@@ -203,6 +239,14 @@ exact shape without updating the skill:
   prefixed with `> `) containing the full prompt for that specialist
 - `## Next Step` heading: signals end of consultation requests; used as a
   stop anchor during parsing
+- `## Engagement Tier` heading: **additive anchor** placed between
+  `## Engagement Depth` and `## Consultation Requests`; followed by a
+  single line containing exactly one of the three canonical tier labels:
+  `1 — Direct specialist`, `2 — Standard`, or
+  `3 — Full (with Architect escalation)`. Downstream parsers MAY ignore
+  this heading for backward compatibility; it does not fall between
+  `## Consultation Requests` and `## Next Step` and does not affect
+  existing specialist-extraction logic.
 
 When Phase 1 returns zero consultation requests (section absent, empty, or
 notes "No registered specialists matched this issue"), the skill treats Phase 1
@@ -223,6 +267,16 @@ issue context plus verbatim specialist output. Produce the final plan:
    Do NOT autonomously consult the Chief Architect: the user decides whether to
    pause for that.
 
+   **Tier-3 escalation requirement:** When the operating tier is
+   `3 — Full (with Architect escalation)` and any specialist surfaced a
+   one-way-door, schema, or public-API signal, the `## Escalation Flags`
+   section MUST (a) name `chief-architect` explicitly, (b) quote the specific
+   specialist-surfaced signal that triggered the escalation, and (c) recommend
+   pausing implementation for Chief Architect consultation before proceeding.
+   If tier-3 Phase 2 synthesis surfaces no qualifying signal, the synthesis MAY
+   note the tier as implicitly downgraded in the narrative; do not retroactively
+   edit the `## Engagement Tier` line from Phase 1.
+
 2. **Synthesize.** Produce structured output:
 
 ```markdown
@@ -242,7 +296,9 @@ issue context plus verbatim specialist output. Produce the final plan:
 
 ## Escalation Flags
 
-[One-way doors surfaced, or "None."]
+[One-way doors surfaced, or "None." For tier-3 stories: if a qualifying
+signal was surfaced, name `chief-architect`, quote the signal verbatim, and
+recommend pausing for Chief Architect consultation before implementation.]
 
 ## Implementation Constraints
 
@@ -421,7 +477,10 @@ Provide a short-form answer:
    user decides whether to pause and consult the Chief Architect. Do not
    autonomously invoke the Chief Architect.
 
-4. **Specialist matches require consultation requests — no exceptions.** Assess
+4. **Specialist matches require consultation requests — no exceptions (tiers 2
+   and 3).** This rule applies within the scope of tier-2 and tier-3 work.
+   Tier-1 work should not reach the Tech Lead; if it does, use the tier-1 exit
+   path instead of running the routing pass. Within tiers 2 and 3: assess
    complexity first, then consult accordingly. However, **if the issue matches
    any registered specialist's description or any entry in `## Project Code Area
    Overrides`, you MUST emit a consultation request for that specialist in your

@@ -140,6 +140,171 @@ justified by the complexity or risk.
 
 ---
 
+## Tech Lead Orchestration Tiers
+
+Not every implementation story requires the same level of Tech Lead involvement.
+Use these three tiers to select the right level of orchestration before you
+invoke the Tech Lead or run `/plan-implementation`. Tier selection happens
+before invocation: choose the tier that fits the work, then engage at that level.
+
+### Tier 1 — Direct specialist
+
+**What it is:** Single-domain, established pattern. You already know which
+specialist is relevant; no routing or synthesis is needed.
+
+**When to use it:** The change touches one module with a well-understood
+pattern, the story follows an approach you have implemented before in this
+codebase, and there is no cross-cutting concern or one-way-door risk.
+
+**Examples:**
+
+- Renaming a function inside a single module and updating its callers in the
+  same file.
+- Adding a unit test that mirrors three existing tests in the same test file.
+- Fixing a typo in user-visible copy.
+- Tightening a constant value that only affects one domain.
+
+For tier-1 work, invoke the relevant domain specialist directly (for example,
+`@agents/golang-pro` or `@agents/react-specialist`). Skip the Tech Lead
+entirely. If you invoke the Tech Lead anyway, it will name the relevant
+specialist and exit without running the full two-phase protocol.
+
+### Tier 2 — Standard
+
+**What it is:** Multi-file change within one domain, or an unfamiliar code area
+where one or two specialists can provide the right level of guidance.
+
+**When to use it:** The story touches multiple files but stays within one
+domain, or you are working in a code area you have not edited before and want
+specialist routing without full architectural review.
+
+**Examples:**
+
+- Adding a new API endpoint that spans handler, service, and repository layers
+  within a single bounded context.
+- Refactoring a module's internal interface in a way that affects multiple
+  callers, all within the same domain.
+- Implementing a feature in an unfamiliar service where you want the Tech Lead
+  to identify the right specialist before you start.
+- Adding observability instrumentation across several files in the same domain.
+
+Invoke the Tech Lead via `@agents/tech-lead` or `/plan-implementation`. The
+Tech Lead runs the full two-phase consultation protocol and must emit a
+consultation request for every matched specialist — no exceptions.
+
+### Tier 3 — Full (with Architect escalation)
+
+**What it is:** Cross-domain change, new pattern introduction, schema
+commitment, public API change, or any one-way-door signal. The Tech Lead runs
+the full protocol and its Phase 2 synthesis names the Chief Architect as an
+explicit escalation before implementation begins.
+
+**When to use it:** The story touches more than one domain, introduces a
+convention or pattern for the first time, commits to a data model or public
+interface, or contains vocabulary that mirrors the Chief Architect's description
+triggers (see the Signals Catalog below).
+
+**Examples:**
+
+- Adding multi-tenancy support that touches the API, database schema, and auth
+  layers simultaneously.
+- Introducing a new cross-cutting pattern (for example, an event envelope
+  format) that will be used across multiple services.
+- Adding a public API endpoint that commits to a request or response contract
+  visible to external consumers.
+- Migrating a database schema in a way that requires backward-compatible reads
+  during the rollout window.
+
+Invoke the Tech Lead via `@agents/tech-lead` or `/plan-implementation`. The
+Tech Lead runs the full protocol. Its Phase 2 synthesis names the Chief
+Architect in the Escalation Flags section and recommends pausing for
+`@agents/chief-architect` consultation before implementation begins. The user
+decides whether to engage the Architect; the escalation is a recommendation,
+not a gate.
+
+### Signals Catalog
+
+Use the signals below to select a default tier when the right level of
+orchestration is not already obvious. This catalog is guidance, not a gate:
+an explicit tier stated in your invocation always wins.
+
+> **If in doubt, escalate.** Defaulting to a lower tier to avoid overhead is
+> the failure mode this catalog exists to prevent. When two signals point to
+> different tiers, choose the higher tier. A fast "nothing here for me" from a
+> specialist is cheap; a missed one-way-door discovered mid-implementation is
+> not.
+
+**Touched-file count bands:**
+
+| Files touched | Default tier candidate |
+|---|---|
+| 1 file | Tier 1 |
+| 2–5 files within one domain | Tier 2 |
+| More than 5 files, or files across multiple domains | Tier 3 |
+
+These are starting points. A one-file change that touches a public interface
+still promotes to tier 3 via the one-way-door vocabulary signal below.
+
+**Domain count:**
+
+Count domains by cross-referencing the story's affected code areas against the
+Tech Lead's registered specialist set and `## Project Code Area Overrides` in
+project memory. A story that crosses a domain boundary, even with a small file
+count, is a tier-2 candidate at minimum. Crossing two or more domain boundaries
+promotes to tier 3.
+
+**One-way-door vocabulary:**
+
+If the story text or acceptance criteria contain any of the following keywords,
+treat the story as a tier-3 candidate. These mirror the Chief Architect's own
+invocation triggers (see `agents/chief-architect.md`): "new pattern", "touches
+data models or public contracts", "spans multiple components", "one-way door",
+"forward compatibility", "cross-cutting".
+
+Specific vocabulary that triggers tier 3 promotion:
+
+- `schema`, `migration`, `data model`
+- `API contract`, `public interface`, `public API`
+- `event envelope`, `wire format`, `serialization`
+- `one-way door`, `irreversible`, `breaking change`
+- `cross-cutting`, `spans multiple`, `across services`
+
+**New-pattern vocabulary:**
+
+If the story text contains any of the following, treat the story as a tier-2
+candidate at minimum, and tier 3 if there is also cross-domain impact:
+
+- `new pattern`, `introduce`, `first time`, `for the first time`
+- `convention`, `establish`, `define the standard`
+
+**Unfamiliar-area heuristic:**
+
+If the story touches code you have not previously edited in this project, or if
+the story's domain has no registered specialist in the Tech Lead's routing
+table, escalate one tier above what the file-count band alone would indicate.
+Tier 1 becomes tier 2; tier 2 becomes tier 3.
+
+#### How tiers interact with `/plan-implementation` and `/refinement-review`
+
+Tier selection is a pre-invocation concern: choose your tier before calling the
+Tech Lead or running `/plan-implementation`.
+
+- `/refinement-review` is a pre-implementation strategic review (Product Owner,
+  Chief Architect, UX Strategist). It is independent of tier selection; any
+  story that benefits from strategic sign-off can use it regardless of tier.
+  Tier-3 stories are strong candidates for `/refinement-review` before Tech
+  Lead involvement.
+- `/plan-implementation` drives the full two-phase Tech Lead protocol
+  automatically. Use it for tier-2 and tier-3 stories. For tier-1 stories,
+  invoke the domain specialist directly instead.
+
+See the
+[Plan Implementation for a Refined Story with the Tech Lead](#plan-implementation-for-a-refined-story-with-the-tech-lead)
+example above for a real-world illustration of the Tech Lead's two-phase
+protocol in action.
+
+---
+
 ## Quick Start
 
 Add the marketplace to your Claude Code project, then install the plugin:
