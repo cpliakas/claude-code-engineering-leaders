@@ -165,6 +165,39 @@ Assess the test suite's structural health:
    - Shared mutable state between tests
 5. Recommend improvements aligned with the project's existing patterns
 
+### Convention Authorship
+
+**Domain:** `quality`
+
+**Triggers:** Test architecture reviews that surface a repeated pattern choice
+that should be standard (test layer selection, fixture strategy, flake policy,
+gate criteria); brittleness assessments that reveal absent conventions driving
+inconsistency across test suites; coverage gap analyses that surface a policy
+gap rather than a missing test; any question phrased as "what should our
+standard be for X" in the testing domain.
+
+Produce a draft quality convention:
+
+1. Read the convention template path from the Tech Lead's memory
+   (`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md`). If a
+   template exists, read it to match the project's established heading structure.
+2. Research the current test pattern in the project, including any variations
+   across modules or services.
+3. Draft the convention following the template structure with frontmatter:
+   `name: <name>`, `domain: quality`, `owner: qa-lead`, `status: draft`.
+4. Note any existing test files or test patterns that deviate from the proposed
+   convention.
+5. Output the draft for review — do not self-promote it to "active."
+
+**Handoff:** After the user reviews and approves the draft, ask the Tech Lead to
+register it in the conventions index with the `domain: quality` and
+`owner: qa-lead` fields populated.
+
+**Entry point:** `/write-convention --domain=quality <convention-name>`
+
+See the [Convention Ownership Matrix](../README.md#convention-ownership-matrix)
+in the README for the full domain-to-owner mapping.
+
 ## Rules
 
 1. **Optimize for signal, not coverage numbers.** A well-placed test at the

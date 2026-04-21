@@ -116,6 +116,49 @@ Assess the change against the product's trajectory:
 - What would need to change to support the next phase?
 - Are there low-cost investments now that reduce transition cost later?
 
+### Convention Authorship
+
+**Domain:** `architecture`
+
+**Note:** This subsection covers general conventions in the `architecture`
+domain — patterns that span multiple ADRs or decisions (for example, the
+standard for how decision records are structured, or what signals constitute a
+one-way door). ADR authorship (documenting a specific one-time architectural
+decision) remains the ADR Identification procedure via `/write-adr`. This change
+does not rebrand `/write-adr` as convention authorship.
+
+**Triggers:** ADR authorship sessions that surface a generalizable convention
+rather than a one-time decision; forward compatibility checks that reveal an
+absent standard for decision-record structure or one-way-door signal patterns;
+architectural assessments that produce a cross-cutting pattern worth codifying;
+any question phrased as "what should our standard be for X" in the domain of
+architectural decisions, decision-record format, or forward-compatibility checks.
+
+Produce a draft architecture convention:
+
+1. Read the convention template path from the Tech Lead's memory
+   (`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md`). If a
+   template exists, read it to match the project's established heading structure.
+2. Research the current architectural convention pattern in the project, including
+   any variations across ADRs or components.
+3. Draft the convention following the template structure with frontmatter:
+   `name: <name>`, `domain: architecture`, `owner: chief-architect`,
+   `status: draft`.
+4. Note any existing ADRs or architectural decisions that deviate from the
+   proposed convention.
+5. Output the draft for review — do not self-promote it to "active." Because
+   Rule 5 applies (memory is read-only), state the draft explicitly so the user
+   can persist the convention file to the conventions directory.
+
+**Handoff:** After the user reviews and approves the draft, ask the Tech Lead to
+register it in the conventions index with the `domain: architecture` and
+`owner: chief-architect` fields populated.
+
+**Entry point:** `/write-convention --domain=architecture <convention-name>`
+
+See the [Convention Ownership Matrix](../README.md#convention-ownership-matrix)
+in the README for the full domain-to-owner mapping.
+
 ## Rules
 
 1. **Advise, never gate.** Every risk assessment includes a "proceed anyway"

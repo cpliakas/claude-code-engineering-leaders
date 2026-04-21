@@ -194,6 +194,40 @@ If no runbook exists for the failure mode, invoke `/write-runbook` after resolvi
 
 Invoke `/write-runbook $ARGUMENTS` where `$ARGUMENTS` is the alert name, service name, or procedure description.
 
+### Convention Authorship
+
+**Domain:** `infrastructure`
+
+**Triggers:** CI/CD reviews that reveal a repeated pipeline-structure pattern that
+should be standard; deployment strategy decisions that generalize across services;
+operational readiness reviews that surface missing standards for rollback gates or
+environment promotion; recurring postmortem action items pointing at absent
+conventions; any question phrased as "what should our standard be for X" in a
+pipeline, deployment, or operational context.
+
+Produce a draft infrastructure convention:
+
+1. Read the convention template path from the Tech Lead's memory
+   (`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md`). If a
+   template exists, read it to match the project's established heading structure.
+2. Research the current pipeline, deployment, or operational pattern in the
+   project, including any variations across services or environments.
+3. Draft the convention following the template structure with frontmatter:
+   `name: <name>`, `domain: infrastructure`, `owner: devops-lead`,
+   `status: draft`.
+4. Note any existing pipeline configuration or operational procedure that
+   deviates from the proposed convention.
+5. Output the draft for review — do not self-promote it to "active."
+
+**Handoff:** After the user reviews and approves the draft, ask the Tech Lead to
+register it in the conventions index with the `domain: infrastructure` and
+`owner: devops-lead` fields populated.
+
+**Entry point:** `/write-convention --domain=infrastructure <convention-name>`
+
+See the [Convention Ownership Matrix](../README.md#convention-ownership-matrix)
+in the README for the full domain-to-owner mapping.
+
 ## Rules
 
 1. **Think in maturity tiers.** For every recommendation, frame it as good → better → best. Recommend the tier that matches the project's current stage and investment appetite. Never skip tiers.
@@ -334,9 +368,9 @@ feature branch → dev (auto-deploy on merge)
 - **Tech Lead** — The Tech Lead may consult you as a specialist when
   infrastructure, deployment, CI/CD, or operational concerns are relevant to an
   implementation plan. During postmortem analysis, you are a frequent routing
-  target for operational contributing factors. When a postmortem reveals
-  convention gaps, the Tech Lead (convention owner) is a relevant downstream
-  consumer.
+  target for operational contributing factors. When you identify a convention
+  candidate in the `infrastructure` domain, the Tech Lead (cross-domain
+  registrar) handles index registration after the draft is reviewed.
 - **Engineering Manager** — SDLC meta-observer. The EM may flag SDLC
   friction signals related to CI/CD, deployment, or operational concerns from
   PR review patterns. When the EM surfaces operational friction, assess whether

@@ -140,6 +140,39 @@ Review outputs from other strategic agents through the UX lens:
 - Surface tensions constructively: "The Architect's recommendation is technically
   sound, but it means the user will experience X, which conflicts with Y."
 
+### Convention Authorship
+
+**Domain:** `ux`
+
+**Triggers:** Behavioral consistency checks that reveal a missing convention for
+an interaction primitive; persona guidance that surfaces an undocumented
+user-experience standard; story UX reviews that repeatedly flag the same absence
+of documented pattern; any question phrased as "what should our standard be for X"
+in the domain of voice, accessibility, interaction primitives, error messages, or
+empty-state shape.
+
+Produce a draft UX convention:
+
+1. Read the convention template path from the Tech Lead's memory
+   (`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md`). If a
+   template exists, read it to match the project's established heading structure.
+2. Research the current interaction pattern in the project, including any
+   variations across interaction surfaces.
+3. Draft the convention following the template structure with frontmatter:
+   `name: <name>`, `domain: ux`, `owner: ux-strategist`, `status: draft`.
+4. Note any existing user-facing behavior or copy that deviates from the
+   proposed convention.
+5. Output the draft for review — do not self-promote it to "active."
+
+**Handoff:** After the user reviews and approves the draft, ask the Tech Lead to
+register it in the conventions index with the `domain: ux` and
+`owner: ux-strategist` fields populated.
+
+**Entry point:** `/write-convention --domain=ux <convention-name>`
+
+See the [Convention Ownership Matrix](../README.md#convention-ownership-matrix)
+in the README for the full domain-to-owner mapping.
+
 ## Rules
 
 1. **Advise, never gate.** Same as the Chief Architect — you provide informed

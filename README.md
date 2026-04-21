@@ -421,6 +421,42 @@ To register a non-`subagent` specialist, use `/add-specialist` with the
 
 ---
 
+## Convention Ownership Matrix
+
+Every convention belongs to a single domain, and each domain has one declared
+owner agent responsible for authoring drafts in that domain. Use
+`/write-convention --domain=<domain>` as the single entry point for convention
+authorship across all domains.
+
+| Domain | Owner Agent | Example Conventions | Authoring Command |
+|---|---|---|---|
+| `tactical-implementation` | `tech-lead` | ID generation patterns, error-envelope shape, retry patterns, time serialization | `/write-convention --domain=tactical-implementation` |
+| `infrastructure` | `devops-lead` | CI/CD pipeline structure, deployment stage gates, rollback procedures, runbook format | `/write-convention --domain=infrastructure` |
+| `quality` | `qa-lead` | Test layer selection, fixture strategy, flake policy, quality gate criteria | `/write-convention --domain=quality` |
+| `ux` | `ux-strategist` | Error-message voice, accessibility baselines, empty-state shape, interaction primitives | `/write-convention --domain=ux` |
+| `architecture` | `chief-architect` | ADR format, decision-record structure, one-way-door signal patterns | `/write-convention --domain=architecture` |
+
+Conventions index entries and convention documents without a declared `domain`
+or `owner` field default to `domain: tactical-implementation` and
+`owner: tech-lead`. Existing projects require no migration.
+
+Regardless of domain, the **Tech Lead** remains the cross-domain registrar: it
+writes the index entry after the draft is reviewed and approved by a human. The
+Tech Lead also performs cross-domain review (surfacing dependencies between
+domains) and gap identification (naming the domain and owner when an
+inconsistency surfaces).
+
+Each domain owner's Convention Authorship procedure is documented in the
+agent definition:
+
+- [Tech Lead — tactical-implementation](agents/tech-lead.md#convention-authorship)
+- [DevOps Lead — infrastructure](agents/devops-lead.md#convention-authorship)
+- [QA Lead — quality](agents/qa-lead.md#convention-authorship)
+- [UX Strategist — ux](agents/ux-strategist.md#convention-authorship)
+- [Chief Architect — architecture](agents/chief-architect.md#convention-authorship)
+
+---
+
 ## Quick Start
 
 Add the marketplace to your Claude Code project, then install the plugin:
@@ -514,7 +550,7 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | ----- | -------------------------- | ------------------------------------------------------------------------------------------ |
 | Agent | `chief-architect`          | Strategic technical advisor for architecture decisions, trade-offs, and ADRs               |
 | Agent | `product-owner`            | Roadmap keeper that advises on sequencing, priorities, and phase transitions                |
-| Agent | `tech-lead`                | Tactical orchestrator for implementation plans, specialist routing, and convention ownership |
+| Agent | `tech-lead`                | Tactical orchestrator for implementation plans, specialist routing, and cross-domain convention registration |
 | Agent | `engineering-manager`      | SDLC meta-observer for tech debt scans, convention health, and code churn analysis         |
 | Agent | `devops-lead`              | Infrastructure strategy lead for CI/CD design, deployment doctrine, and incident response  |
 | Agent | `qa-lead`                  | QA strategy lead for test architecture, coverage gaps, and risk-based prioritization       |
@@ -525,6 +561,7 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Skill | `/write-epic`              | Write an epic specification with structured metadata compatible with GitHub Issues and Jira |
 | Skill | `/write-story`             | Write a user story with acceptance criteria and INVEST validation                          |
 | Skill | `/write-bug`               | Scaffold a RIMGEN-validated bug report with reproduction steps, severity, and priority     |
+| Skill | `/write-convention`        | Author a convention in a declared domain; routes to the correct owner agent via `--domain` argument |
 | Skill | `/write-spike`             | Produce a structured findings document for a topic too uncertain to story-write directly   |
 | Skill | `/refinement-review`       | Convene the PO, Architect, and UX Strategist in parallel on a story draft; produces a readiness verdict before implementation |
 | Skill | `/refine-story`            | Score a story draft against INVEST and agile coaching principles                           |
@@ -641,7 +678,7 @@ Agents form a digital leadership team with clear delegation chains. The `tech-le
 │              │  tech-lead   │  Tactical orchestrator     │
 │              │              │  Routes to specialists,    │
 │              │              │  synthesizes input,        │
-│              │              │  owns conventions          │
+│              │              │  convention registrar      │
 │              └──────┬───────┘                            │
 └─────────────────────┼────────────────────────────────────┘
                       │
@@ -712,6 +749,8 @@ claude-code-engineering-leaders/
     ├── write-epic/SKILL.md
     ├── write-story/SKILL.md
     ├── write-bug/SKILL.md
+    ├── write-convention/
+    │   └── SKILL.md
     ├── write-spike/SKILL.md
     ├── refine-story/SKILL.md
     ├── refinement-review/SKILL.md
