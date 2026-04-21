@@ -166,8 +166,9 @@ codebase, and there is no cross-cutting concern or one-way-door risk.
 
 For tier-1 work, invoke the relevant domain specialist directly (for example,
 `@agents/golang-pro` or `@agents/react-specialist`). Skip the Tech Lead
-entirely. If you invoke the Tech Lead anyway, it will name the relevant
-specialist and exit without running the full two-phase protocol.
+entirely. If you invoke the Tech Lead anyway, it will name the single most
+relevant specialist with a brief rationale and stop. It does not run Phase 1
+routing or emit consultation requests.
 
 ### Tier 2 — Standard
 
@@ -190,7 +191,7 @@ specialist routing without full architectural review.
 
 Invoke the Tech Lead via `@agents/tech-lead` or `/plan-implementation`. The
 Tech Lead runs the full two-phase consultation protocol and must emit a
-consultation request for every matched specialist — no exceptions.
+consultation request for every matched specialist. No exceptions.
 
 ### Tier 3 — Full (with Architect escalation)
 
@@ -216,11 +217,12 @@ triggers (see the Signals Catalog below).
   during the rollout window.
 
 Invoke the Tech Lead via `@agents/tech-lead` or `/plan-implementation`. The
-Tech Lead runs the full protocol. Its Phase 2 synthesis names the Chief
-Architect in the Escalation Flags section and recommends pausing for
-`@agents/chief-architect` consultation before implementation begins. The user
-decides whether to engage the Architect; the escalation is a recommendation,
-not a gate.
+Tech Lead runs the full protocol. If a specialist surfaces a qualifying
+one-way-door, schema, or public-API signal, its Phase 2 synthesis names
+`chief-architect` in the Escalation Flags section, quotes the surfaced signal
+verbatim, and recommends pausing for `@agents/chief-architect` consultation
+before implementation begins. The user decides whether to engage the Architect;
+the escalation is a recommendation, not a gate.
 
 ### Signals Catalog
 

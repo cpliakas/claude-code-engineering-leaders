@@ -237,6 +237,7 @@ future tier-aware behavior in skills is handled by separate changes.
 - **WHEN** `skills/refinement-review/SKILL.md` is diffed before and after
   the change
 - **THEN** no lines are added, removed, or modified
+
 ## Requirements
 ### Requirement: Three named orchestration tiers
 

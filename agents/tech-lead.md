@@ -126,7 +126,7 @@ then stop. Do not run Phase 1 routing. Do not emit consultation requests. Do
 not run Phase 2. Example output:
 
 > This story is a tier-1 single-domain change. Invoke `[specialist-name]`
-> directly — no Tech Lead orchestration is needed for this story.
+> directly. No Tech Lead orchestration is needed for this story.
 
 **User override:** If the caller explicitly states a tier in the invocation
 (for example, "plan this at tier 2"), use the stated tier as the operating
