@@ -29,7 +29,7 @@ description: |
   Convention authorship in the tactical-implementation domain flows through the tech-lead.
   </commentary>
   </example>
-tools: ["Read", "Glob", "Grep"]
+tools: ["Read", "Glob", "Grep", "Skill"]
 model: sonnet
 color: purple
 memory: project

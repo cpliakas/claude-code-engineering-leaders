@@ -14,16 +14,25 @@ if ! command -v markdownlint &> /dev/null; then
 fi
 
 # Run markdownlint, excluding line-length (MD013) and first-line-heading (MD041)
-# which are expected in agent/skill files with YAML frontmatter
-issues=$(markdownlint --disable MD013 MD041 -- "$file_path" 2>&1) || true
+# which are expected in agent/skill files with YAML frontmatter.
+# markdownlint prints findings to stderr; exit code 1 means lint findings,
+# any other non-zero code is a tool failure (bad config, node error) — stay
+# silent on those rather than feeding a stack trace to Claude as lint output.
+issues=$(markdownlint --disable MD013 MD041 -- "$file_path" 2>&1)
+rc=$?
 
-if [ -z "$issues" ]; then
+if [ "$rc" -ne 1 ] || [ -z "$issues" ]; then
   exit 0
 fi
 
+total=$(echo "$issues" | wc -l | tr -d ' ')
+trimmed=$(echo "$issues" | head -20)
+if [ "$total" -gt 20 ]; then
+  trimmed="$trimmed
+(truncated: $((total - 20)) more findings not shown)"
+fi
+
 # Report issues back to Claude as additional context
-json_issues=$(echo "$issues" | jq -Rs .)
-cat <<EOF
-{"hookSpecificOutput": {"additionalContext": "markdownlint found issues in $file_path:\n$(echo "$issues" | head -20)"}}
-EOF
+jq -n --arg path "$file_path" --arg issues "$trimmed" \
+  '{hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: ("markdownlint found issues in " + $path + ":\n" + $issues)}}'
 exit 0

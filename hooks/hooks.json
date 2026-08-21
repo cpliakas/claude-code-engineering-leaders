@@ -1,0 +1,18 @@
+{
+  "description": "markdownlint feedback on markdown writes",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/markdownlint-check.sh\"",
+            "timeout": 30,
+            "statusMessage": "Checking markdown..."
+          }
+        ]
+      }
+    ]
+  }
+}

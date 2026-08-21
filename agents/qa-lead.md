@@ -29,7 +29,7 @@ description: |
   Risk-based coverage gap analysis is core qa-lead territory.
   </commentary>
   </example>
-tools: ["Read", "Glob", "Grep", "Bash"]
+tools: ["Read", "Glob", "Grep", "Skill"]
 model: sonnet
 color: red
 memory: project

@@ -729,10 +729,12 @@ All agents use `memory: project`. The agent definition is shared via the plugin,
 ```
 claude-code-engineering-leaders/
 ├── .claude-plugin/
+│   ├── marketplace.json
 │   └── plugin.json
 ├── README.md
 ├── CLAUDE.md
 ├── hooks/
+│   ├── hooks.json
 │   └── markdownlint-check.sh
 ├── agents/
 │   ├── chief-architect.md
@@ -769,10 +771,15 @@ claude-code-engineering-leaders/
     │   └── SKILL.md
     ├── audit-agent-memory/
     │   └── SKILL.md
+    ├── re-onboard/SKILL.md
     └── plan-implementation/
         ├── SKILL.md
         └── test-fixtures/
 ```
+
+### Hooks
+
+The plugin registers a `PostToolUse` hook (`hooks/hooks.json`, auto-discovered at the plugin root) that runs `hooks/markdownlint-check.sh` after every `Write` or `Edit` tool call. When the written file is Markdown and `markdownlint` is installed, any lint findings are fed back to Claude as additional context so it can fix them; otherwise the hook exits silently.
 
 ## License
 

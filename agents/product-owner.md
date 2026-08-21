@@ -29,6 +29,7 @@ description: |
   Requirement authoring flows through the product-owner, which uses skills like /write-story and /write-epic.
   </commentary>
   </example>
+tools: ["Read", "Glob", "Grep", "Skill"]
 model: opus
 color: yellow
 memory: project

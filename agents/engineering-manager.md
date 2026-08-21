@@ -29,7 +29,7 @@ description: |
   Code churn analysis and hotspot detection for systemic issues flow through the engineering-manager.
   </commentary>
   </example>
-tools: ["Read", "Glob", "Grep", "Bash"]
+tools: ["Read", "Glob", "Grep", "Bash", "Skill"]
 model: sonnet
 color: orange
 memory: project

@@ -29,7 +29,7 @@ description: |
   Cross-cutting changes that introduce new patterns warrant architectural review.
   </commentary>
   </example>
-tools: ["Read", "Glob", "Grep"]
+tools: ["Read", "Glob", "Grep", "Skill"]
 model: opus
 color: blue
 memory: project
