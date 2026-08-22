@@ -39,14 +39,15 @@ streams events from the existing audit log data layer.
 ## Expected Skill Behavior (Happy Path)
 
 Running `/plan-implementation test-fixtures/story-happy-path.md` on a project
-with a well-populated routing table should:
+with a well-populated routing model should:
 
-1. Phase 1: Tech Lead identifies relevant specialists (e.g., frontend, backend,
-   QA, UX) and emits consultation requests for each
-2. Fan-out: All specialists are spawned in parallel with verbatim prompts
-3. Phase 2: Tech Lead synthesizes all specialist responses into a final
-   implementation plan
-4. Output: A complete plan with verbatim specialist input quoted under
+1. Match: the skill reads the routing model and matches the relevant
+   specialists (e.g., frontend, backend, QA, UX), classifying the story's tier
+2. Dispatch: all matched specialists are dispatched in one parallel batch with
+   focused prompts
+3. Synthesis: the Tech Lead is invoked once and synthesizes all specialist
+   responses into a final implementation plan
+4. Output: a complete plan with verbatim specialist input quoted under
    "## Specialist Consultations" and a synthesized approach
 
 The final output should contain every specialist's response verbatim (not

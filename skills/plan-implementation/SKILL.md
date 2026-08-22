@@ -1,27 +1,18 @@
 ---
 name: plan-implementation
-description: "Drive the Tech Lead's two-phase implementation planning protocol end-to-end. Accepts a story or issue reference, invokes the Tech Lead for Phase 1 routing, spawns each matched specialist as a sub-agent in parallel, then re-invokes the Tech Lead for Phase 2 synthesis. Use when you want a fully orchestrated implementation plan without manually driving the two-phase consultation loop. Invoke with /plan-implementation."
+description: "Produce a fully synthesized implementation plan for a story or issue. Accepts a story body, file path, or issue reference; reads the Tech Lead's routing model, matches and dispatches every relevant specialist by target type in parallel, then invokes the Tech Lead once to synthesize the specialist input into an implementation plan. Use when you want an orchestrated implementation plan with specialist consultation. Invoke with /plan-implementation."
 user-invokable: true
 context: fork
-allowed-tools: Read, Grep, Glob, Agent
+allowed-tools: Read, Grep, Glob, Bash, Agent, Skill
 argument-hint: "<story body | file path | issue reference>"
 ---
 
 # Plan Implementation
 
-Drive the Tech Lead's two-phase implementation planning protocol end-to-end,
-producing a fully synthesized implementation plan without requiring manual
-orchestration of the two phases.
-
-## Dependencies
-
-This skill depends on the Parseable Phase 1 Output Contract defined in
-`agents/tech-lead.md` (see the "Parseable Phase 1 Output Contract" subsection
-under Implementation Planning). If the Tech Lead's Phase 1 output format
-changes, this skill's parsing logic must be updated to match. Conversely, if
-this skill's parsing logic changes in a way that requires new contract fields or
-relaxes existing constraints, the contract in `agents/tech-lead.md` must also be
-updated to reflect the new expected format.
+Produce a synthesized implementation plan for a story. This skill owns all
+mechanical routing: it reads the Tech Lead's routing model directly, matches
+specialists, dispatches them by target type, and then invokes the Tech Lead
+**once** — for judgment, not routing — to synthesize the results.
 
 ## Accepted Input Forms
 
@@ -68,310 +59,214 @@ Once `$ARGUMENTS` is provided or confirmed:
 
 Store the resolved story text as the story input for all subsequent steps.
 
-## Step 2: Phase 1 Routing
+## Step 2: Load the Routing Model
 
-Invoke the `tech-lead` agent with the following prompt:
+Read `.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md` directly.
+Use two sections:
 
-```
-Plan the implementation for this story. Use Phase 1 of your two-phase
-consultation protocol: assess engagement depth, match registered specialists
-via description and overrides, and emit structured consultation requests for
-each matched specialist.
+- **`## Registered Specialists`** — a flat list of specialist entries. Each
+  entry carries an optional path-or-slug and an optional
+  `target-type: <type>` suffix; when the suffix is absent, the target type
+  defaults to `subagent`. Supported target types: `subagent`, `skill`, `doc`,
+  `human`, `external-agent`.
+- **`## Project Code Area Overrides`** — a table of project-local signals
+  (file globs, repo-specific module names, internal terminology) mapped to
+  registered specialists.
 
-Story:
+If an entry declares a target type outside the five supported values, emit a
+routing warning naming the entry and the invalid type, then treat the entry
+as `subagent` — never silently drop it.
 
-[resolved story body]
-```
-
-Collect the full Phase 1 response. Proceed to Step 3.
-
-## Step 3: Parse Phase 1 Output
-
-**Empty-response path:** If the Phase 1 response is empty or contains only
-whitespace, surface a failure notice and stop:
-
-```
-[PHASE 1 FAILURE] The Tech Lead returned no output. Verify that the tech-lead
-agent is registered and retry /plan-implementation.
-```
-
-Stop here. Do not attempt Phase 2.
-
-**No-specialists-matched path:** Check whether the response signals that no
-registered specialists matched. This can appear as:
-
-- The text "No registered specialists matched this issue" anywhere in the
-  response, OR
-- A `## Consultation Requests` section that is present but contains zero
-  level-3 specialist subsections.
-
-If either condition is met, treat the Tech Lead's output as the final plan:
+If the memory file is missing, or `## Registered Specialists` is missing or
+empty, emit this notice, skip the matching in Step 3 and the dispatch in
+Step 4 (tier classification in Step 3 still runs — Step 5 requires a tier),
+and proceed to Step 5 with zero specialists:
 
 ```
-[NOTICE] No registered specialists matched this story. The Tech Lead produced
-a direct plan without specialist consultation. This may be expected for stories
-with no domain specialist concerns. Run /onboard or /add-specialist if
-specialist coverage is unexpectedly missing.
-
----
-
-[Phase 1 output]
+[NOTICE] No registered specialists were found in the Tech Lead's routing
+model. The plan will be produced without specialist consultation. Run
+/onboard or /add-specialist if specialist coverage is unexpectedly missing.
 ```
 
-Stop here. Do not proceed to Phase 2.
+## Step 3: Match and Tier
 
-**Parse-failure path:** If `## Consultation Requests` is absent from the
-response and no no-match signal was detected above, the output cannot be parsed.
-Surface it with a notice:
+**Load descriptions.** For each `subagent` entry, read the agent definition
+file at the entry's path (default: `agents/<agent-name>.md`). If a file
+cannot be read, emit a routing warning naming the agent and path — never
+silently drop a specialist:
 
 ```
-[PARSE FAILURE] The Tech Lead's Phase 1 output did not contain a
-## Consultation Requests section. The raw Phase 1 output follows. You may
-re-run /plan-implementation or manually drive Phase 2 using the output below.
-
----
-
-[raw Phase 1 output]
+[WARNING] Could not read agent file for `[agent-name]` at `[path]`. This
+specialist cannot be dispatched; its input will be absent from the final plan.
 ```
 
-Stop here. Do not attempt Phase 2.
+Carry every routing warning forward to Step 5.
 
-**Parse success:** For each specialist subsection (level-3 heading between
-`## Consultation Requests` and `## Next Step`), extract:
+**Match.** A specialist matches the story if either holds:
 
-- The **agent slug** from the `**Agent:** \`<slug>\`` field
-- The **prompt** from the blockquote lines (`> ...`) following the
-  `**Prompt:**` field. Collect all consecutive `> ` lines as the prompt body.
+- The story text matches the specialist's trigger phrases or jurisdiction as
+  described in its `description` field. This is a **semantic match** — the
+  story concerns the specialist's domain — not a literal substring test.
+- The story text or any referenced file paths match a row in
+  `## Project Code Area Overrides` whose target is this specialist.
 
-Stop parsing specialist subsections when `## Next Step` is encountered.
+`skill`, `doc`, `human`, and `external-agent` entries are always match
+candidates: the user registered them explicitly, so their relevance is
+assumed. An `external-agent` entry's path-or-slug is a namespaced
+`plugin:agent-slug` used for dispatch in Step 4 — it is not a readable local
+file, so do not attempt to read one.
 
-Record each specialist as a (slug, prompt) pair. Proceed to Step 4.
+**Tier.** Classify the story using the
+[Signals Catalog](../../README.md#signals-catalog) in the top-level README.
+The three canonical tier labels are:
 
-## Step 4: Parallel Specialist Fan-Out
+- `1 — Direct specialist`: single-domain change following an established
+  pattern. Dispatch ONLY the single most relevant specialist. Synthesis still
+  runs — do not skip it. Record every other matched specialist as
+  **deprioritized at tier 1** and carry those records forward to Step 5 so
+  they appear in the synthesis as not-consulted slots.
+- `2 — Standard` and `3 — Full (with Architect escalation)`: dispatch every
+  matched specialist.
 
-For each extracted (slug, prompt) pair:
+**User override:** If the invocation explicitly states a tier (e.g., "plan
+this at tier 3"), use that tier and record the override in the rationale.
 
-- **Slug not resolvable:** If the slug does not correspond to a known agent in
-  the project's `.claude/agents/` directory or the plugin's `agents/` directory,
-  skip the specialist. Surface the miss to the user and record it for Phase 2:
-  ```
-  [WARNING] Specialist `[slug]` could not be resolved to a registered agent.
-  This specialist's input will be absent from the final plan.
-  ```
+Note the tier and its rationale; both are passed to the Tech Lead in Step 5.
+Emit the canonical tier label **verbatim** on the `# Tier Classification`
+line — the Tech Lead's tier-3 escalation requirement keys on it.
 
-- **Resolvable specialists:** Spawn each as a sub-agent in a single parallel
-  batch, using the verbatim prompt extracted from Phase 1. Do not augment,
-  summarize, or rewrite the prompts.
+**Hard rule — every match is dispatched.** At tiers 2 and 3, never skip a
+matched specialist because consultation seems unnecessary. A fast "nothing for
+me here" is cheaper than a missed constraint.
 
-Wait for all specialist responses before proceeding to Step 5.
+**Unregistered domain gaps.** If a relevant domain has no registered
+specialist, record the gap for Step 5. Never invent a consultation for an
+agent that is not registered.
 
-For each specialist response:
+**Zero matches from a populated registry.** If specialists are registered but
+none match this story, emit this notice, skip the dispatch in Step 4, and
+proceed to Step 5 with zero specialist responses:
+
+```
+[NOTICE] No registered specialists matched this story. The plan will be
+produced without specialist consultation. If a relevant domain seems
+uncovered, register a specialist via /add-specialist.
+```
+
+## Step 4: Dispatch by Target Type
+
+Dispatch every matched specialist according to its target type:
+
+- **`subagent` and `external-agent`**: spawn in one parallel batch via the
+  Agent tool. Author a focused prompt for each: the story context, the
+  relevant code areas, and the questions this specialist should answer.
+- **`skill`**: invoke the named skill via the Skill tool with a focused
+  argument derived from the story.
+- **`doc`**: read the referenced file and extract the constraints relevant to
+  the story.
+- **`human`**: do not block. Record the question for this person as an open
+  item for the synthesis to surface.
+
+Wait for all dispatched responses before proceeding.
+
+For each response:
 
 - **Empty/error:** If a response is empty, contains only whitespace, or the
-  sub-agent errored, surface the miss to the user and record it for Phase 2:
+  dispatch errored, surface the miss and record it for Step 5:
   ```
   [WARNING] No response received from specialist `[slug]`. This specialist's
   input will be absent from the final plan.
   ```
 - Otherwise: record the verbatim response.
 
-Note: This skill always runs the full specialist fan-out regardless of the Tech
-Lead's engagement depth classification (Minimal / Standard / Full). Tiering the
-fan-out based on depth is a caller-level concern tracked separately. The skill
-is intentionally conservative: a fast "nothing for me here" from a specialist is
-cheaper than a missed constraint.
-
-## Step 5: Assemble Phase 2 Input
-
-**All-specialists-missing:** If every specialist slot is a miss (all were
-unresolvable or returned empty), surface a warning to the user before proceeding:
+**All-specialists-missing:** If at least one specialist was actually
+dispatched and every dispatched specialist is a miss, surface a warning
+before proceeding:
 
 ```
 [WARNING] No specialist responses were received. All [N] specialists either
-could not be resolved or returned empty responses. The Tech Lead will synthesize
-a best-effort plan from conventions alone; the result will lack domain-specific
-constraints. Check that specialists are registered via /add-specialist.
+could not be dispatched or returned empty responses. The Tech Lead will
+synthesize a best-effort plan from conventions alone; the result will lack
+domain-specific constraints. Check that specialists are registered via
+/add-specialist.
 ```
 
-Still proceed to Phase 2 with all-missing notices. The Tech Lead synthesizes a
-best-effort plan and explicitly flags the gap.
+Still proceed to Step 5 with all-missing notices.
 
-Construct the Phase 2 prompt using the following structure:
+## Step 5: Tech Lead Synthesis
+
+Invoke the `tech-lead` agent **once** with everything gathered:
 
 ```markdown
-# Original Story
+Produce your Implementation Plan Synthesis for this story.
+
+# Story
 
 [Resolved story body from Step 1]
 
+# Tier Classification
+
+[Tier label] — [rationale from Step 3]
+
 # Specialist Responses
 
-## [agent-slug]
+[One subsection per specialist as below, or "None — no specialists were
+dispatched (see the notice carried forward from Step 2 or Step 3)."]
+
+## [specialist-slug]
 
 [Verbatim specialist response]
 
-## [agent-slug]
+## [specialist-slug]
 
-> No response received. Synthesize without this input and flag the gap.
+> No response received — synthesize without this input and flag the gap.
+
+## [specialist-slug]
+
+> Not consulted — deprioritized at tier 1.
+
+# Doc Extracts
+
+[Constraints extracted from each doc target, or "None."]
+
+# Open Human Questions
+
+[Questions recorded for human targets, or "None."]
+
+# Routing Warnings
+
+[Routing warnings from Step 3, or "None."]
+
+# Unregistered Domain Gaps
+
+[Gaps recorded in Step 3, or "None."]
 ```
 
-Use "No response received. Synthesize without this input and flag the gap." for
-any specialist slot where the response was empty, errored, or where the slug
-could not be resolved.
+Use "No response received — synthesize without this input and flag the gap."
+for any specialist slot where the response was empty, errored, or where the
+specialist could not be dispatched. Use "Not consulted — deprioritized at
+tier 1." for every matched specialist that was not dispatched under tier 1 —
+never silently omit a match from the assembled input.
 
-## Step 6: Phase 2 Synthesis
+The Tech Lead's agent definition defines the synthesis output format.
 
-Invoke the `tech-lead` agent with the following prompt:
-
-```
-You are in Phase 2 of the two-phase implementation planning protocol.
-Below is the original story and the verbatim specialist responses collected
-after Phase 1. Synthesize them into a final implementation plan following your
-Phase 2 synthesis format.
-
-[Phase 2 input block from Step 5]
-```
-
-Collect the full Phase 2 response.
-
-**Phase 2 failure path:** If the Phase 2 response is empty, contains only
-whitespace, or the invocation errored, surface a failure notice and stop:
+**Synthesis failure path:** If the Tech Lead's response is empty, contains
+only whitespace, or the invocation errored, surface the assembled input with a
+failure notice so the user can retry:
 
 ```
-[PHASE 2 FAILURE] The Tech Lead did not return a Phase 2 synthesis. The
-assembled specialist input follows so you can attempt a manual synthesis or
-re-run /plan-implementation.
+[SYNTHESIS FAILURE] The Tech Lead did not return a synthesis. The assembled
+input follows so you can attempt a manual synthesis or re-run
+/plan-implementation.
 
 ---
 
-[Phase 2 input block from Step 5]
+[Assembled input block from Step 5]
 ```
 
-Stop here. Do not proceed to Step 7.
+Stop here.
 
-## Step 7: Return the Plan
+## Step 6: Return the Plan
 
-Return the Phase 2 synthesis to the user as the final output. No additional
-summarization or wrapping is needed.
-
-## Step 8: Capture Routing Outcomes
-
-After returning the Phase 2 synthesis to the user, append one row per
-specialist to the `## Routing Outcomes` section of the Tech Lead's memory file.
-This step runs only on the Phase 2 success path. It does not run on the
-no-match path (no specialists consulted) or the parse-failure path (Phase 1
-output lacked required anchors) because there is nothing to grade.
-
-### 8.1 Parse Routing Values from Phase 2 Output
-
-For each specialist section (level-3 heading under `## Specialist
-Consultations` in the Phase 2 response), extract:
-
-- The **specialist slug** from the level-3 heading or from a nearby
-  `**Agent:**` line if one is present.
-- The **routing value** from the `**Routing Value:**` line. The value must be
-  exactly one of `high`, `medium`, `low`, `none` (case-insensitive match is
-  acceptable; normalize to lowercase for storage).
-- The **routing note** from the optional `**Routing Note:**` line that
-  immediately follows `**Routing Value:**`. If the line is absent, store an
-  empty string.
-
-**Parse failure handling (non-fatal):** If the `**Routing Value:**` line is
-absent for a specialist, or the value is not in the fixed vocabulary, skip
-that specialist and surface a one-line notice in the skill's output:
-
-```
-[ROUTING OUTCOME] Skipped outcome capture for `<specialist>`: could not parse
-**Routing Value:** line.
-```
-
-Continue with the remaining specialists. The Phase 2 synthesis is already
-returned to the user; this notice appears after it or alongside it. A missing
-or invalid line does not block the plan.
-
-### 8.2 Derive the Story Slug
-
-Derive the story slug from the story input resolved in Step 1, using this
-order of precedence:
-
-1. The `slug` field from YAML front matter in the story (if the story body
-   begins with `---`-delimited front matter).
-2. The filename without extension (if the story was loaded from a file path).
-3. The first level-1 or level-2 heading in the story body, slugified
-   (lowercased, spaces and non-alphanumeric characters replaced with `-`,
-   leading/trailing `-` stripped).
-4. `unknown-slug` as a fallback if no candidate is resolvable.
-
-Note: when the story is passed as an inline body without front matter or a
-leading heading, the fallback `unknown-slug` is the common result. Users who
-want meaningful slugs should ensure the story body opens with a heading (e.g.,
-`# Add Retry Logic`) or a front-matter `slug` field.
-
-### 8.3 Append Rows to the Memory File
-
-Read the Tech Lead's memory file at
-`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md`.
-
-**If the `## Routing Outcomes` section is absent:** Create it by appending the
-following block at the end of the file (after the last existing top-level `##`
-section):
-
-```markdown
-## Routing Outcomes
-
-| Date | Story Slug | Specialist | Value | Note |
-|------|------------|------------|-------|------|
-```
-
-**Then append one row per successfully parsed specialist**, using today's date
-in `YYYY-MM-DD` format, the derived story slug, the specialist slug, the
-routing value, and the routing note (empty string when absent):
-
-```markdown
-| 2026-04-21 | my-story-slug | qa-lead | medium | Added flake-resistance notes |
-```
-
-**If the `## Routing Outcomes` section already exists:** Append new rows after
-the last existing data row. Do not duplicate the section heading, column
-header row, or separator row.
-
-**Write failure handling (non-fatal):** If the memory file cannot be read or
-written (does not exist, is read-only, or any other I/O failure), surface a
-notice and stop the append step:
-
-```
-[ROUTING OUTCOME] Could not write to memory file: <path>. Routing outcomes for
-this plan were not recorded.
-```
-
-The Phase 2 synthesis has already been returned to the user unchanged. The
-notice informs the user that outcome data was lost for this plan, but the plan
-itself is complete.
-
-### 8.4 Append Step Paths Summary
-
-| Path | Append step runs? | Reason |
-|------|------------------|--------|
-| Phase 2 success, all values parse | Yes: all rows appended | Normal path |
-| Phase 2 success, some values missing | Yes: parseable rows appended; notice emitted for skipped specialists | Partial parse |
-| Phase 2 success, no values parse | No rows appended; notices emitted for all specialists | Full parse failure |
-| No-match path (no specialists matched) | No | Nothing was graded |
-| Phase 1 parse-failure path | No | Phase 2 did not run |
-| Phase 2 failure path | No | Phase 2 did not run |
-
-## Phase 2 Contract Dependency
-
-Also see the Parseable Phase 2 Output Contract in `agents/tech-lead.md` (the
-"Parseable Phase 2 Output Contract" subsection under Implementation Planning).
-Step 8 depends on the `**Routing Value:**` and `**Routing Note:**` anchors
-defined there. If the Tech Lead's Phase 2 output format changes, Step 8's
-parsing logic must be updated to match.
-
-## Feedback Loop: Routing Quality
-
-The outcome rows appended by Step 8 accumulate in
-`.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md` and are read
-by `/audit-routing-quality`. After running `/plan-implementation` on several
-stories, use `/audit-routing-quality` to review the recorded history. The
-audit skill identifies specialists that are consistently over-routed (high
-`low` or `none` rate) and recommends specific narrowing actions so future
-plans pay for fewer unproductive specialist consultations.
+Return the Tech Lead's synthesis to the user verbatim as the final output. No
+additional summarization or wrapping is needed.

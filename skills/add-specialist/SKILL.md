@@ -1,6 +1,6 @@
 ---
 name: add-specialist
-description: "Register a specialist agent in the Tech Lead's routing model. Use when adding a new agent to the project that the Tech Lead should consult during implementation planning, incident analysis, or retrospectives."
+description: "Register a specialist agent in the Tech Lead's routing model. Use when adding a new agent to the project that /plan-implementation should match and dispatch during implementation planning, or that the Tech Lead should advise consulting during incident analysis or retrospectives."
 user-invokable: true
 allowed-tools: Read, Glob, Edit, Write
 argument-hint: "<agent-name> [<target-type> <path-or-slug>] [code-area-override ...]"
@@ -8,8 +8,9 @@ argument-hint: "<agent-name> [<target-type> <path-or-slug>] [code-area-override 
 
 # Add Specialist
 
-Register a specialist agent so the Tech Lead considers it during implementation
-planning, incident analysis, and retrospectives. Trigger vocabulary for the
+Register a specialist agent so it is considered during implementation planning
+(matched and dispatched by `/plan-implementation`), incident analysis, and
+retrospectives (advised by the Tech Lead). Trigger vocabulary for the
 specialist lives in the agent's own `description` field. This skill registers
 the agent and optionally adds project-local code-area overrides.
 
@@ -198,10 +199,10 @@ the override string appears case-insensitively in the description body.
 
 If a match is found, warn the user before writing:
 
-> "Override `[signal]` already appears in `[agent-name]`'s description. The
-> Tech Lead will match this signal via description matching without an explicit
-> override. Adding this row is redundant and will be flagged by
-> `/audit-routing-table`. Proceed with adding it anyway? (y/n)"
+> "Override `[signal]` already appears in `[agent-name]`'s description.
+> `/plan-implementation` will match this signal via description matching
+> without an explicit override. Adding this row is redundant and will be
+> flagged by `/audit-routing-table`. Proceed with adding it anyway? (y/n)"
 
 If the user says no, skip that override. Continue with non-redundant overrides.
 
@@ -212,9 +213,9 @@ and does not appear to be a project-local module name, emit a warning:
 
 > "Note: `[keyword]` looks like a trigger keyword rather than a project-local
 > code-area signal. Trigger vocabulary (e.g., `authentication`, `pipeline`)
-> belongs in the agent's `description` so both the Tech Lead and the main
-> loop use the same source of truth. Adding as an override anyway — consider
-> whether this keyword should live in the agent file instead."
+> belongs in the agent's `description` so both `/plan-implementation` and the
+> main loop use the same source of truth. Adding as an override anyway —
+> consider whether this keyword should live in the agent file instead."
 
 Still write the row (backward-compatible behavior). This warning is
 informational only.
@@ -251,9 +252,6 @@ append using the format appropriate for the target type:
   - `<name>` — `<plugin:agent-slug>` — `target-type: external-agent`
   ```
 
-Do **not** touch the `## Routing Outcomes` section; leave it unchanged if it
-exists in the file.
-
 **Append overrides:** for each non-skipped override argument (applies to
 `subagent` entries only; non-subagent entries do not use code-area overrides),
 append a row to `## Project Code Area Overrides`:
@@ -280,8 +278,9 @@ Registered `<agent-name>` in `.claude/agent-memory/engineering-leaders-tech-lead
 
 Target type: subagent (default)
 
-The Tech Lead will now consult `<agent-name>` when the issue text matches
-phrases in the agent's description.
+`/plan-implementation` will now match and dispatch `<agent-name>` when the
+issue text matches phrases in the agent's description; the Tech Lead
+synthesizes its input.
 
 To add project-local code-area overrides later:
   /add-specialist <agent-name> "src/example/**"
@@ -301,9 +300,9 @@ Registered `<agent-name>` with <N> code-area override(s):
 
 Routing model updated at: .claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md
 
-The Tech Lead will consult `<agent-name>` when the issue text matches
-the agent's description phrases OR when the issue references any of the
-overrides above.
+`/plan-implementation` will match and dispatch `<agent-name>` when the issue
+text matches the agent's description phrases OR when the issue references any
+of the overrides above; the Tech Lead synthesizes its input.
 
 Run `/audit-routing-table` to verify routing health.
 ```
@@ -316,15 +315,10 @@ Registered `<name>` as a skill routing target.
 Target type: skill
 Skill: <skill-slug>
 
-When the Tech Lead matches this entry during Phase 1, it emits:
-  **Target Type:** skill
-  **Skill:** <skill-slug>
-
-For manual orchestration: invoke `/[skill-slug]` with the emitted prompt and
-feed the result back to Phase 2 for synthesis. Note: `/plan-implementation`
-currently surfaces `skill` targets to the user rather than dispatching them
-automatically; full target-type dispatch is a planned follow-up change. See
-the README "Routing Target Types" section for the full dispatch pattern.
+When `/plan-implementation` matches this entry, it invokes `/<skill-slug>`
+directly with a focused argument derived from the story and feeds the
+output into the Tech Lead's synthesis. See the README "Routing Target
+Types" section for the full dispatch pattern.
 
 Run `/audit-routing-table` to verify routing health.
 ```
@@ -337,11 +331,9 @@ Registered `<name>` as a doc routing target.
 Target type: doc
 Doc: <file-path>
 
-When the Tech Lead matches this entry during Phase 1, it emits:
-  **Target Type:** doc
-  **Doc:** `<file-path>`
-
-The plan will note "Read `<file-path>` before starting." No automated dispatch.
+When `/plan-implementation` matches this entry, it reads `<file-path>`
+directly and extracts the constraints relevant to the story for the Tech
+Lead's synthesis.
 
 Run `/audit-routing-table` to verify routing health.
 ```
@@ -354,12 +346,9 @@ Registered `<name>` as a human escalation target.
 Target type: human
 Contact: <contact-identifier>
 
-When the Tech Lead matches this entry during Phase 1, it emits:
-  **Target Type:** human
-  **Contact:** <contact-identifier>
-
-The plan will pause with an explicit escalation notice. The user owns the
-handoff to <contact-identifier>.
+When `/plan-implementation` matches this entry, it does not block on it: the
+question is recorded as an open item and surfaced in the Tech Lead's
+synthesis. The user owns the handoff to <contact-identifier>.
 
 Run `/audit-routing-table` to verify routing health.
 ```
@@ -372,11 +361,9 @@ Registered `<name>` as an external-agent routing target.
 Target type: external-agent
 Agent: <plugin:agent-slug>
 
-When the Tech Lead matches this entry during Phase 1, it emits:
-  **Target Type:** external-agent
-  **Agent:** `<plugin:agent-slug>`
-
-The caller should spawn the agent via the Agent tool with the namespaced slug.
+When `/plan-implementation` matches this entry, it spawns `<plugin:agent-slug>`
+via the Agent tool using the namespaced slug and feeds its response into the
+Tech Lead's synthesis.
 
 Run `/audit-routing-table` to verify routing health.
 ```

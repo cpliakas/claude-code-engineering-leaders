@@ -442,37 +442,41 @@ exists (or will be created). No `my-backend-specialist` entry present.
 - [ ] If user says no, skips the override but still registers the agent
 - [ ] Output explains what was written vs. skipped
 
-### SR-4: Tech Lead routing via description match
+### SR-4: plan-implementation routing via description match
 
 **Setup:** Register `my-backend-specialist` whose description contains
 "REST API" and "endpoint design".
 
-**Action:** Invoke `@agents/tech-lead Plan the implementation for: Add a new
-REST API endpoint for user profile retrieval.`
+**Action:** Invoke `/plan-implementation Add a new REST API endpoint for
+user profile retrieval.`
 
 **Expected Behaviors:**
 
-- [ ] Phase 1 output includes a `## Consultation Requests` section
-- [ ] `my-backend-specialist` appears under `## Consultation Requests`
+- [ ] The skill matches `my-backend-specialist` via description matching
+  (Step 3)
+- [ ] `my-backend-specialist` is dispatched via the Agent tool (Step 4)
 - [ ] Output does NOT reference a "Specialist Routing Table"; matching is
   described in terms of description matching
-- [ ] Phase 1 format is parseable: `## Consultation Requests`, `### <Name>`,
-  `**Agent:** \`my-backend-specialist\``, `**Prompt:**`, `## Next Step`
+- [ ] The final synthesis includes `my-backend-specialist`'s response under
+  `## Specialist Consultations`
 
 ### SR-5: Broken pointer warning
 
 **Setup:** Add `ghost-specialist` to `## Registered Specialists` with a path
 that does not exist: `- \`ghost-specialist\` — \`agents/ghost-specialist.md\``
 
-**Action:** Invoke `@agents/tech-lead Plan the implementation for any issue.`
+**Action:** Invoke `/plan-implementation Plan the implementation for any
+issue.`
 
 **Expected Behaviors:**
 
-- [ ] Phase 1 output includes a routing warning about `ghost-specialist` in
-  `## Preliminary Constraints`
-- [ ] Other registered specialists (if any) still route correctly
-- [ ] No consultation request is emitted for `ghost-specialist`
-- [ ] The warning is explicit, not silent
+- [ ] The skill emits a `[WARNING] Could not read agent file for
+  ghost-specialist` notice (Step 3)
+- [ ] Other registered specialists (if any) still match and dispatch
+  correctly
+- [ ] No dispatch is attempted for `ghost-specialist`
+- [ ] The warning is explicit, not silent, and is carried into the Tech
+  Lead's synthesis input as a routing warning
 
 ### SR-6: Audit routing table — clean project
 
@@ -519,11 +523,14 @@ format (no `## Specialist Routing Table` section).
 
 **Expected Behaviors:**
 
-- [ ] Phase 1 produces `## Consultation Requests` with the matched specialist
-- [ ] Phase 1 output is parseable: `**Agent:** \`<name>\`` and `**Prompt:**`
-  anchors are present
-- [ ] Phase 2 synthesis runs after specialist responses are fed back
-- [ ] Final plan is produced in the synthesis format
+- [ ] The skill matches and dispatches the specialist directly from
+  `## Registered Specialists` (Steps 3-4)
+- [ ] The specialist's response is gathered before the Tech Lead is invoked
+- [ ] The Tech Lead is invoked once, with the story, tier classification, and
+  specialist responses assembled by the skill (Step 5)
+- [ ] Final plan is produced in the synthesis format (`## Engagement Tier`,
+  `## Specialist Consultations`, `## Escalation Flags`,
+  `## Implementation Constraints`, `## Recommended Approach`)
 
 ### SR-9: Onboard — simplified Q8
 

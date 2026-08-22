@@ -3,7 +3,7 @@ name: facilitate-retrospective
 description: "Facilitate a structured retrospective from a sprint or body-of-work description. Follows the Derby-Larsen five-phase framework with blameless framing and SMART action items."
 user-invokable: true
 context: fork
-allowed-tools: Read, Grep, Glob
+allowed-tools: Read, Grep, Glob, Agent, Write
 argument-hint: "[description of the sprint, milestone, or body of work to retrospect]"
 ---
 
@@ -49,28 +49,28 @@ Establish the retrospective's scope and framing:
 
 ### 4. Gather Specialist Input
 
-Gather specialist input using the Tech Lead's two-phase consultation protocol.
+Gather specialist input using the Tech Lead's single-invocation consultation
+mode, in two calls.
 
-**Phase 1 — Get consultation requests:** Invoke the `tech-lead` agent with the
-work summary from Step 3. Ask it to identify which specialists should contribute
-observations about the retrospected body of work.
+**Ask which specialists are relevant:** Invoke the `tech-lead` agent with the
+work summary from Step 3, asking which specialists should contribute
+observations about the retrospected body of work. The Tech Lead returns a
+short prose recommendation naming each relevant registered specialist and
+what to ask them.
 
-The Tech Lead will return a structured set of **consultation requests**: one per
-matched specialist, each containing an agent name and a focused prompt.
+**Gather specialist input:** For each specialist the Tech Lead named, spawn
+the specified agent with a focused prompt covering what the Tech Lead
+recommended asking. Run independent consultations in parallel.
 
-**Execute consultations:** For each consultation request the Tech Lead returned,
-spawn the specified specialist agent with the provided prompt. Run independent
-consultations in parallel.
+**Synthesize:** Invoke the `tech-lead` agent again, passing the original work
+summary plus the verbatim specialist responses. The Tech Lead synthesizes the
+specialist input into domain-specific observations, convention adherence
+trends, and emerging patterns.
 
-**Phase 2 — Synthesize:** Invoke the `tech-lead` agent again, passing the
-original work summary plus the verbatim specialist responses. The Tech Lead will
-synthesize the specialist input into domain-specific observations, convention
-adherence trends, and emerging patterns.
-
-Incorporate the synthesized specialist observations into Step 5 alongside other
-data sources. If the Tech Lead has no registered specialists for this project,
-the Tech Lead will produce output directly without consultation requests: skip
-the execute and Phase 2 steps and use its output as-is.
+Incorporate the synthesized specialist observations into Step 5 alongside
+other data sources. If the Tech Lead has no registered specialists for this
+project, its first response says so directly: skip the gather and synthesize
+calls and use that response as-is.
 
 ### 5. Gather Data
 

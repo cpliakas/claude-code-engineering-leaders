@@ -37,20 +37,20 @@ The `product-owner` checks the enhancement against the current roadmap phase, ve
 
 ### Plan Implementation for a Refined Story with the Tech Lead
 
-**Scenario:** You need to implement a refined story for hook-based state detection in a pipeline orchestrator. Instead of jumping straight to code, you ask the Tech Lead to plan the work.
+**Scenario:** You need to implement a refined story for hook-based state detection in a pipeline orchestrator. Instead of jumping straight to code, you run `/plan-implementation` to plan the work.
 
 **Action:**
 
-> `@agents/tech-lead Plan the implementation for this refined story.`
+> `/plan-implementation Plan the implementation for this refined story.`
 
-**In a real-world situation,** the **Tech Lead** agent decomposed the problem, identified which domains were involved, and routed consultations to two specialists in parallel:
+**In a real-world situation,** the **`/plan-implementation`** skill matched the story against the Tech Lead's routing model, identified which domains were involved, and dispatched two specialists in parallel:
 
 - **Claude Code Hooks Expert**, a custom subagent defined in the project's `.claude/agents/` directory, specializing in hook event semantics and lifecycle ordering
 - **Golang Pro** from the [Voltagent plugin](https://github.com/VoltAgent/awesome-claude-code-subagents), a language specialist for idiomatic Go implementation, concurrency safety, and test patterns
 
 The two specialists returned conflicting recommendations. The hooks expert argued that `PreToolUse` should cancel the idle timer *and* transition state, because long-running tools (30+ second builds) can cause spurious "idle" transitions on the dashboard. The Go specialist argued for timer cancellation only, keeping state transitions in `PostToolUse` to avoid duplicate events in the log.
 
-The Tech Lead resolved the disagreement by siding with the hooks expert on the core question (the safety argument was stronger) while incorporating the Go specialist's concern by adding a guard: only emit a state-change event if the stage actually changed. Both specialists were right about different aspects of the problem.
+The skill fed both responses to the **Tech Lead** for synthesis. The Tech Lead resolved the disagreement by siding with the hooks expert on the core question (the safety argument was stronger) while incorporating the Go specialist's concern by adding a guard: only emit a state-change event if the stage actually changed. Both specialists were right about different aspects of the problem.
 
 **Impact:** Without this orchestration layer, the AI would have picked one approach and missed the other's constraint, producing code with either **a timing bug that causes spurious state transitions** or **an event log polluted with duplicate entries**. The Tech Lead caught both issues before a single line of code was written.
 
@@ -166,9 +166,10 @@ codebase, and there is no cross-cutting concern or one-way-door risk.
 
 For tier-1 work, invoke the relevant domain specialist directly (for example,
 `@agents/golang-pro` or `@agents/react-specialist`). Skip the Tech Lead
-entirely. If you invoke the Tech Lead anyway, it will name the single most
-relevant specialist with a brief rationale and stop. It does not run Phase 1
-routing or emit consultation requests.
+entirely. If you invoke the Tech Lead anyway without gathered specialist
+input, it produces a best-effort plan, notes explicitly that no specialists
+were consulted, and points you at `/plan-implementation` instead — it does
+not perform specialist matching or dispatch itself.
 
 ### Tier 2 — Standard
 
@@ -189,16 +190,16 @@ specialist routing without full architectural review.
   to identify the right specialist before you start.
 - Adding observability instrumentation across several files in the same domain.
 
-Invoke the Tech Lead via `@agents/tech-lead` or `/plan-implementation`. The
-Tech Lead runs the full two-phase consultation protocol and must emit a
-consultation request for every matched specialist. No exceptions.
+Run `/plan-implementation`. The skill matches every specialist against the
+Tech Lead's routing model, dispatches every match, and invokes the Tech Lead
+once to synthesize the results. No exceptions on dispatch.
 
 ### Tier 3 — Full (with Architect escalation)
 
 **What it is:** Cross-domain change, new pattern introduction, schema
-commitment, public API change, or any one-way-door signal. The Tech Lead runs
-the full protocol and its Phase 2 synthesis names the Chief Architect as an
-explicit escalation before implementation begins.
+commitment, public API change, or any one-way-door signal. `/plan-implementation`
+dispatches every matched specialist, and the Tech Lead's synthesis names the
+Chief Architect as an explicit escalation before implementation begins.
 
 **When to use it:** The story touches more than one domain, introduces a
 convention or pattern for the first time, commits to a data model or public
@@ -216,9 +217,8 @@ triggers (see the Signals Catalog below).
 - Migrating a database schema in a way that requires backward-compatible reads
   during the rollout window.
 
-Invoke the Tech Lead via `@agents/tech-lead` or `/plan-implementation`. The
-Tech Lead runs the full protocol. If a specialist surfaces a qualifying
-one-way-door, schema, or public-API signal, its Phase 2 synthesis names
+Run `/plan-implementation`. If a specialist surfaces a qualifying
+one-way-door, schema, or public-API signal, the Tech Lead's synthesis names
 `chief-architect` in the Escalation Flags section, quotes the surfaced signal
 verbatim, and recommends pausing for `@agents/chief-architect` consultation
 before implementation begins. The user decides whether to engage the Architect;
@@ -283,7 +283,7 @@ candidate at minimum, and tier 3 if there is also cross-domain impact:
 
 If the story touches code you have not previously edited in this project, or if
 the story's domain has no registered specialist in the Tech Lead's routing
-table, escalate one tier above what the file-count band alone would indicate.
+model, escalate one tier above what the file-count band alone would indicate.
 Tier 1 becomes tier 2; tier 2 becomes tier 3.
 
 #### How tiers interact with `/plan-implementation` and `/refinement-review`
@@ -296,20 +296,21 @@ Tech Lead or running `/plan-implementation`.
   story that benefits from strategic sign-off can use it regardless of tier.
   Tier-3 stories are strong candidates for `/refinement-review` before Tech
   Lead involvement.
-- `/plan-implementation` drives the full two-phase Tech Lead protocol
-  automatically. Use it for tier-2 and tier-3 stories. For tier-1 stories,
-  invoke the domain specialist directly instead.
+- `/plan-implementation` performs matching, tiering, and dispatch
+  automatically, then invokes the Tech Lead once to synthesize the results.
+  Use it for tier-2 and tier-3 stories. For tier-1 stories, invoke the domain
+  specialist directly instead.
 
 See the
 [Plan Implementation for a Refined Story with the Tech Lead](#plan-implementation-for-a-refined-story-with-the-tech-lead)
-example above for a real-world illustration of the Tech Lead's two-phase
-protocol in action.
+example above for a real-world illustration of the skill's
+dispatch-then-synthesize flow in action.
 
 ---
 
 ## Routing Target Types
 
-The Tech Lead's routing table supports five target types. Every registered
+The Tech Lead's routing model supports five target types. Every registered
 specialist entry MAY declare a target type; entries without a declared type
 default to `subagent` and existing projects require no migration.
 
@@ -321,99 +322,30 @@ default to `subagent` and existing projects require no migration.
 | `human` | A named person or role whose judgment is required | `/add-specialist my-gate human "Alice Chen (CISO)"` |
 | `external-agent` | A sub-agent in another installed plugin | `/add-specialist my-ext external-agent plugin-x:agent-y` |
 
-When the Tech Lead matches a registered specialist during Phase 1, it emits a
-`**Target Type:**` line on the consultation request immediately after the
-`### <Name>` heading. The caller reads this line to determine how to handle
-the request.
+`/plan-implementation` reads the target type directly from each matched
+entry's `target-type` suffix (defaulting to `subagent` when absent) and
+dispatches accordingly, all within a single skill run:
 
-### Caller-Side Dispatch Patterns
+- **`subagent` and `external-agent`**: spawned via the Agent tool in one
+  parallel batch, using the slug recorded on the entry.
+- **`skill`**: invoked via the Skill tool with a focused argument derived
+  from the story.
+- **`doc`**: read directly by the skill, which extracts the constraints
+  relevant to the story.
+- **`human`**: never blocked on. The question is recorded as an open item
+  and surfaced in the final synthesis rather than routed anywhere.
 
-**`subagent`**
-
-Spawn via the Agent tool using the slug on the `**Agent:**` line:
-
-```
-**Target Type:** subagent
-**Agent:** `golang-pro`
-**Prompt:**
-> [prompt text]
-```
-
-Feed the specialist's response back to the Tech Lead for Phase 2 synthesis.
-This is the current behavior and the default for all existing registered
-entries. See the
+Every gathered result — specialist response, skill output, doc extract, or
+open human question — is handed to the Tech Lead in a single synthesis
+invocation. See the
 [Plan Implementation example](#plan-implementation-for-a-refined-story-with-the-tech-lead)
-for a real-world illustration.
-
-**`skill`**
-
-Invoke the named skill with the emitted prompt as input. Feed the skill's
-output into Phase 2 like any specialist response:
-
-```
-**Target Type:** skill
-**Skill:** write-runbook
-**Prompt:**
-> [what the skill should produce for this issue]
-```
-
-Example scenario: an operational question routes to `/write-runbook` to
-produce a structured runbook draft. The draft feeds Phase 2 as the
-"specialist response."
-
-**`doc`**
-
-Cite the file path in the plan's dependencies. The plan notes "Read
-`<path>` before starting." No Phase 2 feedback loop:
-
-```
-**Target Type:** doc
-**Doc:** `docs/architecture/auth-decisions.md`
-**Prompt:**
-> [what to look for when reading this document]
-```
-
-Example scenario: a security-adjacent change routes to an ADR file that
-documents the approved authentication pattern. The user reads the ADR; no
-agent is spawned.
-
-**`human`**
-
-Pause the plan with an explicit escalation notice naming the contact and
-quoting the prompt as the question being asked. The user owns the handoff:
-
-```
-**Target Type:** human
-**Contact:** Alice Chen (CISO)
-**Prompt:**
-> [the question that requires Alice's judgment]
-```
-
-Example scenario: a change touching PII storage routes to the named security
-reviewer. The plan notes the escalation; automation stops here and the user
-handles the handoff out of band.
-
-**`external-agent`**
-
-Spawn via the Agent tool using the namespaced slug on the `**Agent:**` line,
-exactly as you would a local subagent. Feed the response back to Phase 2:
-
-```
-**Target Type:** external-agent
-**Agent:** `plugin-x:compliance-agent`
-**Prompt:**
-> [prompt for the external specialist]
-```
-
-Example scenario: a compliance check routes to a specialist agent defined in a
-separate compliance plugin installed in the project.
+for a real-world illustration of `subagent` dispatch and synthesis.
 
 ### Back-Compat Guarantee
 
 Entries without a declared target type default to `subagent`. Existing
 `.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md` files require
-no migration. The Tech Lead emits `**Target Type:** subagent` on any
-consultation request whose registered entry has no type suffix.
+no migration.
 
 To register a non-`subagent` specialist, use `/add-specialist` with the
 `--target-type` flag or the positional target-type token. See
@@ -572,42 +504,20 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Skill | `/write-runbook`           | Generate a structured operational runbook for incident response or maintenance             |
 | Skill | `/plan-test-strategy`      | Produce a test strategy with highest-impact tests by type and layer                        |
 | Skill | `/analyze-code-churn`      | Analyze code churn and thrash patterns with hotspot detection and rework classification    |
-| Skill | `/plan-implementation`     | Drive the Tech Lead's two-phase consultation end-to-end: routing, specialist fan-out, and synthesis |
+| Skill | `/plan-implementation`     | Match, dispatch, and synthesize: reads the Tech Lead's routing model, fans out to every relevant specialist, then invokes the Tech Lead once for synthesis |
 | Skill | `/add-specialist`          | Register a specialist agent for Tech Lead routing (one step, no trigger-phrase copying)    |
 | Skill | `/audit-routing-table`     | Audit Tech Lead routing health: orphan overrides, broken pointers, redundant rows, thin descriptions |
-| Skill | `/audit-routing-quality`   | Audit Tech Lead routing quality from outcome history: recommends narrowing actions for over-routed specialists |
 | Skill | `/audit-agent-memory`      | Audit a single agent's project memory for state leakage, dead links, and size; advisory and read-only |
 | Skill | `/re-onboard`              | Audit onboarded agent memory for drift against live project signals; confirms updates before writing  |
 
 ### Audit Skills
 
-Four skills cover memory hygiene, drift detection, and routing quality: three are read-only audits, one applies confirmed updates.
+Three skills cover memory hygiene and drift detection: two are read-only audits, one applies confirmed updates.
 
 **`/audit-routing-table`** inspects the Tech Lead's specialist routing model
 for orphan overrides, broken file pointers, redundant override rows, and thin
 agent descriptions. Run it after onboarding, after adding specialists, or when
-the Tech Lead appears to be missing consultation requests.
-
-**`/audit-routing-quality`** reads the Tech Lead's `## Routing Outcomes`
-history and recommends narrowing actions for over-routed specialists:
-specialists the Tech Lead consulted repeatedly but that added little or no
-value. It aggregates per-specialist outcome counts, computes a narrowing-signal
-score (`low` + `none` percentage), and suggests specific narrowing actions:
-tighten description vocabulary, remove redundant Code Area Overrides, or
-consider deregistering. When the outcome table exceeds 200 rows, it offers a
-user-confirmed roll-up that condenses older rows into summary rows while
-preserving the most-recent 50.
-
-This skill is advisory only: it never edits the routing table. All
-recommendations are applied manually. Run it after accumulating outcome
-history from several `/plan-implementation` runs.
-
-The two routing audit skills are complementary:
-
-| Skill | Input | Finds |
-|-------|-------|-------|
-| `/audit-routing-table` | Routing memory structure and agent files | Structural problems: orphan overrides, broken pointers, thin descriptions |
-| `/audit-routing-quality` | `## Routing Outcomes` history | Coverage drift: over-routed specialists with consistently low value |
+`/plan-implementation` appears to be missing specialist matches.
 
 **`/audit-agent-memory <agent-name>`** inspects a single agent's project
 memory directory (`.claude/agent-memory/engineering-leaders-<agent-name>/`)
@@ -634,10 +544,8 @@ signal source (team norms, persona preferences, stakeholder relationships).
 
 `/re-onboard` is the only audit skill that writes to memory by default.
 `/audit-routing-table` and `/audit-agent-memory` are read-only and advisory:
-they do not delete, move, or rewrite any file. `/audit-routing-quality` is
-advisory for all recommendations, but writes to `## Routing Outcomes` only
-when the user explicitly confirms a roll-up. All four audits are complementary
-and can be run independently.
+they do not delete, move, or rewrite any file. All three audits are
+complementary and can be run independently.
 
 ## Architecture
 
@@ -767,8 +675,6 @@ claude-code-engineering-leaders/
     ├── audit-routing-table/
     │   ├── SKILL.md
     │   └── MIGRATION.md
-    ├── audit-routing-quality/
-    │   └── SKILL.md
     ├── audit-agent-memory/
     │   └── SKILL.md
     ├── re-onboard/SKILL.md

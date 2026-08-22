@@ -3,7 +3,7 @@ name: onboard
 description: "Use when setting up the engineering-leaders plugin for the first time on a project, or when re-running onboarding to update shared project context. Gathers shared project context for all agents (one question at a time) and discovers specialist plugins for the Tech Lead to consult. Run this before per-agent onboarding skills like /onboard-product-owner."
 user-invokable: true
 argument-hint: ""
-allowed-tools: Read, Glob, Grep, Write, Bash
+allowed-tools: Read, Glob, Grep, Write, Bash, Skill
 context: fork
 ---
 
@@ -205,9 +205,10 @@ not exist, then write the file. Track: `context_written = true`.
 Transition with:
 
 > "Now let's register any specialist agents the Tech Lead should know about.
-> Specialists are consulted during implementation planning, incident analysis,
-> and retrospectives. The Tech Lead will match issues to specialists based on
-> each agent's own description — you only need to name the agents."
+> Specialists are matched and dispatched by `/plan-implementation` during
+> implementation planning, and the Tech Lead advises on them during incident
+> analysis and retrospectives. Matching is based on each agent's own
+> description — you only need to name the agents."
 
 **Q8 — Installed specialist agents**
 
@@ -342,8 +343,8 @@ override:** Ask:
 > (c) Higher-quality planning: strongest planning on complex multi-domain
 >     work; higher spend per invocation
 >
-> Tech Lead is the agent that deconstructs stories, routes to specialists, and
-> synthesizes their input. It is the most invoked planning agent in the plugin."
+> Tech Lead is the agent that synthesizes specialist input into implementation
+> plans. It is the most invoked planning agent in the plugin."
 
 - **(a) selected:** Write override with `model: haiku`. Track
   `tech_lead_action = wrote_override(haiku)`.

@@ -157,10 +157,11 @@ prompt:
 >
 > [paste the template content from Step 5]
 
-Note: the consultation request pattern (rather than a direct Agent-tool spawn)
-is consistent with the existing routing infrastructure. A direct-spawn path is
-a deliberate follow-up if usage warrants it (see the "Open Questions" section
-of `openspec/changes/add-convention-domain-ownership/design.md`).
+Note: the plugin's standard dispatch path is now a direct Agent-tool spawn
+(see `/plan-implementation` Step 4). This skill's consultation-request form is
+a remaining exception; converting Step 6 to a direct spawn is a deliberate
+follow-up if usage warrants it (see the "Open Questions" section of
+`openspec/changes/add-convention-domain-ownership/design.md`).
 
 ## Step 7 — Write the Draft
 

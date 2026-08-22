@@ -1,6 +1,6 @@
 ---
 name: audit-routing-table
-description: "Audit the Tech Lead's specialist routing model for orphan overrides, broken file pointers, redundant overrides, and thin agent descriptions. Reports findings for human review — does not auto-correct. Use after onboarding, after adding specialists, or when the Tech Lead appears to be missing consultation requests."
+description: "Audit the Tech Lead's specialist routing model for orphan overrides, broken file pointers, redundant overrides, and thin agent descriptions. Reports findings for human review — does not auto-correct. Use after onboarding, after adding specialists, or when /plan-implementation appears to be missing specialist matches."
 user-invokable: true
 argument-hint: ""
 allowed-tools: Read, Glob, Grep
@@ -84,9 +84,10 @@ If found:
 **Finding:** override signal `<signal>` for `<agent-name>` already appears in
 the agent's description.
 
-**Recommended action:** Remove this override row. The Tech Lead will match the
-signal via description matching, so the override is unnecessary and creates
-maintenance surface. This row will be re-flagged on every audit until removed.
+**Recommended action:** Remove this override row. `/plan-implementation` will
+match the signal via description matching, so the override is unnecessary and
+creates maintenance surface. This row will be re-flagged on every audit until
+removed.
 
 #### Check 4: Thin Descriptions
 
@@ -103,10 +104,10 @@ If the word count is below 60:
 than 60 words after stripping markup).
 
 **Recommended action:** Enrich the agent's description with more trigger
-phrases, example-context phrases, and jurisdiction keywords so the Tech Lead
-can match it reliably via description matching. A thin description means the
-Tech Lead may miss relevant consultations that the old routing table would have
-caught.
+phrases, example-context phrases, and jurisdiction keywords so
+`/plan-implementation` can match it reliably via description matching. A thin
+description means the skill may miss relevant consultations that the old
+routing table would have caught.
 
 ### 3. Produce the Report
 

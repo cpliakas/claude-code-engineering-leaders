@@ -19,18 +19,18 @@ degrade service for other users.
 ## Notes
 
 This story touches the API gateway, observability pipeline, and client-facing
-response contracts. It is expected to match multiple routing table specialists.
+response contracts. It is expected to match multiple routing model specialists.
 
 **Empty-response simulation:** To exercise the "specialist returns empty"
-branch, configure the routing table to include a specialist whose agent
+branch, configure the routing model to include a specialist whose agent
 definition instructs it to return no output (or simulate by temporarily
 replacing a real specialist's agent with a stub that emits an empty response).
-Run this story. The skill should record the empty slot, continue with remaining
-specialists, and proceed to Phase 2 with the miss noted.
+Run this story. The skill should record the empty slot, continue with
+remaining specialists, and proceed to synthesis with the miss noted.
 
 **Expected skill behavior:**
 
 - Specialist with empty response has slot recorded as "No response received"
 - Remaining specialists' responses are included verbatim
-- Phase 2 runs with the miss recorded
+- Synthesis runs with the miss recorded
 - Tech Lead explicitly flags the gap in the synthesis

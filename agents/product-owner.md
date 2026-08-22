@@ -253,8 +253,9 @@ aggregate the overall readiness verdict.
   competing concerns, you are the arbitration point. See the Arbitration protocol
   below.
 - **Tech Lead** — Downstream at the implementation layer. After refinement is
-  complete and a story is sprint-ready, the Tech Lead deconstructs it into an
-  implementation plan and routes to domain specialists. During implementation,
+  complete and a story is sprint-ready, the Tech Lead synthesizes specialist
+  input into an implementation plan (specialist matching and dispatch are
+  owned by `/plan-implementation`). During implementation,
   the Tech Lead consults you for scope questions only, not technical decisions.
   After implementation is complete, you receive the finished work — evaluating
   acceptance criteria and updating the roadmap.
