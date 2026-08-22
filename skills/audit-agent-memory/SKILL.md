@@ -1,6 +1,6 @@
 ---
 name: audit-agent-memory
-description: "Audit a single agent's project memory directory for hygiene issues. Use when you want to run agent memory hygiene checks, audit memory, inspect bloated memory, or detect state-like content, dead links, or oversized memory files. Complements /audit-routing-table, which audits the Tech Lead's specialist routing model. This skill is read-only and advisory: it does not modify any file."
+description: "Audit a single agent's project memory directory for hygiene issues. Use when you want to run agent memory hygiene checks, audit memory, inspect bloated memory, or detect state-like content, dead links, or oversized memory files. When the audited agent is the tech-lead, also audits the specialist routing model: use it to audit the routing table, check routing health, or find orphan overrides, broken file pointers, redundant overrides, and thin agent descriptions — run it after onboarding, after adding specialists, or when /plan-implementation appears to be missing specialist matches. This skill is read-only and advisory: it does not modify any file."
 user-invokable: true
 argument-hint: "<agent-name>"
 allowed-tools: Read, Glob, Grep
@@ -9,8 +9,10 @@ allowed-tools: Read, Glob, Grep
 # Audit Agent Memory
 
 Audit one agent's project memory directory for four categories of hygiene
-issues. Produces a structured advisory report with recommended actions. Does
-not modify any files.
+issues. When the audited agent is the `tech-lead`, additionally audit the
+specialist routing model in its memory for four more categories. Produces a
+structured advisory report with recommended actions. Does not modify any
+files.
 
 If invoked without an argument, report:
 
@@ -41,8 +43,17 @@ If the directory or `MEMORY.md` does not exist, report:
 
 ```
 No memory directory found at .claude/agent-memory/engineering-leaders-<agent-name>/.
-Run /onboard or /onboard-<agent-name> to create one.
+Run /onboard to create one.
 ```
+
+Tailor the second sentence to skills that actually exist:
+
+- When `<agent-name>` is `tech-lead`, say instead: "Run /onboard or
+  /add-specialist to create one." (Registering a specialist also creates the
+  Tech Lead's memory file.)
+- Append "or /onboard-<agent-name>" only when the plugin ships a companion
+  onboarding skill for that agent (currently only `/onboard-product-owner`).
+  Never name an `/onboard-<agent-name>` skill that does not exist.
 
 And exit.
 
@@ -60,9 +71,10 @@ Read every `*.md` file found. Collect:
 
 ### 2. Run Checks
 
-Run the four checks below against the collected files. Each check records
-findings independently. A single file can produce findings under multiple
-checks.
+Run the four hygiene checks below against the collected files. Each check
+records findings independently. A single file can produce findings under
+multiple checks. When the audited agent is `tech-lead`, also run the routing
+model checks (Checks 5–8).
 
 #### Check 1: State-Like Content
 
@@ -173,6 +185,100 @@ For each size finding:
   moved to an issue tracker, removed as stale, or condensed. Large memory files
   raise per-turn token costs for every agent invocation."
 
+#### Routing Model Checks (tech-lead only)
+
+Run Checks 5–8 only when the audited agent is `tech-lead`. For any other
+agent, skip them and omit their rows and report sections entirely.
+
+These checks audit the Tech Lead's specialist routing model — the registry
+that `/plan-implementation` reads to match and dispatch specialists. Run them
+after onboarding, after adding specialists, or when `/plan-implementation`
+appears to be missing specialist matches.
+
+Parse two sections from `MEMORY.md`:
+
+- **Registered Specialists** — extract the list of `<agent-name>` and optional
+  `<path>` from each bullet. Default path is `agents/<agent-name>.md` when no
+  path is given.
+- **Project Code Area Overrides** — extract each `| signal | agent-name |` row
+  from the table, ignoring the header and separator rows.
+
+If neither section exists, skip Checks 5–8 and, in the report, emit the
+following notice in place of the routing summary lines, routing table, and
+routing findings subsections:
+
+```
+No routing model sections found in the Tech Lead's memory. Run /onboard or
+/add-specialist to register specialists. (If this memory file still uses the
+pre-0.12.0 `## Specialist Routing Table` format, see MIGRATION.md in this
+skill's directory for the conversion path.)
+```
+
+##### Check 5: Orphan Overrides
+
+For each row in `## Project Code Area Overrides`, verify the target agent name
+appears in `## Registered Specialists`.
+
+**Finding:** override row targets `<agent-name>` which is not in `## Registered
+Specialists`.
+
+**Recommended action:** Either register the agent with `/add-specialist
+<agent-name>` or remove the orphan override row.
+
+##### Check 6: Broken Pointers
+
+For each entry in `## Registered Specialists`, attempt to read the agent file
+at the specified path (or `agents/<agent-name>.md`).
+
+Use Glob to check whether the file exists. If the file is not found:
+
+**Finding:** registered specialist `<agent-name>` points to `<path>` which does
+not exist.
+
+**Recommended action:** Correct the path in `## Registered Specialists`, or
+remove the entry if the specialist is no longer used. If the agent is from an
+external plugin that is not installed locally, this may be expected — verify
+with the plugin author.
+
+##### Check 7: Redundant Overrides
+
+For each row in `## Project Code Area Overrides` where the target agent's file
+is readable:
+
+1. Read the agent file.
+2. Extract the `description` field from the frontmatter.
+3. Check whether the override signal appears verbatim (case-insensitive) in the
+   description body.
+
+If found:
+
+**Finding:** override signal `<signal>` for `<agent-name>` already appears in
+the agent's description.
+
+**Recommended action:** Remove this override row. `/plan-implementation` will
+match the signal via description matching, so the override is unnecessary and
+creates maintenance surface. This row will be re-flagged on every audit until
+removed.
+
+##### Check 8: Thin Descriptions
+
+For each entry in `## Registered Specialists` where the agent file is readable:
+
+1. Extract the `description` field from the frontmatter.
+2. Count the non-whitespace word count of the description body. Exclude the
+   YAML scalar delimiter (`|`), the `name:` header line, and `<example>` /
+   `<commentary>` blocks.
+
+If the word count is below 60:
+
+**Finding:** registered specialist `<agent-name>` has a thin description (fewer
+than 60 words after stripping markup).
+
+**Recommended action:** Enrich the agent's description with more trigger
+phrases, example-context phrases, and jurisdiction keywords so
+`/plan-implementation` can match it reliably via description matching. A thin
+description means the skill may miss relevant consultations.
+
 ### 3. Compute Size Summary
 
 After running all checks, compute the summary figures:
@@ -181,6 +287,9 @@ After running all checks, compute the summary figures:
 - Total estimated tokens (`directory_token_count`)
 - Findings per check: state-like count, mixed count, dead-link count,
   size-flag count
+- When auditing `tech-lead`: registered specialist count, override row count,
+  and findings per routing check (orphan overrides, broken pointers,
+  redundant overrides, thin descriptions)
 
 ### 4. Emit Report
 
@@ -200,6 +309,20 @@ Estimated tokens: <T> (threshold: 10,000 for the directory)
 | Mixed         | <N>      |
 | Dead links    | <N>      |
 | Size          | <N>      |
+
+[When auditing tech-lead, append these lines and rows. If no routing model
+sections were found (see Process Step 2), emit the no-routing-model notice
+here instead and omit the routing lines, table, and findings subsections:]
+
+Registered specialists: <N>
+Override rows: <M>
+
+| Routing check       | Findings |
+|---------------------|----------|
+| Orphan overrides    | <N>      |
+| Broken pointers     | <N>      |
+| Redundant overrides | <N>      |
+| Thin descriptions   | <N>      |
 
 ## Findings
 
@@ -231,6 +354,27 @@ Estimated tokens: <T> (threshold: 10,000 for the directory)
 - **Directory total**: estimated <T> tokens (threshold: 10,000 for the
   directory). Review the memory directory as a whole for accumulation.
 
+### Orphan overrides (tech-lead only)
+
+- **`<signal>` → `<agent-name>`**: agent not in Registered Specialists.
+  Register with `/add-specialist <agent-name>` or remove this row.
+
+### Broken pointers (tech-lead only)
+
+- **`<agent-name>`**: agent file not found at `<path>`.
+  Correct the path or remove the entry.
+
+### Redundant overrides (tech-lead only)
+
+- **`<signal>` → `<agent-name>`**: signal appears in the agent's description.
+  Remove this override row.
+
+### Thin descriptions (tech-lead only)
+
+- **`<agent-name>`**: description is <W> words (threshold: 60).
+  Add trigger phrases, example contexts, and jurisdiction keywords to the
+  agent's description.
+
 ## Recommendations
 
 [If no findings: "No hygiene issues detected. The memory directory for
@@ -248,6 +392,9 @@ Estimated tokens: <T> (threshold: 10,000 for the directory)
 - If the directory or individual files exceed the size thresholds, review for
   accumulation. Smaller, strategy-focused memory reduces per-invocation token
   cost for every session.
+- If any routing findings exist (tech-lead only), address each one manually —
+  no auto-fix occurred — then re-run `/audit-agent-memory tech-lead` to
+  verify.
 
 ## Next Step
 
@@ -262,9 +409,19 @@ consider moving dated content to the project's issue tracker.
 [Else if only size findings exist:] Review the largest files and consider
 condensing or pruning content that is no longer load-bearing.
 
+[Else if only routing findings exist:] Address the routing findings above,
+then re-run `/audit-agent-memory tech-lead` to verify routing health.
+
 [If no findings:] No action required. Run this audit again after the next
 onboarding session or when the agent feels slower than expected.
 ```
 
 All output is advisory. No file is read twice; no file is written, edited, or
 deleted. The user decides what to act on.
+
+## Migration Use
+
+The routing checks double as a migration helper for projects converting the
+Tech Lead's memory from the old pre-0.12.0 `## Specialist Routing Table`
+format. See `MIGRATION.md` in this skill directory for the step-by-step
+migration path.

@@ -488,7 +488,7 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Agent | `qa-lead`                  | QA strategy lead for test architecture, coverage gaps, and risk-based prioritization       |
 | Agent | `agile-coach`              | Peer coach for story quality review and retrospective facilitation                         |
 | Agent | `ux-strategist`            | Strategic UX advisor for experience coherence, persona guidance, and behavioral consistency |
-| Skill | `/onboard`                 | Guided project setup: shared context interview for all agents + Tech Lead specialist discovery |
+| Skill | `/onboard`                 | Guided project setup: shared context interview for all agents + Tech Lead specialist discovery; `--check-drift` audits onboarded memory for drift and confirms updates before writing |
 | Skill | `/onboard-product-owner`   | Configure the Product Owner with issue tracker, backlog norms, and current roadmap state |
 | Skill | `/write-epic`              | Write an epic specification with structured metadata compatible with GitHub Issues and Jira |
 | Skill | `/write-story`             | Write a user story with acceptance criteria and INVEST validation                          |
@@ -506,18 +506,11 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Skill | `/analyze-code-churn`      | Analyze code churn and thrash patterns with hotspot detection and rework classification    |
 | Skill | `/plan-implementation`     | Match, dispatch, and synthesize: reads the Tech Lead's routing model, fans out to every relevant specialist, then invokes the Tech Lead once for synthesis |
 | Skill | `/add-specialist`          | Register a specialist agent for Tech Lead routing (one step, no trigger-phrase copying)    |
-| Skill | `/audit-routing-table`     | Audit Tech Lead routing health: orphan overrides, broken pointers, redundant rows, thin descriptions |
-| Skill | `/audit-agent-memory`      | Audit a single agent's project memory for state leakage, dead links, and size; advisory and read-only |
-| Skill | `/re-onboard`              | Audit onboarded agent memory for drift against live project signals; confirms updates before writing  |
+| Skill | `/audit-agent-memory`      | Audit a single agent's project memory for state leakage, dead links, and size; for the tech-lead, also audits routing health (orphan overrides, broken pointers, redundant rows, thin descriptions); advisory and read-only |
 
 ### Audit Skills
 
-Three skills cover memory hygiene and drift detection: two are read-only audits, one applies confirmed updates.
-
-**`/audit-routing-table`** inspects the Tech Lead's specialist routing model
-for orphan overrides, broken file pointers, redundant override rows, and thin
-agent descriptions. Run it after onboarding, after adding specialists, or when
-`/plan-implementation` appears to be missing specialist matches.
+Two paths cover memory hygiene and drift detection: one read-only audit, one drift pass that applies confirmed updates.
 
 **`/audit-agent-memory <agent-name>`** inspects a single agent's project
 memory directory (`.claude/agent-memory/engineering-leaders-<agent-name>/`)
@@ -525,27 +518,33 @@ for four hygiene categories: state-like content (dated phase trackers,
 enumerated file lists, work-item tables that belong in an issue tracker),
 dead-link files (files that exist in the directory but are no longer
 referenced from `MEMORY.md`), and size signals (individual files or the full
-directory exceeding documented token thresholds). Run it as periodic hygiene,
-before re-onboarding an agent, or when an agent feels slower or noisier than
-expected.
+directory exceeding documented token thresholds). When the audited agent is
+the `tech-lead`, it additionally inspects the specialist routing model for
+orphan overrides, broken file pointers, redundant override rows, and thin
+agent descriptions. Run it as periodic hygiene, after onboarding or adding
+specialists, before a drift check, or when an agent feels slower or noisier
+than expected. Projects whose Tech Lead memory still uses the pre-0.12.0
+`## Specialist Routing Table` format can convert it with the step-by-step
+path in `skills/audit-agent-memory/MIGRATION.md`.
 
-**`/re-onboard`** (or `/re-onboard <agent-name>`) audits onboarded agent
-project memory for drift against cheaply derivable local signals: filesystem
-path existence, specialist agent files, git remote URL, and tracker directory
-probes. It produces a per-agent diff report and phrases every finding as a
-question the user confirms or dismisses. Confirmed updates are applied in
-place to the existing memory file using Edit; no write happens without
-explicit user confirmation. Run it on a periodic cadence, after a structural
-project change (renamed directories, migrated issue tracker, specialist agents
-added or removed), or when an agent gives advice that feels out of date. This
-skill is a diff pass, not a replacement for a full `/onboard-<agent>` re-run.
-Use `/onboard-<agent>` when you want to refresh content that has no local
-signal source (team norms, persona preferences, stakeholder relationships).
+**`/onboard --check-drift`** (or `/onboard --check-drift <agent-name>`) audits
+onboarded agent project memory for drift against cheaply derivable local
+signals: filesystem path existence, specialist agent files, git remote URL,
+and tracker directory probes. It produces a per-agent diff report and phrases
+every finding as a question the user confirms or dismisses. Confirmed updates
+are applied in place to the existing memory file using Edit; no write happens
+without explicit user confirmation. Run it on a periodic cadence, after a
+structural project change (renamed directories, migrated issue tracker,
+specialist agents added or removed), or when an agent gives advice that feels
+out of date. This mode is a diff pass, not a replacement for a full
+`/onboard-<agent>` re-run. Use `/onboard-<agent>` when you want to refresh
+content that has no local signal source (team norms, persona preferences,
+stakeholder relationships).
 
-`/re-onboard` is the only audit skill that writes to memory by default.
-`/audit-routing-table` and `/audit-agent-memory` are read-only and advisory:
-they do not delete, move, or rewrite any file. All three audits are
-complementary and can be run independently.
+`/onboard --check-drift` is the only audit path that writes to memory by
+default. `/audit-agent-memory` is read-only and advisory: it does not delete,
+move, or rewrite any file. The two are complementary and can be run
+independently.
 
 ## Architecture
 
@@ -672,12 +671,9 @@ claude-code-engineering-leaders/
     ├── plan-test-strategy/SKILL.md
     ├── analyze-code-churn/SKILL.md
     ├── add-specialist/SKILL.md
-    ├── audit-routing-table/
+    ├── audit-agent-memory/
     │   ├── SKILL.md
     │   └── MIGRATION.md
-    ├── audit-agent-memory/
-    │   └── SKILL.md
-    ├── re-onboard/SKILL.md
     └── plan-implementation/
         ├── SKILL.md
         └── test-fixtures/

@@ -42,12 +42,15 @@ whose purpose is not obvious.
 ### Step 1: Run the Audit
 
 ```
-/audit-routing-table
+/audit-agent-memory tech-lead
 ```
 
 The audit skill reads the current file and flags every row whose signal is
 already present in the target agent's description (redundant row) or whose
 target agent is not registered (orphan row). Use the report as your work list.
+On a memory file still in the old format (no `## Registered Specialists`
+section yet), the routing checks emit a no-routing-model notice instead — in
+that case start from Step 2 and re-run the audit after Step 4.
 
 ### Step 2: Identify Agents
 
@@ -70,6 +73,7 @@ Use the actual file path if the agent definition is not at the default
 For each row in the old `## Specialist Routing Table`, decide:
 
 **Keep as a code-area override** if the signal is:
+
 - A file glob (`src/payments/**`)
 - A repo-specific module name (`billing-service`, `webhook-processor`)
 - Internal terminology not likely found in any agent description
@@ -77,8 +81,9 @@ For each row in the old `## Specialist Routing Table`, decide:
 Move these rows to `## Project Code Area Overrides`.
 
 **Delete the row** if the signal is:
+
 - A generic keyword or phrase (`authentication`, `pipeline`, `deployment`)
-- Already present in the target agent's description body (flagged by Check 3)
+- Already present in the target agent's description body (flagged by Check 7)
 
 Duplicating trigger vocabulary into the overrides table creates silent drift
 and will be flagged by every future audit run.
@@ -107,16 +112,17 @@ The resulting file should look like:
 ### Step 5: Re-run the Audit
 
 ```
-/audit-routing-table
+/audit-agent-memory tech-lead
 ```
 
-Verify zero findings. If findings remain, address them and re-run until clean.
+Verify zero routing findings. If findings remain, address them and re-run
+until clean.
 
 ## Notes
 
 - This migration is one-time. Once complete, adding a new specialist requires
   only one command: `/add-specialist <name>`.
-- Specialists whose agent files cannot be found will be flagged by Check 2.
+- Specialists whose agent files cannot be found will be flagged by Check 6.
   For agents from external plugins not installed locally, this is expected.
 - If you are uncertain whether a signal belongs in the agent description or
   in the overrides table, prefer the agent description. The overrides table

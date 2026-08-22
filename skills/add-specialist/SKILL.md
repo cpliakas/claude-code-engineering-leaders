@@ -193,7 +193,7 @@ the provided name. If found:
 If override arguments were provided, and the agent file exists locally (per the
 Glob check in Step 3), read the agent's `description` field. If the file does
 not exist locally (e.g., the agent is installed from an external plugin), skip
-this redundancy check and proceed to Step 7; `/audit-routing-table` will surface
+this redundancy check and proceed to Step 7; `/audit-agent-memory tech-lead` will surface
 redundancies later once the file becomes accessible. For each override argument, check whether
 the override string appears case-insensitively in the description body.
 
@@ -202,7 +202,7 @@ If a match is found, warn the user before writing:
 > "Override `[signal]` already appears in `[agent-name]`'s description.
 > `/plan-implementation` will match this signal via description matching
 > without an explicit override. Adding this row is redundant and will be
-> flagged by `/audit-routing-table`. Proceed with adding it anyway? (y/n)"
+> flagged by `/audit-agent-memory tech-lead`. Proceed with adding it anyway? (y/n)"
 
 If the user says no, skip that override. Continue with non-redundant overrides.
 
@@ -285,7 +285,7 @@ synthesizes its input.
 To add project-local code-area overrides later:
   /add-specialist <agent-name> "src/example/**"
 
-Run `/audit-routing-table` to verify routing health.
+Run `/audit-agent-memory tech-lead` to verify routing health.
 ```
 
 **`subagent`: register plus overrides:**
@@ -304,7 +304,7 @@ Routing model updated at: .claude/agent-memory/engineering-leaders-tech-lead/MEM
 text matches the agent's description phrases OR when the issue references any
 of the overrides above; the Tech Lead synthesizes its input.
 
-Run `/audit-routing-table` to verify routing health.
+Run `/audit-agent-memory tech-lead` to verify routing health.
 ```
 
 **`skill` target:**
@@ -320,7 +320,7 @@ directly with a focused argument derived from the story and feeds the
 output into the Tech Lead's synthesis. See the README "Routing Target
 Types" section for the full dispatch pattern.
 
-Run `/audit-routing-table` to verify routing health.
+Run `/audit-agent-memory tech-lead` to verify routing health.
 ```
 
 **`doc` target:**
@@ -335,7 +335,7 @@ When `/plan-implementation` matches this entry, it reads `<file-path>`
 directly and extracts the constraints relevant to the story for the Tech
 Lead's synthesis.
 
-Run `/audit-routing-table` to verify routing health.
+Run `/audit-agent-memory tech-lead` to verify routing health.
 ```
 
 **`human` target:**
@@ -350,7 +350,7 @@ When `/plan-implementation` matches this entry, it does not block on it: the
 question is recorded as an open item and surfaced in the Tech Lead's
 synthesis. The user owns the handoff to <contact-identifier>.
 
-Run `/audit-routing-table` to verify routing health.
+Run `/audit-agent-memory tech-lead` to verify routing health.
 ```
 
 **`external-agent` target:**
@@ -365,7 +365,7 @@ When `/plan-implementation` matches this entry, it spawns `<plugin:agent-slug>`
 via the Agent tool using the namespaced slug and feeds its response into the
 Tech Lead's synthesis.
 
-Run `/audit-routing-table` to verify routing health.
+Run `/audit-agent-memory tech-lead` to verify routing health.
 ```
 
 If any overrides were skipped (redundant), list them and explain what was
