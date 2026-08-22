@@ -314,30 +314,19 @@ The Tech Lead's routing model supports five target types. Every registered
 specialist entry MAY declare a target type; entries without a declared type
 default to `subagent` and existing projects require no migration.
 
-| Target Type | What it is | How to register |
-|---|---|---|
-| `subagent` | A local Claude Code sub-agent (default) | `/add-specialist my-agent` |
-| `skill` | A skill invocation that produces the answer | `/add-specialist my-skill skill write-runbook` |
-| `doc` | A document the user should read before proceeding | `/add-specialist my-doc doc docs/security/review.md` |
-| `human` | A named person or role whose judgment is required | `/add-specialist my-gate human "Alice Chen (CISO)"` |
-| `external-agent` | A sub-agent in another installed plugin | `/add-specialist my-ext external-agent plugin-x:agent-y` |
-
-`/plan-implementation` reads the target type directly from each matched
-entry's `target-type` suffix (defaulting to `subagent` when absent) and
-dispatches accordingly, all within a single skill run:
-
-- **`subagent` and `external-agent`**: spawned via the Agent tool in one
-  parallel batch, using the slug recorded on the entry.
-- **`skill`**: invoked via the Skill tool with a focused argument derived
-  from the story.
-- **`doc`**: read directly by the skill, which extracts the constraints
-  relevant to the story.
-- **`human`**: never blocked on. The question is recorded as an open item
-  and surfaced in the final synthesis rather than routed anywhere.
+| Target Type | What it is | Dispatch summary | How to register |
+|---|---|---|---|
+| `subagent` | A local Claude Code sub-agent (default) | Spawned via the Agent tool in one parallel batch | `/add-specialist my-agent` |
+| `skill` | A skill invocation that produces the answer | Invoked via the Skill tool with a story-derived argument | `/add-specialist my-skill skill write-runbook` |
+| `doc` | A document the user should read before proceeding | Read directly; story-relevant constraints extracted | `/add-specialist my-doc doc docs/security/review.md` |
+| `human` | A named person or role whose judgment is required | Never blocked on; recorded as an open question for the synthesis | `/add-specialist my-gate human "Alice Chen (CISO)"` |
+| `external-agent` | A sub-agent in another installed plugin | Spawned via the Agent tool by namespaced slug, in the same parallel batch | `/add-specialist my-ext external-agent plugin-x:agent-y` |
 
 Every gathered result — specialist response, skill output, doc extract, or
 open human question — is handed to the Tech Lead in a single synthesis
-invocation. See the
+invocation. This table is a summary, not the spec: the authoritative dispatch
+semantics live in Step 4 of
+[`/plan-implementation`](skills/plan-implementation/SKILL.md). See the
 [Plan Implementation example](#plan-implementation-for-a-refined-story-with-the-tech-lead)
 for a real-world illustration of `subagent` dispatch and synthesis.
 

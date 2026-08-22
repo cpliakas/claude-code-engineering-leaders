@@ -16,10 +16,17 @@ fi
 # Run markdownlint, excluding line-length (MD013) and first-line-heading (MD041)
 # which are expected in agent/skill files with YAML frontmatter.
 # markdownlint prints findings to stderr; exit code 1 means lint findings,
-# any other non-zero code is a tool failure (bad config, node error) — stay
-# silent on those rather than feeding a stack trace to Claude as lint output.
+# any exit code >= 2 is a tool failure (bad config, node error) — surface a
+# short notice so a broken setup doesn't silently disable linting.
 issues=$(markdownlint --disable MD013 MD041 -- "$file_path" 2>&1)
 rc=$?
+
+if [ "$rc" -ge 2 ]; then
+  snippet=$(echo "$issues" | head -5)
+  jq -n --arg path "$file_path" --arg rc "$rc" --arg out "$snippet" \
+    '{hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: ("markdownlint failed (exit " + $rc + ") on " + $path + "; markdown linting is not running:\n" + $out)}}'
+  exit 0
+fi
 
 if [ "$rc" -ne 1 ] || [ -z "$issues" ]; then
   exit 0

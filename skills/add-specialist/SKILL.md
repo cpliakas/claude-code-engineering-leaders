@@ -102,12 +102,15 @@ answer. This matches the existing duplicate and redundancy warning pattern.
 
 **`subagent` (default):**
 
-Use Glob to check for `agents/<agent-name>.md`. If the file does not exist:
+Use Glob to check for `.claude/agents/<agent-name>.md`, then
+`agents/<agent-name>.md`. Record which path was found — Step 8 writes it into
+the registry entry. If neither file exists:
 
-- Warn: "No agent file found at `agents/<agent-name>.md`. Verify the agent
-  name matches the `name` field in its frontmatter."
-- List any agents in `agents/` whose filename contains the provided name as a
-  substring (to help identify typos).
+- Warn: "No agent file found at `.claude/agents/<agent-name>.md` or
+  `agents/<agent-name>.md`. Verify the agent name matches the `name` field in
+  its frontmatter."
+- List any agents in `.claude/agents/` or `agents/` whose filename contains
+  the provided name as a substring (to help identify typos).
 - Ask whether to continue (agents from external plugins may not have a local
   file).
 
@@ -228,9 +231,12 @@ append using the format appropriate for the target type:
 - **`subagent` (default or explicit):** Write in the legacy two-token format
   so existing memory files remain unchanged:
   ```
-  - `<agent-name>` — `agents/<agent-name>.md`
+  - `<agent-name>` — `<path-found-in-step-3>`
   ```
-  If the agent file path differs from the default, use the resolved path.
+  Record the path the Step 3 Glob actually found
+  (`.claude/agents/<agent-name>.md` or `agents/<agent-name>.md`). If neither
+  was found and the user chose to continue, write the default
+  `agents/<agent-name>.md`.
 
 - **`skill`:**
   ```
@@ -315,10 +321,8 @@ Registered `<name>` as a skill routing target.
 Target type: skill
 Skill: <skill-slug>
 
-When `/plan-implementation` matches this entry, it invokes `/<skill-slug>`
-directly with a focused argument derived from the story and feeds the
-output into the Tech Lead's synthesis. See the README "Routing Target
-Types" section for the full dispatch pattern.
+On match, `/plan-implementation` invokes `/<skill-slug>` with a story-derived
+argument (dispatch semantics: /plan-implementation Step 4).
 
 Run `/audit-agent-memory tech-lead` to verify routing health.
 ```
@@ -331,9 +335,8 @@ Registered `<name>` as a doc routing target.
 Target type: doc
 Doc: <file-path>
 
-When `/plan-implementation` matches this entry, it reads `<file-path>`
-directly and extracts the constraints relevant to the story for the Tech
-Lead's synthesis.
+On match, `/plan-implementation` reads `<file-path>` and extracts the
+story-relevant constraints (dispatch semantics: /plan-implementation Step 4).
 
 Run `/audit-agent-memory tech-lead` to verify routing health.
 ```
@@ -346,9 +349,9 @@ Registered `<name>` as a human escalation target.
 Target type: human
 Contact: <contact-identifier>
 
-When `/plan-implementation` matches this entry, it does not block on it: the
-question is recorded as an open item and surfaced in the Tech Lead's
-synthesis. The user owns the handoff to <contact-identifier>.
+On match, `/plan-implementation` never blocks on this entry — the question is
+recorded as an open item for the synthesis (dispatch semantics:
+/plan-implementation Step 4).
 
 Run `/audit-agent-memory tech-lead` to verify routing health.
 ```
@@ -361,9 +364,8 @@ Registered `<name>` as an external-agent routing target.
 Target type: external-agent
 Agent: <plugin:agent-slug>
 
-When `/plan-implementation` matches this entry, it spawns `<plugin:agent-slug>`
-via the Agent tool using the namespaced slug and feeds its response into the
-Tech Lead's synthesis.
+On match, `/plan-implementation` spawns `<plugin:agent-slug>` via the Agent
+tool by its namespaced slug (dispatch semantics: /plan-implementation Step 4).
 
 Run `/audit-agent-memory tech-lead` to verify routing health.
 ```
@@ -371,6 +373,7 @@ Run `/audit-agent-memory tech-lead` to verify routing health.
 If any overrides were skipped (redundant), list them and explain what was
 preserved.
 
-For the full per-type handling patterns, see the
+The authoritative per-type dispatch semantics live in Step 4 of
+[`/plan-implementation`](../plan-implementation/SKILL.md). The
 [Routing Target Types](../../README.md#routing-target-types) section of the
-top-level README.
+top-level README carries a compact summary table.

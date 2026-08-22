@@ -13,10 +13,11 @@ the expected behavior described in the table below.
 |---|---|---|
 | (no argument) | Empty `$ARGUMENTS` | Skill prompts for story body; does not proceed |
 | `story-no-specialists.md` | No routing model matches | No-specialists notice emitted; Tech Lead synthesizes a plan with zero specialist input |
-| `story-slug-missing.md` | Agent file not readable | Routing warning names the agent and path; remaining specialists dispatched; synthesis flags the gap |
+| `story-slug-missing.md` | Agent file not readable | Routing warning names the agent and the unreadable path(s); the specialist remains a match candidate on its explicit registration and is still dispatched; synthesis carries the routing warning |
 | `story-specialist-empty.md` | Specialist returns empty response | Miss warning emitted; synthesis runs with the gap flagged |
 | `story-all-specialists-missing.md` | All specialists missing | All-missing warning emitted; Tech Lead synthesizes a best-effort plan and flags the coverage gap |
 | `story-happy-path.md` | Multi-specialist happy path | All matched specialists dispatched in parallel; synthesis includes all responses verbatim |
+| Any fixture (simulate an empty or errored Tech Lead response) | Synthesis failure | `[SYNTHESIS FAILURE]` notice emitted with the full assembled input block surfaced verbatim; skill stops — no plan is returned |
 
 ## How to Trigger the Empty-Arguments Branch
 

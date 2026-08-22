@@ -105,8 +105,8 @@ maintenance", "tests fail on refactor", "fragile test suite"
 
 Analyze an existing test suite or test pattern for fragility:
 
-1. Use the **Explore subagent** (thoroughness: `medium`) to find and read the
-   test files in the target area
+1. Find the test files in the target area directly with Glob and Grep, then
+   read them
 2. Identify brittleness signals:
    - Implementation-coupled assertions (method call counts, internal state)
    - Excessive mocking (>2-3 mocks per test = boundary smell)
@@ -125,10 +125,11 @@ Analyze an existing test suite or test pattern for fragility:
 
 Cross-reference code risk with test coverage:
 
-1. Use the **Explore subagent** (thoroughness: `very thorough`) to map the
-   codebase structure. Identify components, boundaries, and notable file
-   organization patterns. A comprehensive map is essential here: gaps in the
-   component inventory will produce false negatives in the gap matrix.
+1. Map the codebase structure directly with Glob and Grep, sweeping multiple
+   directories and naming conventions. Identify components, boundaries, and
+   notable file organization patterns. A comprehensive map is essential here:
+   gaps in the component inventory will produce false negatives in the gap
+   matrix.
 2. Run `/analyze-code-churn` scoped to the target area to identify hotspots
 
    **Lens note:** When you invoke `/analyze-code-churn`, you interpret the output
@@ -137,8 +138,8 @@ Cross-reference code risk with test coverage:
    data through an SDLC friction lens (rework cycles, convention drift). Same
    data, different conclusions.
 
-3. Use the **Explore subagent** (thoroughness: `medium`) to scan for existing
-   test files covering each component
+3. Scan for existing test files covering each component directly with Glob
+   and Grep
 4. Produce a gap matrix:
 
    | Component | Risk Level | Test Coverage | Gap? | Recommendation |
@@ -154,8 +155,8 @@ strategy", "test data", "how are tests organized"
 
 Assess the test suite's structural health:
 
-1. Use the **Explore subagent** (thoroughness: `medium`) to scan test file
-   organization (co-located vs. separate, naming conventions)
+1. Scan test file organization directly with Glob and Grep (co-located vs.
+   separate, naming conventions)
 2. Identify fixture and test data patterns
 3. Evaluate test helper/utility reuse
 4. Check for anti-patterns:

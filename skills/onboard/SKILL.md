@@ -630,8 +630,8 @@ drift-check Step 3).
 If no agent memory directories exist and no `PROJECT.md` exists, report:
 
 ```
-No onboarded agents found. Run /onboard without --check-drift, or
-/onboard-<agent-name>, to create project memory for this project.
+No onboarded agents found. Run /onboard without --check-drift to create
+project memory for this project.
 ```
 
 And exit without further checks.
@@ -646,8 +646,16 @@ If the directory does not exist or contains no readable `MEMORY.md`, report:
 
 ```
 No memory directory found at .claude/agent-memory/engineering-leaders-<agent-name>/.
-Run /onboard without --check-drift, or /onboard-<agent-name>, to create one.
+Run /onboard without --check-drift to create one.
 ```
+
+Tailor the second sentence to skills that actually exist:
+
+- When `<agent-name>` is `tech-lead`, say instead: "Run /onboard without
+  --check-drift, or /add-specialist, to create one."
+- Append "or /onboard-<agent-name>" only when the plugin ships a companion
+  onboarding skill for that agent (currently only `/onboard-product-owner`).
+  Never name an `/onboard-<agent-name>` skill that does not exist.
 
 And exit without further checks.
 
@@ -661,7 +669,8 @@ findings before emitting the report.
 derivable local signal: team norms, review practices, persona preferences,
 stakeholder relationships, philosophy, free-text rationale paragraphs, and
 narrative prose. Do not raise drift questions about these. They remain the
-domain of `/onboard-<agent>` for a full refresh.
+domain of a full onboarding refresh (see the Next Step guidance for which
+skill to run).
 
 #### Signal 1: Filesystem Path Presence
 
@@ -699,16 +708,25 @@ This check applies only when auditing the Tech Lead's memory (the
 `engineering-leaders-tech-lead` directory) or the shared `PROJECT.md` if it
 lists specialists.
 
-1. Parse the `## Registered Specialists` section of the memory file. Extract
-   each specialist's agent name (for example, `frontend-engineer`) and its
-   expected file path (default: `agents/<agent-name>.md`).
-2. Glob `agents/*.md` to enumerate all agent files currently present on disk.
-3. Compare the two sets:
-   - Specialists in memory but not found on disk: **drifted** (file removed
-     or moved).
+1. Parse the `## Registered Specialists` section of the memory file. Each
+   entry has the form `- <name> — <path-or-slug> — target-type: <type>`,
+   where the `target-type:` suffix is optional and defaults to `subagent`.
+   Extract each specialist's name, its path-or-slug, and its target type.
+2. Run the file-existence check only for `subagent` and `doc` entries:
+   - `subagent`: check the entry's agent file path (default:
+     `agents/<agent-name>.md`).
+   - `doc`: check the entry's doc file path.
+   - `skill`, `human`, and `external-agent` entries are never flagged for
+     missing files — their path-or-slug is a skill slug, contact identifier,
+     or namespaced `plugin:agent-slug`, not a local file path. Skip them
+     with no finding.
+3. Glob `agents/*.md` to enumerate all agent files currently present on disk.
+4. Compare against disk:
+   - `subagent` or `doc` entries in memory whose file is not found on disk:
+     **drifted** (file removed or moved).
    - Agent files on disk not listed in memory: **new** (file added since
      onboarding).
-4. Phrase each finding as a question (see Signal Phrasing below).
+5. Phrase each finding as a question (see Signal Phrasing below).
 
 #### Signal 3: Git Remote URL
 
@@ -871,14 +889,20 @@ Review and confirm the findings in `## Confirmation` above. Run
 
 [If any agent has more than 50% of its auditable items drifted:]
 More than half of `<agent-name>`'s onboarding-derived memory appears to have
-drifted. Consider re-running `/onboard-<agent-name>` for a full refresh rather
-than confirming item by item.
+drifted. Consider a full refresh rather than confirming item by item: run
+`/onboard-<agent-name>` when that companion skill ships (currently only
+`/onboard-product-owner`); for the tech-lead, run `/onboard` or
+`/add-specialist`; for any other agent, re-run `/onboard` (without
+--check-drift). Never name an `/onboard-<agent-name>` skill that does not
+exist.
 
 [If any un-diffable content categories were present in memory:]
 Note: the following onboarding categories have no local signal source and were
 not audited: team norms, review practices, persona preferences, stakeholder
-relationships, philosophy, and free-text rationale. Re-run `/onboard-<agent>`
-if those may have changed.
+relationships, philosophy, and free-text rationale. If those may have changed,
+re-run `/onboard-<agent-name>` when that companion skill ships (currently only
+`/onboard-product-owner`); otherwise re-run `/onboard` (without
+--check-drift).
 ```
 
 ### 5. Apply Confirmed Updates

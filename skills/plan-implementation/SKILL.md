@@ -74,8 +74,10 @@ Use two sections:
   registered specialists.
 
 If an entry declares a target type outside the five supported values, emit a
-routing warning naming the entry and the invalid type, then treat the entry
-as `subagent` — never silently drop it.
+routing warning naming the entry and the invalid type, exclude the entry from
+the matching in Step 3 and the dispatch in Step 4, and carry the warning to
+Step 5 so the synthesis flags it with a pointer to fix the entry via
+`/add-specialist`. Never silently drop it — the warning is the signal.
 
 If the memory file is missing, or `## Registered Specialists` is missing or
 empty, emit this notice, skip the matching in Step 3 and the dispatch in
@@ -91,13 +93,19 @@ model. The plan will be produced without specialist consultation. Run
 ## Step 3: Match and Tier
 
 **Load descriptions.** For each `subagent` entry, read the agent definition
-file at the entry's path (default: `agents/<agent-name>.md`). If a file
-cannot be read, emit a routing warning naming the agent and path — never
+file at the entry's path if one is given; otherwise try
+`.claude/agents/<agent-name>.md`, then `agents/<agent-name>.md`. If no file
+can be read, description-based matching is unavailable for that specialist —
+Agent-tool dispatch by slug needs no local file, so treat it as a match
+candidate on its explicit registration alone and still dispatch it in Step 4.
+Emit a routing warning naming the agent and the unreadable path(s) — never
 silently drop a specialist:
 
 ```
-[WARNING] Could not read agent file for `[agent-name]` at `[path]`. This
-specialist cannot be dispatched; its input will be absent from the final plan.
+[WARNING] Could not read agent file for `[agent-name]` (tried: `[path(s)]`).
+Description-based matching is unavailable for this specialist; it is treated
+as a match candidate on its explicit registration alone and will still be
+dispatched.
 ```
 
 Carry every routing warning forward to Step 5.

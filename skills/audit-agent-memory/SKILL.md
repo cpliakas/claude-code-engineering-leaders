@@ -197,9 +197,15 @@ appears to be missing specialist matches.
 
 Parse two sections from `MEMORY.md`:
 
-- **Registered Specialists** — extract the list of `<agent-name>` and optional
-  `<path>` from each bullet. Default path is `agents/<agent-name>.md` when no
-  path is given.
+- **Registered Specialists** — extract from each bullet the `<agent-name>`,
+  the optional `<path-or-slug>`, and the optional `target-type: <type>`
+  suffix (default: `subagent`). For `subagent` entries, the default path is
+  `agents/<agent-name>.md` when no path is given. For `skill`, `human`, and
+  `external-agent` entries, the second token is a skill slug, contact
+  identifier, or namespaced `plugin:agent-slug` — not a file path — so those
+  entries are exempt from the file-pointer check (Check 6) and from
+  frontmatter-description extraction (Checks 7 and 8 read agent-file
+  frontmatter only for `subagent` entries).
 - **Project Code Area Overrides** — extract each `| signal | agent-name |` row
   from the table, ignoring the header and separator rows.
 
@@ -227,8 +233,11 @@ Specialists`.
 
 ##### Check 6: Broken Pointers
 
-For each entry in `## Registered Specialists`, attempt to read the agent file
-at the specified path (or `agents/<agent-name>.md`).
+For each `subagent` or `doc` entry in `## Registered Specialists`, attempt to
+read the file at the specified path (for `subagent` entries with no path,
+`agents/<agent-name>.md`). Skip `skill`, `human`, and `external-agent`
+entries — their second token is not a path, so a missing file is never a
+finding for them.
 
 Use Glob to check whether the file exists. If the file is not found:
 
@@ -242,8 +251,8 @@ with the plugin author.
 
 ##### Check 7: Redundant Overrides
 
-For each row in `## Project Code Area Overrides` where the target agent's file
-is readable:
+For each row in `## Project Code Area Overrides` whose target is a `subagent`
+entry with a readable agent file:
 
 1. Read the agent file.
 2. Extract the `description` field from the frontmatter.
@@ -262,7 +271,8 @@ removed.
 
 ##### Check 8: Thin Descriptions
 
-For each entry in `## Registered Specialists` where the agent file is readable:
+For each `subagent` entry in `## Registered Specialists` where the agent file
+is readable:
 
 1. Extract the `description` field from the frontmatter.
 2. Count the non-whitespace word count of the description body. Exclude the
