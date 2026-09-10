@@ -1,5 +1,20 @@
 # Engineering Leaders
 
+> **⚠️ Deprecated.** This plugin is no longer maintained.
+>
+> Its core premise, one subagent per virtual engineering role, has not produced
+> better results in practice. Community consensus has moved toward subagents
+> that encapsulate **domains within a codebase** rather than engineering job
+> titles, and that is the model we recommend instead.
+>
+> Several skills remain useful on their own and can be adapted to run without
+> subagents: the ADR skill (`write-adr`), the retrospective skill
+> (`facilitate-retrospective`), and the story scoping skills (`write-story`,
+> `refine-story`, `decompose-requirement`, `refinement-review`). Copy what is
+> useful; strip the agent delegation.
+>
+> The repository stays available for reference. No further releases are planned.
+
 A Claude Code plugin that provides the **leadership layer** for AI-assisted development. While most agent plugins focus on writing code, this one focuses on what happens *before and after* code gets written: [refining requirements](#refine-a-feature-with-the-product-owner), [structuring technical decisions](#plan-implementation-for-a-refined-story-with-the-tech-lead), [governing delivery](#run-a-post-mortem-with-the-devops-lead), and [surfacing systemic issues](#scan-code-churn-then-route-tech-debt-through-the-tech-lead).
 
 Humans decide what to build and why. These agents help refine that intent into artifacts that are ready for implementation.
