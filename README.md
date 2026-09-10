@@ -7,6 +7,13 @@
 > that encapsulate **domains within a codebase** rather than engineering job
 > titles, and that is the model we recommend instead.
 >
+> A second lesson: the Tech Lead's specialist routing table proved brittle and
+> unreliable. Matching free-text stories against hand-maintained specialist
+> descriptions and path overrides failed silently and varied run to run, so the
+> appropriate subagents were not consistently consulted. Routing that infers
+> "which agent" from prose does not hold up; domain-scoped agents make that
+> question answer itself.
+>
 > Several skills remain useful on their own and can be adapted to run without
 > subagents: the ADR skill (`write-adr`), the retrospective skill
 > (`facilitate-retrospective`), and the story scoping skills (`write-story`,
