@@ -29,7 +29,7 @@ description: |
   Persona definitions and guidance are the ux-strategist's authority.
   </commentary>
   </example>
-tools: ["Read", "Glob", "Grep"]
+tools: ["Read", "Glob", "Grep", "Skill"]
 model: opus
 color: magenta
 memory: project

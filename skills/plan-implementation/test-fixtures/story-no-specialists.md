@@ -17,9 +17,10 @@ copyright notice requirements.
 
 ## Notes
 
-This is a one-line change to a single template file. No routing table
+This is a one-line change to a single template file. No routing model
 specialists are expected to match.
 
-**Expected skill behavior:** The Tech Lead should classify this as Minimal
-engagement with no routing table matches. Phase 1 output is returned as the
-final plan with a "no specialists matched" notice. Phase 2 is skipped.
+**Expected skill behavior:** The skill matches no registered specialists,
+emits the no-specialists notice, and proceeds to synthesis with zero
+specialist input. The Tech Lead produces a direct plan noting that no
+specialists were consulted.

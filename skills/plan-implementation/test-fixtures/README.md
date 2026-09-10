@@ -12,12 +12,12 @@ the expected behavior described in the table below.
 | Fixture | Branch | Expected Outcome |
 |---|---|---|
 | (no argument) | Empty `$ARGUMENTS` | Skill prompts for story body; does not proceed |
-| `story-no-specialists.md` | No routing table matches | Phase 1 output returned with "no specialists matched" notice; Phase 2 skipped |
-| `story-parse-failure.md` | Phase 1 parse failure | Raw Phase 1 output returned with parse-failure notice; Phase 2 skipped |
-| `story-slug-missing.md` | Specialist slug not resolvable | Specialist skipped; miss recorded in Phase 2 input; Phase 2 runs |
-| `story-specialist-empty.md` | Specialist returns empty response | Miss recorded in Phase 2 input; Phase 2 runs with the gap flagged |
-| `story-all-specialists-missing.md` | All specialists missing | Phase 2 runs with all-missing notices; Tech Lead flags the gap explicitly |
-| `story-happy-path.md` | Multi-specialist happy path | All specialists respond; Phase 2 synthesis includes all responses verbatim |
+| `story-no-specialists.md` | No routing model matches | No-specialists notice emitted; Tech Lead synthesizes a plan with zero specialist input |
+| `story-slug-missing.md` | Agent file not readable | Routing warning names the agent and the unreadable path(s); the specialist remains a match candidate on its explicit registration and is still dispatched; synthesis carries the routing warning |
+| `story-specialist-empty.md` | Specialist returns empty response | Miss warning emitted; synthesis runs with the gap flagged |
+| `story-all-specialists-missing.md` | All specialists missing | All-missing warning emitted; Tech Lead synthesizes a best-effort plan and flags the coverage gap |
+| `story-happy-path.md` | Multi-specialist happy path | All matched specialists dispatched in parallel; synthesis includes all responses verbatim |
+| Any fixture (simulate an empty or errored Tech Lead response) | Synthesis failure | `[SYNTHESIS FAILURE]` notice emitted with the full assembled input block surfaced verbatim; skill stops — no plan is returned |
 
 ## How to Trigger the Empty-Arguments Branch
 
@@ -30,11 +30,11 @@ Run the skill with no argument:
 The skill must prompt for the story body and must not proceed without one.
 Confirm it does not fabricate or guess a story.
 
-## Reproducibility Check (tasks 5.4)
+## Reproducibility Check
 
 Run `/plan-implementation test-fixtures/story-happy-path.md` twice consecutively
 with the same project memory. Confirm:
 
-- The same set of specialists is identified in both runs
+- The same set of specialists is dispatched in both runs
 - The section ordering in the synthesis is comparable
 - No specialist is present in one run but absent in the other

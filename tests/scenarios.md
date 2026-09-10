@@ -410,8 +410,8 @@ exists (or will be created). No `my-backend-specialist` entry present.
   section
 - [ ] Adds `- \`my-backend-specialist\`` to `## Registered Specialists`
 - [ ] Does NOT add any row to `## Project Code Area Overrides`
-- [ ] Output confirms registration and mentions `/audit-routing-table` as a
-  follow-up step
+- [ ] Output confirms registration and mentions `/audit-agent-memory
+  tech-lead` as a follow-up step
 
 ### SR-2: Register with code-area override
 
@@ -425,7 +425,7 @@ exists (or will be created). No `my-backend-specialist` entry present.
 - [ ] Appends a row `| \`src/payments/**\` | my-payments-specialist |` to
   `## Project Code Area Overrides`
 - [ ] Output shows both the registration and the override row
-- [ ] Output mentions `/audit-routing-table`
+- [ ] Output mentions `/audit-agent-memory tech-lead`
 
 ### SR-3: Override redundancy warning
 
@@ -442,72 +442,76 @@ exists (or will be created). No `my-backend-specialist` entry present.
 - [ ] If user says no, skips the override but still registers the agent
 - [ ] Output explains what was written vs. skipped
 
-### SR-4: Tech Lead routing via description match
+### SR-4: plan-implementation routing via description match
 
 **Setup:** Register `my-backend-specialist` whose description contains
 "REST API" and "endpoint design".
 
-**Action:** Invoke `@agents/tech-lead Plan the implementation for: Add a new
-REST API endpoint for user profile retrieval.`
+**Action:** Invoke `/plan-implementation Add a new REST API endpoint for
+user profile retrieval.`
 
 **Expected Behaviors:**
 
-- [ ] Phase 1 output includes a `## Consultation Requests` section
-- [ ] `my-backend-specialist` appears under `## Consultation Requests`
+- [ ] The skill matches `my-backend-specialist` via description matching
+  (Step 3)
+- [ ] `my-backend-specialist` is dispatched via the Agent tool (Step 4)
 - [ ] Output does NOT reference a "Specialist Routing Table"; matching is
   described in terms of description matching
-- [ ] Phase 1 format is parseable: `## Consultation Requests`, `### <Name>`,
-  `**Agent:** \`my-backend-specialist\``, `**Prompt:**`, `## Next Step`
+- [ ] The final synthesis includes `my-backend-specialist`'s response under
+  `## Specialist Consultations`
 
 ### SR-5: Broken pointer warning
 
 **Setup:** Add `ghost-specialist` to `## Registered Specialists` with a path
 that does not exist: `- \`ghost-specialist\` — \`agents/ghost-specialist.md\``
 
-**Action:** Invoke `@agents/tech-lead Plan the implementation for any issue.`
+**Action:** Invoke `/plan-implementation Plan the implementation for any
+issue.`
 
 **Expected Behaviors:**
 
-- [ ] Phase 1 output includes a routing warning about `ghost-specialist` in
-  `## Preliminary Constraints`
-- [ ] Other registered specialists (if any) still route correctly
-- [ ] No consultation request is emitted for `ghost-specialist`
-- [ ] The warning is explicit, not silent
+- [ ] The skill emits a `[WARNING] Could not read agent file for
+  ghost-specialist` notice (Step 3)
+- [ ] Other registered specialists (if any) still match and dispatch
+  correctly
+- [ ] No dispatch is attempted for `ghost-specialist`
+- [ ] The warning is explicit, not silent, and is carried into the Tech
+  Lead's synthesis input as a routing warning
 
-### SR-6: Audit routing table — clean project
+### SR-6: Audit routing model — clean project
 
 **Setup:** Project has one registered specialist with a readable agent file.
 No override rows. No redundant signals.
 
-**Action:** Run `/audit-routing-table`
+**Action:** Run `/audit-agent-memory tech-lead`
 
 **Expected Behaviors:**
 
-- [ ] All four checks report PASS
-- [ ] Summary table shows PASS for all checks
+- [ ] All four routing checks (Checks 5–8) report zero findings
+- [ ] Summary includes the routing check table with 0 findings per row
 - [ ] No files are modified
 - [ ] Report is human-readable
 
-### SR-7: Audit routing table — all four findings
+### SR-7: Audit routing model — all four findings
 
-**Setup:** Manually craft a MEMORY.md with:
+**Setup:** Manually craft the tech-lead MEMORY.md with:
 - An orphan override row (target agent not in Registered Specialists)
 - A registered specialist whose agent file does not exist
 - A redundant override row (signal text appears in the agent's description)
 - A registered specialist with a description under 60 words
 
-**Action:** Run `/audit-routing-table`
+**Action:** Run `/audit-agent-memory tech-lead`
 
 **Expected Behaviors:**
 
-- [ ] Check 1 flags the orphan override with the agent name and recommended action
-- [ ] Check 2 flags the broken pointer with the missing path
-- [ ] Check 3 flags the redundant override, identifying which description
+- [ ] Check 5 flags the orphan override with the agent name and recommended action
+- [ ] Check 6 flags the broken pointer with the missing path
+- [ ] Check 7 flags the redundant override, identifying which description
   contains the signal
-- [ ] Check 4 flags the thin description with the actual word count
-- [ ] Summary table shows N finding(s) for each failing check
+- [ ] Check 8 flags the thin description with the actual word count
+- [ ] Summary routing table shows N finding(s) for each failing check
 - [ ] No files are modified
-- [ ] Report ends with a reminder that no auto-fix occurred
+- [ ] Report notes that no auto-fix occurred
 
 ### SR-8: plan-implementation regression
 
@@ -519,11 +523,14 @@ format (no `## Specialist Routing Table` section).
 
 **Expected Behaviors:**
 
-- [ ] Phase 1 produces `## Consultation Requests` with the matched specialist
-- [ ] Phase 1 output is parseable: `**Agent:** \`<name>\`` and `**Prompt:**`
-  anchors are present
-- [ ] Phase 2 synthesis runs after specialist responses are fed back
-- [ ] Final plan is produced in the synthesis format
+- [ ] The skill matches and dispatches the specialist directly from
+  `## Registered Specialists` (Steps 3-4)
+- [ ] The specialist's response is gathered before the Tech Lead is invoked
+- [ ] The Tech Lead is invoked once, with the story, tier classification, and
+  specialist responses assembled by the skill (Step 5)
+- [ ] Final plan is produced in the synthesis format (`## Engagement Tier`,
+  `## Specialist Consultations`, `## Escalation Flags`,
+  `## Implementation Constraints`, `## Recommended Approach`)
 
 ### SR-9: Onboard — simplified Q8
 
@@ -536,6 +543,29 @@ when prompted.
 
 - [ ] Q8 does NOT ask for code areas or trigger keywords — only agent names
 - [ ] `/add-specialist <name>` is invoked with the agent name only (no signals)
-- [ ] Step 5 summary mentions `/audit-routing-table` as a follow-up hygiene step
+- [ ] Final summary mentions `/audit-agent-memory tech-lead` as a follow-up
+  hygiene step
 - [ ] MEMORY.md after onboarding uses `## Registered Specialists` format, not
   `## Specialist Routing Table`
+
+### SR-10: Onboard — drift-check mode
+
+**Setup:** Onboarded project where one agent's MEMORY.md claims a filesystem
+path that no longer exists on disk (e.g., memory records an ADR directory at
+`docs/adr/` but the directory was renamed to `docs/decisions/`).
+
+**Action:** Run `/onboard --check-drift`
+
+**Expected Behaviors:**
+
+- [ ] The onboarding interview does not run; the skill goes straight to the
+  drift-check pass
+- [ ] The stale path is reported as a drift finding phrased as a question,
+  quoting both the memory-claimed value and the observed alternate (no
+  declarative "the path is now X" statement)
+- [ ] No file is written, edited, or deleted before the user confirms the
+  finding
+- [ ] After confirmation, the update is applied in place to the existing
+  memory file via Edit
+- [ ] The `## Next Step` block references `/onboard --check-drift`, not
+  `/re-onboard`

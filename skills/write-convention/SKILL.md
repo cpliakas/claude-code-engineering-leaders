@@ -7,7 +7,7 @@ description: >
   to tactical-implementation when omitted. Use when authoring a new convention
   for any domain.
 user-invokable: true
-allowed-tools: Read, Glob, Grep, Write
+allowed-tools: Read, Glob, Grep, Write, Agent
 argument-hint: "[--domain=<domain>] <convention-name>"
 context: fork
 ---
@@ -121,8 +121,10 @@ List them so the team can track alignment over time.]
 
 ## Step 6 — Delegate Drafting to the Owner Agent
 
-Emit a consultation request for the resolved owner agent with the following
-prompt:
+Spawn the resolved owner agent directly via the Agent tool — the plugin's
+standard dispatch pattern, as `/plan-implementation` Step 4 does — with the
+following focused prompt (it names the domain, the pattern to codify, and the
+template to follow):
 
 > You are being asked to draft a convention for the `<domain>` domain.
 >
@@ -157,15 +159,14 @@ prompt:
 >
 > [paste the template content from Step 5]
 
-Note: the consultation request pattern (rather than a direct Agent-tool spawn)
-is consistent with the existing routing infrastructure. A direct-spawn path is
-a deliberate follow-up if usage warrants it (see the "Open Questions" section
-of `openspec/changes/add-convention-domain-ownership/design.md`).
+Wait for the agent's response. If the response is empty or the spawn errors,
+report the failure and stop — do not write a file.
 
 ## Step 7 — Write the Draft
 
-Write the owner agent's output to the conventions directory as a file named
-`<convention-name>.md` (convention name converted to kebab-case).
+Write the draft returned by the owner agent in Step 6 to the conventions
+directory as a file named `<convention-name>.md` (convention name converted
+to kebab-case).
 
 Do not write to or update the conventions index. Index registration is the
 Tech Lead's responsibility after the draft is reviewed and approved.

@@ -21,18 +21,19 @@ than 60 seconds of downtime for end users.
 ## Notes
 
 This story touches infrastructure, database configuration, and observability.
-It is expected to match multiple routing table specialists.
+It is expected to match multiple routing model specialists.
 
 **All-missing simulation:** To exercise the "all specialists missing" branch,
-configure all routing table specialists so that they either use unresolvable
-slugs or return empty responses. Run this story. Phase 2 must still run with
-all-missing notices. The Tech Lead should synthesize a best-effort plan from
-conventions alone and explicitly flag the complete specialist coverage gap.
+configure all routing model specialists so that they either point at
+unreadable agent files or return empty responses. Run this story. The skill
+must emit the all-missing warning and still run synthesis with all-missing
+notices. The Tech Lead should synthesize a best-effort plan from conventions
+alone and explicitly flag the complete specialist coverage gap.
 
 **Expected skill behavior:**
 
 - All specialist slots recorded as "No response received" or "could not be
-  resolved"
-- Phase 2 runs regardless (it is NOT skipped)
+  dispatched"
+- Synthesis runs regardless (it is NOT skipped)
 - Tech Lead synthesis explicitly flags that all consultations failed
 - A best-effort plan is produced from conventions and Tech Lead's own knowledge

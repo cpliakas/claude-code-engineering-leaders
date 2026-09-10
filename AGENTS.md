@@ -7,7 +7,7 @@ Instructions for AI agents working in this repository.
 `engineering-leaders` is a Claude Code plugin providing a virtual engineering
 leadership team. It ships eight leadership agents (Chief Architect, Product
 Owner, UX Strategist, Agile Coach, DevOps Lead, Engineering Manager, QA Lead,
-Tech Lead) and fifteen skills covering the full SDLC: requirement refinement,
+Tech Lead) and a set of skills covering the full SDLC: requirement refinement,
 story/epic/ADR/runbook authoring, retrospectives, postmortems, and more.
 
 The plugin is installed into other projects. Development work happens here;

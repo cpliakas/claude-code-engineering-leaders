@@ -19,18 +19,22 @@ leverage Stripe's built-in fraud detection.
 ## Notes
 
 This story touches the payments domain and the webhook handler. It is expected
-to match at least one routing table specialist.
+to match at least one routing model specialist.
 
-**Slug-missing simulation:** To exercise the "specialist slug not resolvable"
-branch, register a specialist slug in the routing table that does not correspond
-to an actual agent file (e.g., `payments-wizard` with no matching
-`.claude/agents/payments-wizard.md`). Then run this story. The skill should
-skip the unresolvable specialist, record the miss, and continue with any
-remaining specialists. Phase 2 should run with the miss noted in the input.
+**Missing-agent-file simulation:** To exercise the "agent file not readable"
+branch, register a specialist in `## Registered Specialists` whose entry does
+not correspond to an actual agent file (e.g., `payments-wizard` with no
+matching `.claude/agents/payments-wizard.md` or `agents/payments-wizard.md`).
+Then run this story. The skill should emit a routing warning naming the agent
+and the unreadable path(s), treat the specialist as a match candidate on its
+explicit registration alone, and still dispatch it alongside the other matched
+specialists. Synthesis runs with the routing warning in its input.
 
 **Expected skill behavior:**
 
-- Unresolvable slug is skipped with a "could not be resolved" notice
-- Any resolvable specialists are spawned normally
-- Phase 2 runs with the miss recorded
-- Tech Lead flags the routing gap in the synthesis
+- Unreadable agent file produces a routing warning naming the agent and the
+  tried path(s)
+- The specialist is still dispatched by slug — description-based matching is
+  unavailable, not dispatch
+- All other matched specialists are dispatched normally
+- Synthesis runs with the routing warning carried forward and flagged

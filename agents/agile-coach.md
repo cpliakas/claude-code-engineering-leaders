@@ -20,6 +20,7 @@ description: |
   Retrospective facilitation using the Derby-Larsen framework is owned by the agile-coach.
   </commentary>
   </example>
+tools: ["Read", "Glob", "Grep", "Skill"]
 model: sonnet
 color: green
 memory: project

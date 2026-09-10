@@ -1,5 +1,27 @@
 # Engineering Leaders
 
+> **⚠️ Deprecated.** This plugin is no longer maintained.
+>
+> Its core premise, one subagent per virtual engineering role, has not produced
+> better results in practice. Community consensus has moved toward subagents
+> that encapsulate **domains within a codebase** rather than engineering job
+> titles, and that is the model we recommend instead.
+>
+> A second lesson: the Tech Lead's specialist routing table proved brittle and
+> unreliable. Matching free-text stories against hand-maintained specialist
+> descriptions and path overrides failed silently and varied run to run, so the
+> appropriate subagents were not consistently consulted. Routing that infers
+> "which agent" from prose does not hold up; domain-scoped agents make that
+> question answer itself.
+>
+> Several skills remain useful on their own and can be adapted to run without
+> subagents: the ADR skill (`write-adr`), the retrospective skill
+> (`facilitate-retrospective`), and the story scoping skills (`write-story`,
+> `refine-story`, `decompose-requirement`, `refinement-review`). Copy what is
+> useful; strip the agent delegation.
+>
+> The repository stays available for reference. No further releases are planned.
+
 A Claude Code plugin that provides the **leadership layer** for AI-assisted development. While most agent plugins focus on writing code, this one focuses on what happens *before and after* code gets written: [refining requirements](#refine-a-feature-with-the-product-owner), [structuring technical decisions](#plan-implementation-for-a-refined-story-with-the-tech-lead), [governing delivery](#run-a-post-mortem-with-the-devops-lead), and [surfacing systemic issues](#scan-code-churn-then-route-tech-debt-through-the-tech-lead).
 
 Humans decide what to build and why. These agents help refine that intent into artifacts that are ready for implementation.
@@ -37,20 +59,20 @@ The `product-owner` checks the enhancement against the current roadmap phase, ve
 
 ### Plan Implementation for a Refined Story with the Tech Lead
 
-**Scenario:** You need to implement a refined story for hook-based state detection in a pipeline orchestrator. Instead of jumping straight to code, you ask the Tech Lead to plan the work.
+**Scenario:** You need to implement a refined story for hook-based state detection in a pipeline orchestrator. Instead of jumping straight to code, you run `/plan-implementation` to plan the work.
 
 **Action:**
 
-> `@agents/tech-lead Plan the implementation for this refined story.`
+> `/plan-implementation Plan the implementation for this refined story.`
 
-**In a real-world situation,** the **Tech Lead** agent decomposed the problem, identified which domains were involved, and routed consultations to two specialists in parallel:
+**In a real-world situation,** the **`/plan-implementation`** skill matched the story against the Tech Lead's routing model, identified which domains were involved, and dispatched two specialists in parallel:
 
 - **Claude Code Hooks Expert**, a custom subagent defined in the project's `.claude/agents/` directory, specializing in hook event semantics and lifecycle ordering
 - **Golang Pro** from the [Voltagent plugin](https://github.com/VoltAgent/awesome-claude-code-subagents), a language specialist for idiomatic Go implementation, concurrency safety, and test patterns
 
 The two specialists returned conflicting recommendations. The hooks expert argued that `PreToolUse` should cancel the idle timer *and* transition state, because long-running tools (30+ second builds) can cause spurious "idle" transitions on the dashboard. The Go specialist argued for timer cancellation only, keeping state transitions in `PostToolUse` to avoid duplicate events in the log.
 
-The Tech Lead resolved the disagreement by siding with the hooks expert on the core question (the safety argument was stronger) while incorporating the Go specialist's concern by adding a guard: only emit a state-change event if the stage actually changed. Both specialists were right about different aspects of the problem.
+The skill fed both responses to the **Tech Lead** for synthesis. The Tech Lead resolved the disagreement by siding with the hooks expert on the core question (the safety argument was stronger) while incorporating the Go specialist's concern by adding a guard: only emit a state-change event if the stage actually changed. Both specialists were right about different aspects of the problem.
 
 **Impact:** Without this orchestration layer, the AI would have picked one approach and missed the other's constraint, producing code with either **a timing bug that causes spurious state transitions** or **an event log polluted with duplicate entries**. The Tech Lead caught both issues before a single line of code was written.
 
@@ -166,9 +188,10 @@ codebase, and there is no cross-cutting concern or one-way-door risk.
 
 For tier-1 work, invoke the relevant domain specialist directly (for example,
 `@agents/golang-pro` or `@agents/react-specialist`). Skip the Tech Lead
-entirely. If you invoke the Tech Lead anyway, it will name the single most
-relevant specialist with a brief rationale and stop. It does not run Phase 1
-routing or emit consultation requests.
+entirely. If you invoke the Tech Lead anyway without gathered specialist
+input, it produces a best-effort plan, notes explicitly that no specialists
+were consulted, and points you at `/plan-implementation` instead — it does
+not perform specialist matching or dispatch itself.
 
 ### Tier 2 — Standard
 
@@ -189,16 +212,16 @@ specialist routing without full architectural review.
   to identify the right specialist before you start.
 - Adding observability instrumentation across several files in the same domain.
 
-Invoke the Tech Lead via `@agents/tech-lead` or `/plan-implementation`. The
-Tech Lead runs the full two-phase consultation protocol and must emit a
-consultation request for every matched specialist. No exceptions.
+Run `/plan-implementation`. The skill matches every specialist against the
+Tech Lead's routing model, dispatches every match, and invokes the Tech Lead
+once to synthesize the results. No exceptions on dispatch.
 
 ### Tier 3 — Full (with Architect escalation)
 
 **What it is:** Cross-domain change, new pattern introduction, schema
-commitment, public API change, or any one-way-door signal. The Tech Lead runs
-the full protocol and its Phase 2 synthesis names the Chief Architect as an
-explicit escalation before implementation begins.
+commitment, public API change, or any one-way-door signal. `/plan-implementation`
+dispatches every matched specialist, and the Tech Lead's synthesis names the
+Chief Architect as an explicit escalation before implementation begins.
 
 **When to use it:** The story touches more than one domain, introduces a
 convention or pattern for the first time, commits to a data model or public
@@ -216,9 +239,8 @@ triggers (see the Signals Catalog below).
 - Migrating a database schema in a way that requires backward-compatible reads
   during the rollout window.
 
-Invoke the Tech Lead via `@agents/tech-lead` or `/plan-implementation`. The
-Tech Lead runs the full protocol. If a specialist surfaces a qualifying
-one-way-door, schema, or public-API signal, its Phase 2 synthesis names
+Run `/plan-implementation`. If a specialist surfaces a qualifying
+one-way-door, schema, or public-API signal, the Tech Lead's synthesis names
 `chief-architect` in the Escalation Flags section, quotes the surfaced signal
 verbatim, and recommends pausing for `@agents/chief-architect` consultation
 before implementation begins. The user decides whether to engage the Architect;
@@ -283,7 +305,7 @@ candidate at minimum, and tier 3 if there is also cross-domain impact:
 
 If the story touches code you have not previously edited in this project, or if
 the story's domain has no registered specialist in the Tech Lead's routing
-table, escalate one tier above what the file-count band alone would indicate.
+model, escalate one tier above what the file-count band alone would indicate.
 Tier 1 becomes tier 2; tier 2 becomes tier 3.
 
 #### How tiers interact with `/plan-implementation` and `/refinement-review`
@@ -296,124 +318,45 @@ Tech Lead or running `/plan-implementation`.
   story that benefits from strategic sign-off can use it regardless of tier.
   Tier-3 stories are strong candidates for `/refinement-review` before Tech
   Lead involvement.
-- `/plan-implementation` drives the full two-phase Tech Lead protocol
-  automatically. Use it for tier-2 and tier-3 stories. For tier-1 stories,
-  invoke the domain specialist directly instead.
+- `/plan-implementation` performs matching, tiering, and dispatch
+  automatically, then invokes the Tech Lead once to synthesize the results.
+  Use it for tier-2 and tier-3 stories. For tier-1 stories, invoke the domain
+  specialist directly instead.
 
 See the
 [Plan Implementation for a Refined Story with the Tech Lead](#plan-implementation-for-a-refined-story-with-the-tech-lead)
-example above for a real-world illustration of the Tech Lead's two-phase
-protocol in action.
+example above for a real-world illustration of the skill's
+dispatch-then-synthesize flow in action.
 
 ---
 
 ## Routing Target Types
 
-The Tech Lead's routing table supports five target types. Every registered
+The Tech Lead's routing model supports five target types. Every registered
 specialist entry MAY declare a target type; entries without a declared type
 default to `subagent` and existing projects require no migration.
 
-| Target Type | What it is | How to register |
-|---|---|---|
-| `subagent` | A local Claude Code sub-agent (default) | `/add-specialist my-agent` |
-| `skill` | A skill invocation that produces the answer | `/add-specialist my-skill skill write-runbook` |
-| `doc` | A document the user should read before proceeding | `/add-specialist my-doc doc docs/security/review.md` |
-| `human` | A named person or role whose judgment is required | `/add-specialist my-gate human "Alice Chen (CISO)"` |
-| `external-agent` | A sub-agent in another installed plugin | `/add-specialist my-ext external-agent plugin-x:agent-y` |
+| Target Type | What it is | Dispatch summary | How to register |
+|---|---|---|---|
+| `subagent` | A local Claude Code sub-agent (default) | Spawned via the Agent tool in one parallel batch | `/add-specialist my-agent` |
+| `skill` | A skill invocation that produces the answer | Invoked via the Skill tool with a story-derived argument | `/add-specialist my-skill skill write-runbook` |
+| `doc` | A document the user should read before proceeding | Read directly; story-relevant constraints extracted | `/add-specialist my-doc doc docs/security/review.md` |
+| `human` | A named person or role whose judgment is required | Never blocked on; recorded as an open question for the synthesis | `/add-specialist my-gate human "Alice Chen (CISO)"` |
+| `external-agent` | A sub-agent in another installed plugin | Spawned via the Agent tool by namespaced slug, in the same parallel batch | `/add-specialist my-ext external-agent plugin-x:agent-y` |
 
-When the Tech Lead matches a registered specialist during Phase 1, it emits a
-`**Target Type:**` line on the consultation request immediately after the
-`### <Name>` heading. The caller reads this line to determine how to handle
-the request.
-
-### Caller-Side Dispatch Patterns
-
-**`subagent`**
-
-Spawn via the Agent tool using the slug on the `**Agent:**` line:
-
-```
-**Target Type:** subagent
-**Agent:** `golang-pro`
-**Prompt:**
-> [prompt text]
-```
-
-Feed the specialist's response back to the Tech Lead for Phase 2 synthesis.
-This is the current behavior and the default for all existing registered
-entries. See the
+Every gathered result — specialist response, skill output, doc extract, or
+open human question — is handed to the Tech Lead in a single synthesis
+invocation. This table is a summary, not the spec: the authoritative dispatch
+semantics live in Step 4 of
+[`/plan-implementation`](skills/plan-implementation/SKILL.md). See the
 [Plan Implementation example](#plan-implementation-for-a-refined-story-with-the-tech-lead)
-for a real-world illustration.
-
-**`skill`**
-
-Invoke the named skill with the emitted prompt as input. Feed the skill's
-output into Phase 2 like any specialist response:
-
-```
-**Target Type:** skill
-**Skill:** write-runbook
-**Prompt:**
-> [what the skill should produce for this issue]
-```
-
-Example scenario: an operational question routes to `/write-runbook` to
-produce a structured runbook draft. The draft feeds Phase 2 as the
-"specialist response."
-
-**`doc`**
-
-Cite the file path in the plan's dependencies. The plan notes "Read
-`<path>` before starting." No Phase 2 feedback loop:
-
-```
-**Target Type:** doc
-**Doc:** `docs/architecture/auth-decisions.md`
-**Prompt:**
-> [what to look for when reading this document]
-```
-
-Example scenario: a security-adjacent change routes to an ADR file that
-documents the approved authentication pattern. The user reads the ADR; no
-agent is spawned.
-
-**`human`**
-
-Pause the plan with an explicit escalation notice naming the contact and
-quoting the prompt as the question being asked. The user owns the handoff:
-
-```
-**Target Type:** human
-**Contact:** Alice Chen (CISO)
-**Prompt:**
-> [the question that requires Alice's judgment]
-```
-
-Example scenario: a change touching PII storage routes to the named security
-reviewer. The plan notes the escalation; automation stops here and the user
-handles the handoff out of band.
-
-**`external-agent`**
-
-Spawn via the Agent tool using the namespaced slug on the `**Agent:**` line,
-exactly as you would a local subagent. Feed the response back to Phase 2:
-
-```
-**Target Type:** external-agent
-**Agent:** `plugin-x:compliance-agent`
-**Prompt:**
-> [prompt for the external specialist]
-```
-
-Example scenario: a compliance check routes to a specialist agent defined in a
-separate compliance plugin installed in the project.
+for a real-world illustration of `subagent` dispatch and synthesis.
 
 ### Back-Compat Guarantee
 
 Entries without a declared target type default to `subagent`. Existing
 `.claude/agent-memory/engineering-leaders-tech-lead/MEMORY.md` files require
-no migration. The Tech Lead emits `**Target Type:** subagent` on any
-consultation request whose registered entry has no type suffix.
+no migration.
 
 To register a non-`subagent` specialist, use `/add-specialist` with the
 `--target-type` flag or the positional target-type token. See
@@ -556,7 +499,7 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Agent | `qa-lead`                  | QA strategy lead for test architecture, coverage gaps, and risk-based prioritization       |
 | Agent | `agile-coach`              | Peer coach for story quality review and retrospective facilitation                         |
 | Agent | `ux-strategist`            | Strategic UX advisor for experience coherence, persona guidance, and behavioral consistency |
-| Skill | `/onboard`                 | Guided project setup: shared context interview for all agents + Tech Lead specialist discovery |
+| Skill | `/onboard`                 | Guided project setup: shared context interview for all agents + Tech Lead specialist discovery; `--check-drift` audits onboarded memory for drift and confirms updates before writing |
 | Skill | `/onboard-product-owner`   | Configure the Product Owner with issue tracker, backlog norms, and current roadmap state |
 | Skill | `/write-epic`              | Write an epic specification with structured metadata compatible with GitHub Issues and Jira |
 | Skill | `/write-story`             | Write a user story with acceptance criteria and INVEST validation                          |
@@ -572,42 +515,13 @@ Additional per-agent onboarding skills will be added as the pattern matures. You
 | Skill | `/write-runbook`           | Generate a structured operational runbook for incident response or maintenance             |
 | Skill | `/plan-test-strategy`      | Produce a test strategy with highest-impact tests by type and layer                        |
 | Skill | `/analyze-code-churn`      | Analyze code churn and thrash patterns with hotspot detection and rework classification    |
-| Skill | `/plan-implementation`     | Drive the Tech Lead's two-phase consultation end-to-end: routing, specialist fan-out, and synthesis |
+| Skill | `/plan-implementation`     | Match, dispatch, and synthesize: reads the Tech Lead's routing model, fans out to every relevant specialist, then invokes the Tech Lead once for synthesis |
 | Skill | `/add-specialist`          | Register a specialist agent for Tech Lead routing (one step, no trigger-phrase copying)    |
-| Skill | `/audit-routing-table`     | Audit Tech Lead routing health: orphan overrides, broken pointers, redundant rows, thin descriptions |
-| Skill | `/audit-routing-quality`   | Audit Tech Lead routing quality from outcome history: recommends narrowing actions for over-routed specialists |
-| Skill | `/audit-agent-memory`      | Audit a single agent's project memory for state leakage, dead links, and size; advisory and read-only |
-| Skill | `/re-onboard`              | Audit onboarded agent memory for drift against live project signals; confirms updates before writing  |
+| Skill | `/audit-agent-memory`      | Audit a single agent's project memory for state leakage, dead links, and size; for the tech-lead, also audits routing health (orphan overrides, broken pointers, redundant rows, thin descriptions); advisory and read-only |
 
 ### Audit Skills
 
-Four skills cover memory hygiene, drift detection, and routing quality: three are read-only audits, one applies confirmed updates.
-
-**`/audit-routing-table`** inspects the Tech Lead's specialist routing model
-for orphan overrides, broken file pointers, redundant override rows, and thin
-agent descriptions. Run it after onboarding, after adding specialists, or when
-the Tech Lead appears to be missing consultation requests.
-
-**`/audit-routing-quality`** reads the Tech Lead's `## Routing Outcomes`
-history and recommends narrowing actions for over-routed specialists:
-specialists the Tech Lead consulted repeatedly but that added little or no
-value. It aggregates per-specialist outcome counts, computes a narrowing-signal
-score (`low` + `none` percentage), and suggests specific narrowing actions:
-tighten description vocabulary, remove redundant Code Area Overrides, or
-consider deregistering. When the outcome table exceeds 200 rows, it offers a
-user-confirmed roll-up that condenses older rows into summary rows while
-preserving the most-recent 50.
-
-This skill is advisory only: it never edits the routing table. All
-recommendations are applied manually. Run it after accumulating outcome
-history from several `/plan-implementation` runs.
-
-The two routing audit skills are complementary:
-
-| Skill | Input | Finds |
-|-------|-------|-------|
-| `/audit-routing-table` | Routing memory structure and agent files | Structural problems: orphan overrides, broken pointers, thin descriptions |
-| `/audit-routing-quality` | `## Routing Outcomes` history | Coverage drift: over-routed specialists with consistently low value |
+Two paths cover memory hygiene and drift detection: one read-only audit, one drift pass that applies confirmed updates.
 
 **`/audit-agent-memory <agent-name>`** inspects a single agent's project
 memory directory (`.claude/agent-memory/engineering-leaders-<agent-name>/`)
@@ -615,29 +529,33 @@ for four hygiene categories: state-like content (dated phase trackers,
 enumerated file lists, work-item tables that belong in an issue tracker),
 dead-link files (files that exist in the directory but are no longer
 referenced from `MEMORY.md`), and size signals (individual files or the full
-directory exceeding documented token thresholds). Run it as periodic hygiene,
-before re-onboarding an agent, or when an agent feels slower or noisier than
-expected.
+directory exceeding documented token thresholds). When the audited agent is
+the `tech-lead`, it additionally inspects the specialist routing model for
+orphan overrides, broken file pointers, redundant override rows, and thin
+agent descriptions. Run it as periodic hygiene, after onboarding or adding
+specialists, before a drift check, or when an agent feels slower or noisier
+than expected. Projects whose Tech Lead memory still uses the pre-0.12.0
+`## Specialist Routing Table` format can convert it with the step-by-step
+path in `skills/audit-agent-memory/MIGRATION.md`.
 
-**`/re-onboard`** (or `/re-onboard <agent-name>`) audits onboarded agent
-project memory for drift against cheaply derivable local signals: filesystem
-path existence, specialist agent files, git remote URL, and tracker directory
-probes. It produces a per-agent diff report and phrases every finding as a
-question the user confirms or dismisses. Confirmed updates are applied in
-place to the existing memory file using Edit; no write happens without
-explicit user confirmation. Run it on a periodic cadence, after a structural
-project change (renamed directories, migrated issue tracker, specialist agents
-added or removed), or when an agent gives advice that feels out of date. This
-skill is a diff pass, not a replacement for a full `/onboard-<agent>` re-run.
-Use `/onboard-<agent>` when you want to refresh content that has no local
-signal source (team norms, persona preferences, stakeholder relationships).
+**`/onboard --check-drift`** (or `/onboard --check-drift <agent-name>`) audits
+onboarded agent project memory for drift against cheaply derivable local
+signals: filesystem path existence, specialist agent files, git remote URL,
+and tracker directory probes. It produces a per-agent diff report and phrases
+every finding as a question the user confirms or dismisses. Confirmed updates
+are applied in place to the existing memory file using Edit; no write happens
+without explicit user confirmation. Run it on a periodic cadence, after a
+structural project change (renamed directories, migrated issue tracker,
+specialist agents added or removed), or when an agent gives advice that feels
+out of date. This mode is a diff pass, not a replacement for a full
+`/onboard-<agent>` re-run. Use `/onboard-<agent>` when you want to refresh
+content that has no local signal source (team norms, persona preferences,
+stakeholder relationships).
 
-`/re-onboard` is the only audit skill that writes to memory by default.
-`/audit-routing-table` and `/audit-agent-memory` are read-only and advisory:
-they do not delete, move, or rewrite any file. `/audit-routing-quality` is
-advisory for all recommendations, but writes to `## Routing Outcomes` only
-when the user explicitly confirms a roll-up. All four audits are complementary
-and can be run independently.
+`/onboard --check-drift` is the only audit path that writes to memory by
+default. `/audit-agent-memory` is read-only and advisory: it does not delete,
+move, or rewrite any file. The two are complementary and can be run
+independently.
 
 ## Architecture
 
@@ -729,10 +647,12 @@ All agents use `memory: project`. The agent definition is shared via the plugin,
 ```
 claude-code-engineering-leaders/
 ├── .claude-plugin/
+│   ├── marketplace.json
 │   └── plugin.json
 ├── README.md
 ├── CLAUDE.md
 ├── hooks/
+│   ├── hooks.json
 │   └── markdownlint-check.sh
 ├── agents/
 │   ├── chief-architect.md
@@ -762,17 +682,17 @@ claude-code-engineering-leaders/
     ├── plan-test-strategy/SKILL.md
     ├── analyze-code-churn/SKILL.md
     ├── add-specialist/SKILL.md
-    ├── audit-routing-table/
+    ├── audit-agent-memory/
     │   ├── SKILL.md
     │   └── MIGRATION.md
-    ├── audit-routing-quality/
-    │   └── SKILL.md
-    ├── audit-agent-memory/
-    │   └── SKILL.md
     └── plan-implementation/
         ├── SKILL.md
         └── test-fixtures/
 ```
+
+### Hooks
+
+The plugin registers a `PostToolUse` hook (`hooks/hooks.json`, auto-discovered at the plugin root) that runs `hooks/markdownlint-check.sh` after every `Write` or `Edit` tool call. When the written file is Markdown and `markdownlint` is installed, any lint findings are fed back to Claude as additional context so it can fix them; otherwise the hook exits silently.
 
 ## License
 

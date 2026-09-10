@@ -11,9 +11,11 @@ A Claude Code plugin providing engineering leadership agents — the virtual lea
 ### Agents
 
 - One markdown file per agent in `agents/`
-- Follow the agent definition template: frontmatter (name, description, model, memory) + body (jurisdiction, delegation, key knowledge, memory protocol)
+- Follow the agent definition template: frontmatter (name, description, tools, skills, model, color, memory) + body (jurisdiction, delegation, key knowledge, memory protocol)
 - Descriptions must include trigger phrases AND delegation relationships
 - All agents use `memory: project` — they learn per-project
+- Every agent declares an explicit `tools` grant in frontmatter; advisory agents get `Read`, `Glob`, `Grep`, and `Skill` (the `skills:` frontmatter field only preloads skill content — the `Skill` tool is what allows invocation), and `Bash` is added only when the agent's body instructs running commands
+- `Write`/`Edit` are never granted in frontmatter — file authoring flows through skills, and agent memory persistence uses the memory feature's scoped write access, not a frontmatter grant
 - Agent names use kebab-case
 - Agent colors are assigned by role to ensure visual distinction in the Claude Code UI:
 

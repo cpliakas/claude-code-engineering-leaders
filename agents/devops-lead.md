@@ -29,6 +29,7 @@ description: |
   Runbook authorship for operational procedures flows through the devops-lead.
   </commentary>
   </example>
+tools: ["Read", "Glob", "Grep", "Skill"]
 model: sonnet
 color: cyan
 memory: project
